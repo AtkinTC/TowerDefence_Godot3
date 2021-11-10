@@ -1,0 +1,60 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=1]
+[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile181.png" type="Texture" id=2]
+[ext_resource path="res://Scenes/Towers/GunT1.gd" type="Script" id=3]
+[ext_resource path="res://Assets/Effects/kenney/towerDefense_tile297.png" type="Texture" id=4]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 175.0
+
+[sub_resource type="Animation" id=2]
+resource_name = "Fire"
+length = 0.15
+step = 0.01
+tracks/0/type = "value"
+tracks/0/path = NodePath("Turret/Muzzle/MuzzleFlash:visible")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.05 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+
+[node name="GunT1" type="Node2D"]
+script = ExtResource( 3 )
+
+[node name="Base" type="Sprite" parent="."]
+position = Vector2( 32, 32 )
+texture = ExtResource( 2 )
+
+[node name="Turret" type="Sprite" parent="."]
+position = Vector2( 32, 32 )
+texture = ExtResource( 1 )
+offset = Vector2( 12, 0 )
+
+[node name="Muzzle" type="Position2D" parent="Turret"]
+position = Vector2( 40, 0 )
+
+[node name="MuzzleFlash" type="Sprite" parent="Turret/Muzzle"]
+visible = false
+position = Vector2( 13, 0 )
+scale = Vector2( 0.7, 0.7 )
+texture = ExtResource( 4 )
+
+[node name="RangeArea" type="Area2D" parent="."]
+position = Vector2( 32, 32 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RangeArea"]
+visible = false
+shape = SubResource( 1 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/Fire = SubResource( 2 )
+
+[connection signal="body_entered" from="RangeArea" to="." method="_on_RangeArea_body_entered"]
+[connection signal="body_exited" from="RangeArea" to="." method="_on_RangeArea_body_exited"]
