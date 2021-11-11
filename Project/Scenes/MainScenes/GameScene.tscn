@@ -29,11 +29,14 @@ script = ExtResource( 5 )
 script = ExtResource( 18 )
 
 [node name="Camera" type="Camera2D" parent="."]
-position = Vector2( 608, 352 )
+position = Vector2( 640, 360 )
 current = true
 limit_left = 0
 limit_top = 0
 script = ExtResource( 17 )
+__meta__ = {
+"_edit_group_": true
+}
 
 [node name="Tween" type="Tween" parent="Camera"]
 
@@ -47,6 +50,7 @@ margin_top = -720.0
 margin_right = 1280.0
 mouse_filter = 2
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 

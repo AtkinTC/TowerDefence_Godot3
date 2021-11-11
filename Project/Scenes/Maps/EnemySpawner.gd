@@ -91,7 +91,7 @@ func spawn_enemy() -> void:
 	
 	var new_enemy: Enemy = load(ENEMIES_PATH + wave.enemy_type + SCENE_EXT).instance()
 	new_enemy.set_navigation_map(navigation_map)
-	new_enemy.set_debug(OS.is_debug_build())
+	#new_enemy.set_debug(OS.is_debug_build())
 	enemies_parent_node.add_child(new_enemy, true)
 	if(spawn_points.size() > 0):
 		var index = randi() % spawn_points.size()

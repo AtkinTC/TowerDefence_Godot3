@@ -111,7 +111,6 @@ config/icon="res://icon.png"
 [autoload]
 
 GameData="*res://Singletons/GameData.gd"
-WaveDataBuilder="*res://Singletons/WaveDataBuilder.gd"
 
 [debug]
 
