@@ -26,7 +26,8 @@ var base_health: int = 10000
 
 func _ready() -> void:
 	levelMap = get_node("Map001") #TODO: change to dynamically get current map
-	levelMap.set_debug(OS.is_debug_build())
+	#levelMap.set_debug(OS.is_debug_build())
+	
 	
 	camera = get_node("Camera")
 	print("Viewport size : " + String(camera.get_viewport().get_size()))
