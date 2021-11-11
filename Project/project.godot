@@ -44,6 +44,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/MainScenes/GameScene.gd"
 }, {
+"base": "Tower",
+"class": "GunTower",
+"language": "GDScript",
+"path": "res://Scenes/Towers/GunTower.gd"
+}, {
 "base": "TileMap",
 "class": "NavigationMap",
 "language": "GDScript",
@@ -77,6 +82,7 @@ _global_script_class_icons={
 "GameCamera2D": "",
 "GameMap": "",
 "GameScene": "",
+"GunTower": "",
 "NavigationMap": "",
 "RectExtents": "",
 "Tower": "",

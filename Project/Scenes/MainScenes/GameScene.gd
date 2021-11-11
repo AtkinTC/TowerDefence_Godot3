@@ -88,9 +88,9 @@ func _unhandled_input(event: InputEvent) -> void:
 func initiate_build_mode(tower_type: String) -> void:
 	if build_mode:
 		cancel_build_mode()
-	build_type = tower_type + "T1"
+	build_type = tower_type
 	build_mode = true
-	ui.set_tower_preview(build_type, get_camera_mouse_position())
+	ui.set_tower_preview(tower_type, get_camera_mouse_position())
 
 func update_tower_preview() -> void:
 	var mouse_position: Vector2 = get_global_mouse_position()

@@ -1,6 +1,6 @@
-extends GunTower
+extends Tower
 
-func _init().("MissileT1"):
+func _init().("ArcTower"):
 	pass
 
 #func _ready():

@@ -1,4 +1,4 @@
-extends Tower
+extends GunTower
 
 func _init().("GunT1"):
 	pass
