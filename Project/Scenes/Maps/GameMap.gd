@@ -1,12 +1,13 @@
 extends Node2D
 class_name GameMap
 
-var navigation_map: NavigationMap
-var tower_exclusion_map: TileMap
-var enemy_spawner: EnemySpawner
-var target_area: EnemyTarget
-var enemies_node: Node2D
-var towers_node: Node2D
+onready var navigation_map: NavigationMap = get_node("NavigationMap")
+onready var tower_exclusion_map: TileMap = get_node("TowerExclusion")
+onready var enemy_spawner: EnemySpawner =  get_node("EnemySpawner")
+onready var target_area: EnemyTarget = get_node("EnemyTarget")
+onready var enemies_node: Node2D = get_node("Enemies")
+onready var towers_node: Node2D = get_node("Towers")
+onready var effects_node: Node2D = get_node("Effects")
 
 var debug: bool = false;
 
@@ -14,12 +15,6 @@ var debug: bool = false;
 #	pass
 
 func _ready() -> void:
-	navigation_map = get_node("NavigationMap") as NavigationMap
-	tower_exclusion_map = get_node("TowerExclusion") as TileMap
-	target_area = get_node("EnemyTarget") as EnemyTarget
-	enemies_node = get_node("Enemies") as Node2D
-	towers_node = get_node("Towers") as Node2D
-	enemy_spawner = get_node("EnemySpawner") as EnemySpawner
 	enemy_spawner.set_enemies_parent_node(enemies_node)
 	enemy_spawner.set_navigation_map(navigation_map)
 	enemy_spawner.set_map_name("STREAM")
@@ -50,6 +45,9 @@ func get_enemies_node() -> Node2D:
 
 func get_towers_node() -> Node2D:
 	return towers_node
+	
+func get_effects_node() -> Node2D:
+	return effects_node
 	
 func set_debug(_debug: bool) -> void:
 	debug = _debug

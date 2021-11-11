@@ -101,7 +101,7 @@ func update_tower_preview() -> void:
 		var current_tile: Vector2 = map.world_to_map(mouse_position)
 		var tile_position: Vector2 = map.map_to_world(current_tile)
 		
-		build_location = tile_position
+		build_location = tile_position + map.get_cell_size()/2
 		build_tile = current_tile
 		
 		if (map.get_cellv(current_tile) != -1):
@@ -123,6 +123,7 @@ func verify_and_build() -> void:
 		#TODO: test that conditions are met to build new tower
 		var new_tower: Node2D = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
 		new_tower.position = build_location
+		new_tower.connect("create_effect", self, "_on_create_effect")
 		var towers_node: Node2D = levelMap.get_towers_node()
 		towers_node.add_child(new_tower, true)
 		var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
@@ -165,6 +166,12 @@ func get_current_wave_index() -> int:
 #		new_enemy.connect("base_damage", self, "on_base_damage")
 #		levelMap.get_enemies_node().add_child(new_enemy, true)
 #		yield(get_tree().create_timer(i[1]), "timeout") ## ugly padding
+
+#spawn effect from create_effect signal
+func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictionary):
+	var effect_instance = (effect_scene.instance() as Effect)
+	effect_instance.setup_from_attribute_dictionary(effect_attributes_dict)
+	levelMap.get_effects_node().add_child(effect_instance)
 
 func on_player_damaged(damage: int) -> void:
 	base_health -= damage;
