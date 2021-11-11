@@ -64,6 +64,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Towers/Tower.gd"
 }, {
+"base": "Area2D",
+"class": "TowerRangeArea",
+"language": "GDScript",
+"path": "res://Scenes/Towers/TowerRangeArea.gd"
+}, {
 "base": "CanvasLayer",
 "class": "UI",
 "language": "GDScript",
@@ -86,6 +91,7 @@ _global_script_class_icons={
 "NavigationMap": "",
 "RectExtents": "",
 "Tower": "",
+"TowerRangeArea": "",
 "UI": "",
 "WaveData": ""
 }

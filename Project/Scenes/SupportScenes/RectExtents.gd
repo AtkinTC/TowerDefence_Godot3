@@ -35,6 +35,6 @@ func _draw() -> void:
 		return
 	draw_rect(_rect, color, false)
 
-func has_point(point : Vector2) -> bool:
+func has_point(_global_point : Vector2) -> bool:
 	var rect_global = Rect2(global_position + _rect.position, _rect.size)
-	return rect_global.has_point(point)
+	return rect_global.has_point(_global_point)

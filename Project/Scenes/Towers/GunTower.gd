@@ -10,23 +10,20 @@ var enemy_array: Array = []
 var target: Node2D
 
 func _init(_tower_type: String = "").(_tower_type):
-	if(tower_type.length() > 0):
-		initialize_default_values()
+	pass
 
 func initialize_default_values() -> void:
-	if (tower_type != null && tower_type.length() > 0):
-		var tower_data : Dictionary = (GameData.tower_data as Dictionary).get(tower_type)
-		if tower_data != null:
-			tower_range = (tower_data.get(GameData.RANGE, -1) as float)
-			tower_rof = (tower_data.get(GameData.ROF, -1) as float)
-			tower_damage = (tower_data.get(GameData.DAMAGE, -1) as float)
-			tower_proj_type = (tower_data.get(GameData.PROJTYPE, "") as String)
+	.initialize_default_values()
+	var tower_data : Dictionary = get_default_attributes()
+	tower_rof = (tower_data.get(GameData.ROF, -1) as float)
+	tower_damage = (tower_data.get(GameData.DAMAGE, -1) as float)
+	tower_proj_type = (tower_data.get(GameData.PROJTYPE, "") as String)
 
 func _ready():
 	var rangeAreaShape: CollisionShape2D = get_node("RangeArea/CollisionShape2D") as CollisionShape2D
 	if active:
 		if rangeAreaShape:
-			(rangeAreaShape.get_shape() as Shape2D).radius = 0.5 * tower_range
+			(rangeAreaShape.get_shape() as Shape2D).radius = tower_range
 		yield(get_tree().create_timer(1.0/tower_rof), "timeout")
 		ready_to_fire = true
 	else:
