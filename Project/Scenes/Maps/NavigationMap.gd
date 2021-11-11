@@ -135,7 +135,7 @@ func setup_debug_tile_labels() -> void:
 			var cell_label: Label = Label.new()
 			cell_label.set_global_position(convert_map_pos_to_world_pos(cell, false))
 			cell_label.set_name("cell_label_"+String(cell.x)+"_"+String(cell.y))
-			cell_label.text = String(cell as Vector2) + "\n" + String(distance_map[cell])
+			cell_label.text = String(cell as Vector2) + "\n" + String(distance_map.get(cell, "---"))
 			debug_cell_labels.add_child(cell_label)
 
 func setup_debug_flow_lines() -> void:
