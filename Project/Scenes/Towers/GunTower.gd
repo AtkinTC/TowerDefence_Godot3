@@ -3,6 +3,7 @@ class_name GunTower
 
 var tower_damage: float = -1
 var tower_rof: float = -1
+var tower_range: float = -1
 var tower_proj_type: String
 var ready_to_fire: bool = false
 
@@ -14,10 +15,10 @@ func _init(_tower_type: String = "").(_tower_type):
 
 func initialize_default_values() -> void:
 	.initialize_default_values()
-	var tower_data : Dictionary = get_default_attributes()
-	tower_rof = (tower_data.get(GameData.ROF, -1) as float)
-	tower_damage = (tower_data.get(GameData.DAMAGE, -1) as float)
-	tower_proj_type = (tower_data.get(GameData.PROJTYPE, "") as String)
+	tower_rof = (get_default_attribute(GameData.ROF, -1) as float)
+	tower_damage = (get_default_attribute(GameData.DAMAGE, -1) as float)
+	tower_range = (get_default_attribute(GameData.RANGE, -1) as float)
+	tower_proj_type = (get_default_attribute(GameData.PROJTYPE, "") as String)
 
 func _ready():
 	var rangeAreaShape: CollisionShape2D = get_node("RangeArea/CollisionShape2D") as CollisionShape2D

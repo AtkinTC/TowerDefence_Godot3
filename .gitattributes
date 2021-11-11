@@ -15,3 +15,8 @@
 *.PDF	 diff=astextplain
 *.rtf	 diff=astextplain
 *.RTF	 diff=astextplain
+
+# Godt files
+*.gd	eol=lf
+*.tscn	eol=lf
+*.tres	eol=lf

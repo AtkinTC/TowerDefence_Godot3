@@ -44,11 +44,12 @@ func set_tower_preview(tower_type: String, mouse_position: Vector2) -> void:
 	control.set_name(TOWER_PREVIEW_NAME)
 	control.set_scale(Vector2.ONE/active_camera.get_zoom())
 	
-	var turret := (drag_tower as Tower)
-	if turret && turret.tower_range != null && turret.tower_range > 0:
+	var tower := (drag_tower as Tower)
+	var tower_range : float = tower.get_default_attribute(GameData.RANGE, -1)
+	if(tower_range != null && tower_range > 0):
 		var range_overlay := Sprite.new()
 		range_overlay.position = Vector2(32, 32)
-		var scaling : float = turret.tower_range / 310.0
+		var scaling : float = tower_range / 310.0
 		range_overlay.scale = Vector2(scaling, scaling)
 		var texture : Texture = load(RANGE_TEXTURE_FILEPATH)
 		range_overlay.texture = texture

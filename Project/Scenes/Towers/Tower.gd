@@ -6,7 +6,6 @@ signal create_effect(effect_scene, effect_attributes_dict)
 var active: bool = true
 var tower_type: String
 var default_attributes: Dictionary = {}
-var tower_range: float = -1
 
 func _init(_tower_type: String = ""):
 	if(_tower_type.length() > 0):
@@ -14,10 +13,13 @@ func _init(_tower_type: String = ""):
 		initialize_default_values()
 
 func get_default_attributes() -> Dictionary:
-	if (tower_type == null || tower_type.length() == 0):
-		return {}
-	return (GameData.tower_data as Dictionary).get(tower_type, {})
+	return default_attributes
+
+func get_default_attribute(_key: String, _default = null):
+	return get_default_attributes().get(_key, _default)
 
 func initialize_default_values() -> void:
-		var tower_data : Dictionary = get_default_attributes()
-		tower_range = (tower_data.get(GameData.RANGE, -1) as float)
+	if (tower_type == null || tower_type.length() == 0):
+		default_attributes = {}
+	else:
+		default_attributes = (GameData.tower_data as Dictionary).get(tower_type, {})

@@ -7,9 +7,6 @@ var cooldown_timer: Timer
 var target: Node2D
 var chain_targets: Array
 
-var tower_damage: float = -1
-var tower_rof: float = -1
-var maximum_chains: int
 var on_cooldown: bool = true
 
 var debug: bool = false
@@ -21,27 +18,20 @@ func _init().("ArcTower"):
 func _ready():
 	range_area = get_node("RangeArea")
 	if(range_area):
-		if(active && tower_range >= 0.0):
-			range_area.set_range(tower_range)
+		if(active && (get_default_attribute(GameData.RANGE, -1) as float) >= 0.0):
+			range_area.set_range((get_default_attribute(GameData.RANGE, -1) as float))
 		else:
 			range_area.set_range(0)
 	
-	if(active):
+	if(active && (get_default_attribute(GameData.ROF, -1) as float) >= 0):
 		cooldown_timer = Timer.new()
 		cooldown_timer.set_one_shot(true)
 		cooldown_timer.connect("timeout", self, "_on_cooldown_timeout")
 		add_child(cooldown_timer)
-		cooldown_timer.start(1.0/tower_rof)
+		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
 		
 		if(debug):
 			setup_target_line()
-	
-func initialize_default_values() -> void:
-	.initialize_default_values()
-	var tower_data : Dictionary = get_default_attributes()
-	tower_rof = (tower_data.get(GameData.ROF, -1) as float)
-	tower_damage = (tower_data.get(GameData.DAMAGE, -1) as float)
-	maximum_chains = (tower_data.get(GameData.MAX_CHAINS, 1) as int)
 
 func _physics_process(_delta):
 	if active && range_area.enemy_array.size() > 0 && !on_cooldown:
@@ -74,14 +64,15 @@ func get_target_by_closest(_potential_targets: Array, _excluded_targets: Array =
 
 # recursively find a series of unique targets in chaining range from inital target
 func get_chain_targets(_targets: Array):
-	if(_targets == null || _targets.size() == 0 || _targets.size() >= maximum_chains || _targets.back() == null):
+	if(_targets == null || _targets.size() == 0 || _targets.back() == null
+	|| _targets.size() >= (get_default_attribute(GameData.MAX_CHAINS, 1) as int)):
 		return _targets
 	
 	var previous_target := (_targets.back() as Node2D)
 	
 	# create shape to find enemies in around previous target
 	var shape = CircleShape2D.new()
-	shape.radius = tower_range
+	shape.radius = (get_default_attribute(GameData.RANGE, -1) as float)
 	
 	# run a collision query to find targets in the shape
 	var query = Physics2DShapeQueryParameters.new()
@@ -112,9 +103,9 @@ func fire():
 		}
 		emit_signal("create_effect", beam_scene, effect_attributes)
 		for target in chain_targets:
-			(target as Enemy).on_hit(tower_damage)
+			(target as Enemy).on_hit((get_default_attribute(GameData.DAMAGE, -1) as float))
 		on_cooldown = true
-		cooldown_timer.start(1.0/tower_rof)
+		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
 
 func _on_cooldown_timeout() -> void:
 	on_cooldown = false
