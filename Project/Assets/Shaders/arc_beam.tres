@@ -1,0 +1,12 @@
+[gd_resource type="Shader" format=2]
+
+[resource]
+code = "shader_type canvas_item;
+
+const vec2 amp = vec2(0.2, 0.05);
+const vec2 freq = vec2(10.0, 50.0);
+
+void fragment(){
+	vec2 uv = vec2(UV.x + sin(TIME * freq.x) * amp.x, UV.y - sin(TIME * freq.y) * amp.y);
+	COLOR = texture(TEXTURE, uv);
+}"

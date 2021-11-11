@@ -14,6 +14,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Enemies/BlueTank.gd"
 }, {
+"base": "Node2D",
+"class": "Effect",
+"language": "GDScript",
+"path": "res://Effect.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Enemy",
 "language": "GDScript",
@@ -81,6 +86,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "BlueTank": "",
+"Effect": "",
 "Enemy": "",
 "EnemySpawner": "",
 "EnemyTarget": "",
