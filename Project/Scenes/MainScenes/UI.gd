@@ -80,7 +80,7 @@ func update_tower_preview(new_position: Vector2, color: Color) -> void:
 #			child.set_scale(Vector2.ONE/active_camera.get_zoom())
 		
 func remove_tower_preview() -> void:
-	var tower_preview: Control = get_node(TOWER_PREVIEW_NAME)
+	var tower_preview: Node2D = get_node(TOWER_PREVIEW_NAME)
 	tower_preview.name += "_delete"
 	tower_preview.visible = false
 	tower_preview.queue_free()
