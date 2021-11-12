@@ -48,7 +48,7 @@ func set_tower_preview(tower_type: String, mouse_position: Vector2) -> void:
 	var tower_range : float = tower.get_default_attribute(GameData.RANGE, -1)
 	if(tower_range != null && tower_range > 0):
 		var range_overlay := Sprite.new()
-		range_overlay.position = Vector2(32, 32)
+		range_overlay.position = Vector2.ZERO
 		var scaling : float = tower_range / 310.0
 		range_overlay.scale = Vector2(scaling, scaling)
 		var texture : Texture = load(RANGE_TEXTURE_FILEPATH)
