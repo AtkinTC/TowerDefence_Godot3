@@ -98,17 +98,33 @@ func initiate_build_mode(tower_type: String) -> void:
 
 func update_tower_preview() -> void:
 	var mouse_position: Vector2 = get_global_mouse_position()
-	var exclusion_maps: Array = [levelMap.get_tower_exclusion_map(), levelMap.get_navigation_map()]
+	var placement_type = GameData.tower_data.get(build_type, {}).get(GameData.PLACEMENT, GameData.PLACEMENT_TYPE.RANGED)
+	
+	var exclusion_maps: Array = [levelMap.get_tower_exclusion_map()]
+	var inclusion_maps: Array = []
+	
+	if(placement_type == GameData.PLACEMENT_TYPE.RANGED):
+		exclusion_maps.append(levelMap.get_navigation_map())
+	if(placement_type == GameData.PLACEMENT_TYPE.MELEE):
+		inclusion_maps.append(levelMap.get_navigation_map())
 	
 	build_valid = true
+	#tower cannot be placed on any tiles in the exclusion maps
 	for map in exclusion_maps:
 		var current_tile: Vector2 = map.world_to_map(mouse_position)
 		var tile_position: Vector2 = map.map_to_world(current_tile)
-		
 		build_location = tile_position + map.get_cell_size()/2
 		build_tile = current_tile
-		
 		if (map.get_cellv(current_tile) != -1):
+			build_valid = false
+			break
+	#tower can only be placed on tiles in the inclusion map
+	for map in inclusion_maps:
+		var current_tile: Vector2 = map.world_to_map(mouse_position)
+		var tile_position: Vector2 = map.map_to_world(current_tile)
+		build_location = tile_position + map.get_cell_size()/2
+		build_tile = current_tile
+		if (map.get_cellv(current_tile) == -1):
 			build_valid = false
 			break
 			
@@ -137,39 +153,11 @@ func verify_and_build() -> void:
 func get_camera_mouse_position() -> Vector2:
 	return camera.convert_to_camera_position(get_global_mouse_position())
 
-##
-## Enemy Functions
-##
-
 func start_waves() -> void:
 	levelMap.get_enemy_spawner().start_spawner()
 	
 func get_current_wave_index() -> int:
 	return (levelMap.get_enemy_spawner() as EnemySpawner).get_current_wave_index()
-
-#func start_next_wave() -> void:
-#	var wave_data: Array = retrieve_wave_data()
-#	yield(get_tree().create_timer(1), "timeout") ## ugly padding
-#	spawn_enemies(wave_data)
-#
-#func retrieve_wave_data() -> Array:
-#	var wave_data := [["Enemy", 1.0], ["Enemy", 1.0], ["Enemy", 1.0], ["Enemy", 1.0], ["Enemy", 1.0], ["Enemy", 1.0]]
-#	current_wave += 1
-#	enemies_in_wave = wave_data.size();
-#	return wave_data
-#
-#func spawn_enemies(wave_data: Array) -> void:
-#	for i in wave_data:
-#		var new_enemy: Enemy = load(ENEMIES_PATH + i[0] + SCENE_EXT).instance()
-#		new_enemy.set_navigation_map(levelMap.get_navigation_map())
-#		new_enemy.set_debug(OS.is_debug_build())
-#		var spawnPoints : Array = levelMap.get_enemy_spawn_points() as Array
-#		if(spawnPoints.size() > 0):
-#			var index = randi() % spawnPoints.size()
-#			new_enemy.set_global_position((spawnPoints[index] as Position2D).get_global_position())
-#		new_enemy.connect("base_damage", self, "on_base_damage")
-#		levelMap.get_enemies_node().add_child(new_enemy, true)
-#		yield(get_tree().create_timer(i[1]), "timeout") ## ugly padding
 
 #spawn enemy from create_enemy signal
 func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary):

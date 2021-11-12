@@ -1,12 +1,14 @@
 extends Node
 
+enum PLACEMENT_TYPE {RANGED, MELEE, BOTH}
+
 const DAMAGE: String = "damage"
 const ROF: String = "rof"
 const RANGE: String = "range"
 const PROJTYPE: String = "projType"
 const MAX_CHAINS: String = "max_chains"
+const PLACEMENT: String = "placement"
 
-enum PROJTYPES_ENUM {HITSCAN, MISSILE}
 
 const tower_data = {
 	"GunT1": {
@@ -25,6 +27,13 @@ const tower_data = {
 		RANGE: 200,
 		PROJTYPE: "Beam",
 		MAX_CHAINS: 3
+		},
+	"BlockerTower": {
+		DAMAGE: 20,
+		ROF: 1,
+		RANGE: 50,
+		PROJTYPE: "Area",
+		PLACEMENT: PLACEMENT_TYPE.MELEE
 		}
 	}
 	

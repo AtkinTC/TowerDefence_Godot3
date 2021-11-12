@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=2]
+[gd_scene load_steps=22 format=2]
 
 [ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=2]
@@ -20,6 +20,7 @@
 [ext_resource path="res://Scenes/MainScenes/InputHandler.gd" type="Script" id=18]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile203.png" type="Texture" id=19]
 [ext_resource path="res://Scenes/MainScenes/NavigationController.gd" type="Script" id=20]
+[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile229.png" type="Texture" id=21]
 
 [node name="GameScene" type="Node2D"]
 script = ExtResource( 5 )
@@ -118,7 +119,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MissileT1" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBar" groups=["build_buttons"]]
+[node name="BlockerTower" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBar" groups=["build_buttons"]]
 margin_left = 10.0
 margin_top = 110.0
 margin_right = 90.0
@@ -131,14 +132,14 @@ enabled_focus_mode = 0
 texture_normal = ExtResource( 4 )
 expand = true
 
-[node name="Icon" type="TextureRect" parent="UI/HUD/BuildPanel/BuildBar/MissileT1"]
+[node name="Icon" type="TextureRect" parent="UI/HUD/BuildPanel/BuildBar/BlockerTower"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 10.0
 margin_top = 10.0
 margin_right = -10.0
 margin_bottom = -10.0
-texture = ExtResource( 3 )
+texture = ExtResource( 21 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
