@@ -1,8 +1,9 @@
-extends TileMap
-class_name NavigationMap
+extends Node2D
+class_name NavigationController
+
+var navigation_map: TileMap
 
 var used_cells: Array;
-
 var next_cell_map: Dictionary
 var distance_map: Dictionary
 var goal_position: Vector2
@@ -11,13 +12,10 @@ var debug: bool = false
 var debug_flow_lines: Node2D
 var debug_cell_labels: Node2D
 
-func _ready() -> void:
-	used_cells = self.get_used_cells()
-
 func initialize_navigation(world_goal_position: Vector2) -> void:
-	if(world_goal_position != null):
+	if(navigation_map != null && world_goal_position != null):
 		#array of all existing  cells in the tilemap
-		used_cells = self.get_used_cells()
+		used_cells = navigation_map.get_used_cells()
 		
 		goal_position = convert_world_pos_to_map_pos(world_goal_position)
 		
@@ -98,15 +96,15 @@ func get_path_to_goal(world_current_position: Vector2) -> Array:
 	return path
 
 func convert_world_pos_to_map_pos(world_position: Vector2) -> Vector2:
-	var local_position = self.to_local(world_position)
-	var map_position = self.world_to_map(local_position)
+	var local_position = navigation_map.to_local(world_position)
+	var map_position = navigation_map.world_to_map(local_position)
 	return map_position
 
 func convert_map_pos_to_world_pos(map_position: Vector2, cell_center: bool = true) -> Vector2:
-	var local_position = self.map_to_world(map_position)
+	var local_position = navigation_map.map_to_world(map_position)
 	if(cell_center):
-		local_position += self.cell_size/2.0
-	var world_position = self.to_global(local_position)
+		local_position += navigation_map.cell_size/2.0
+	var world_position = navigation_map.to_global(local_position)
 	return world_position
 	
 func set_debug(_debug: bool) -> void:
@@ -129,7 +127,7 @@ func setup_debug_tile_labels() -> void:
 			debug_cell_labels = Node2D.new()
 			debug_cell_labels.set_as_toplevel(true)
 			debug_cell_labels.set_name("debug_cell_labels")
-			add_child(debug_cell_labels)
+			navigation_map.add_child(debug_cell_labels)
 			
 		for cell in used_cells:
 			var cell_label: Label = Label.new()
@@ -149,7 +147,7 @@ func setup_debug_flow_lines() -> void:
 			debug_flow_lines = Node2D.new()
 			debug_flow_lines.set_as_toplevel(true)
 			debug_flow_lines.set_name("debug_flow_lines")
-			add_child(debug_flow_lines)
+			navigation_map.add_child(debug_flow_lines)
 		
 		for cell in next_cell_map.keys():
 			if(next_cell_map[cell] != null):
@@ -159,3 +157,6 @@ func setup_debug_flow_lines() -> void:
 				flow_line.set_points([convert_map_pos_to_world_pos(cell), convert_map_pos_to_world_pos(next_cell_map[cell])])
 				flow_line.set_name("flow_lines_"+String(cell.x)+"_"+String(cell.y))
 				debug_flow_lines.add_child(flow_line)
+
+func set_navigation_map(_navigation_map: TileMap) -> void:
+	navigation_map = _navigation_map

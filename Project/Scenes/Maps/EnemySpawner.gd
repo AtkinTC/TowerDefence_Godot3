@@ -1,11 +1,11 @@
 extends Node2D
 class_name EnemySpawner
 
+signal create_enemy(enemy_scene, enemy_attributes_dict)
+
 const ENEMIES_PATH: String = "res://Scenes/Enemies/"
 const SCENE_EXT: String = ".tscn"
 
-var enemies_parent_node: Node2D
-var navigation_map: NavigationMap
 var map_name: String
 var wave_data_array: Array
 var wave_index: int = -1
@@ -15,9 +15,6 @@ var spawn_points: Array = []
 
 var spawn_timer: Timer
 var wave_timer: Timer
-
-#func _init() -> void:
-#	pass
 
 func _ready() -> void:
 	spawn_timer = Timer.new()
@@ -46,7 +43,6 @@ func start_spawner() -> void:
 		reset()
 		
 		assert((map_name != null || map_name.length() > 0), "Error: spawner needs a map_name to retrieve wave data")
-		assert((enemies_parent_node != null), "Error: spawner needs an enemies_parent_node to assign enemies to")
 		assert((spawn_points != null || spawn_points.size() > 0), "Error: spawner has no spawn points")
 		
 		spawner_running = true
@@ -89,15 +85,20 @@ func spawn_next_enemy() -> void:
 func spawn_enemy() -> void:
 	var wave: WaveData = wave_data_array[wave_index]
 	
-	var new_enemy: Enemy = load(ENEMIES_PATH + wave.enemy_type + SCENE_EXT).instance()
-	new_enemy.set_navigation_map(navigation_map)
-	#new_enemy.set_debug(OS.is_debug_build())
-	enemies_parent_node.add_child(new_enemy, true)
-	if(spawn_points.size() > 0):
-		var index = randi() % spawn_points.size()
-		new_enemy.set_global_position((spawn_points[index] as Position2D).get_global_position())
-			
-	#print("number of enemies on screen: " + String(enemies_parent_node.get_child_count()))
+	var enemy_scene: PackedScene = load(ENEMIES_PATH + wave.enemy_type + SCENE_EXT)
+	if(enemy_scene != null):
+		var spawn_position := Vector2.ZERO
+		if(spawn_points.size() == 1):
+			spawn_position = (spawn_points[1] as Position2D).get_global_position()
+		elif(spawn_points.size() > 1):
+			var index := randi() % spawn_points.size()
+			spawn_position = (spawn_points[index] as Position2D).get_global_position()
+		
+		var enemy_attributes = {
+			"source" : self,
+			"spawn_position" : spawn_position
+		}
+		emit_signal("create_enemy", enemy_scene, enemy_attributes)
 
 func _on_spawn_timeout():
 	#print("spawn timeout! " + String(spawn_index))
@@ -141,18 +142,9 @@ func get_spawn_points() -> Array:
 
 func set_map_name(_map_name: String) -> void:
 	map_name = _map_name
-
-func set_enemies_parent_node(_enemies_parent_node: Node2D) -> void:
-	enemies_parent_node = _enemies_parent_node
-	
-func set_navigation_map(_navigation_map: NavigationMap) -> void:
-	navigation_map = _navigation_map
 	
 func get_current_wave_index() -> int:
 	return wave_index
 	
 func is_spawner_running() -> bool:
 	return spawner_running
-	
-
-

@@ -10,6 +10,7 @@ signal game_finished(result)
 signal base_health_changed(base_health)
 
 var levelMap: GameMap
+onready var navigation_cont: NavigationController = get_node("NavigationController")
 
 var build_mode: bool = false
 var build_valid: bool = false
@@ -19,15 +20,13 @@ var build_type: String
 var ui: UI
 var camera: GameCamera2D
 
-var current_wave: int = 0
-var enemies_in_wave: int = 0
-
 var base_health: int = 10000
+
+var debug: bool = false
 
 func _ready() -> void:
 	levelMap = get_node("Map001") #TODO: change to dynamically get current map
 	#levelMap.set_debug(OS.is_debug_build())
-	
 	
 	camera = get_node("Camera")
 	print("Viewport size : " + String(camera.get_viewport().get_size()))
@@ -46,6 +45,11 @@ func _ready() -> void:
 	# connect signals
 	connect("base_health_changed", ui, "on_base_health_changed")
 	levelMap.get_target_area().connect("player_damaged", self, "on_player_damaged")
+	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
+	
+	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
+	navigation_cont.initialize_navigation(levelMap.get_target_area().global_position)
+	navigation_cont.set_debug(debug)
 
 func _process(_delta: float) -> void:
 	if build_mode:
@@ -166,6 +170,14 @@ func get_current_wave_index() -> int:
 #		new_enemy.connect("base_damage", self, "on_base_damage")
 #		levelMap.get_enemies_node().add_child(new_enemy, true)
 #		yield(get_tree().create_timer(i[1]), "timeout") ## ugly padding
+
+#spawn enemy from create_enemy signal
+func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary):
+	var enemy_instance = (enemy_scene.instance() as Enemy)
+	enemy_instance.setup_from_attribute_dictionary(enemy_attributes_dict)
+	enemy_instance.set_navigation_controller(navigation_cont)
+	enemy_instance.set_debug(true)
+	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal
 func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictionary):

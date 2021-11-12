@@ -3,6 +3,8 @@ class_name Enemy
 
 signal base_damage(damage)
 
+var attribute_dict: Dictionary
+
 var active = true
 var speed: float = 150
 var max_hp: float = 50
@@ -21,8 +23,8 @@ var pathLine: Line2D = null
 var closestPointLine: Line2D = null
 var reached_target: bool = false
 
-#NavigationMap pathing
-var navigation_map: NavigationMap
+#NavigationController pathing
+var navigation_controller: NavigationController
 var navigation_next_position: Vector2
 var is_navigating: bool = false
 
@@ -32,6 +34,10 @@ var debug: bool = false
 #	pass
 
 func _ready() -> void:
+	var spawn_position = attribute_dict.get("spawn_position")
+	if(spawn_position != null):
+		global_position = spawn_position
+		
 	health_bar.max_value = max_hp
 	health_bar.value = current_hp
 	health_bar.set_as_toplevel(true)
@@ -49,7 +55,7 @@ func _physics_process(delta) -> void:
 			## damage the target and destroy self
 			#emit_signal("base_damage", base_damage)
 			queue_free()
-		if(navigation_map != null):
+		if(navigation_controller != null):
 			navigate_to_next_position()
 		move(delta)
 	health_bar.set_position(position + health_bar_offset)
@@ -94,14 +100,14 @@ func set_current_hp(hp: float) -> void:
 ### NavigationMap pathfinding ###
 #################################
 func get_next_navigation_position():
-	if(navigation_map == null):
+	if(navigation_controller == null):
 		return null
-	return navigation_map.get_next_world_position(self.global_position)
+	return navigation_controller.get_next_world_position(self.global_position)
 		
 func get_pathed_distance_to_target() -> float:
-	if(navigation_map == null):
+	if(navigation_controller == null):
 		return -1.0
-	return float(navigation_map.get_distance_to_goal(self.global_position))
+	return float(navigation_controller.get_distance_to_goal(self.global_position))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
@@ -125,9 +131,16 @@ func navigate_to_next_position() -> void:
 
 func set_target(target: Node2D) -> void:
 	self.target = target
+	
+func set_navigation_controller(_navigation_controller: NavigationController) -> void:
+	navigation_controller = _navigation_controller
 
-func set_navigation_map(_navigation_map: NavigationMap) -> void:
-	navigation_map = _navigation_map
+func setup_from_attribute_dictionary(_attribute_dict: Dictionary):
+	attribute_dict = _attribute_dict
+
+##################
+### DEBUG code ###
+##################
 
 func set_debug(debug: bool) -> void:
 	self.debug = debug
@@ -148,7 +161,7 @@ func setup_nearest_point_line() -> void:
 	
 func update_debug_path_line() -> void:
 	if(pathLine != null):
-		pathLine.set_points(navigation_map.get_path_to_goal(self.global_position))
+		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position))
 
 func update_nearest_point_line() -> void:
 	if(closestPointLine != null):
