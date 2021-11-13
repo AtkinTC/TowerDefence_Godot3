@@ -8,7 +8,8 @@ const RANGE: String = "range"
 const PROJTYPE: String = "projType"
 const MAX_CHAINS: String = "max_chains"
 const PLACEMENT: String = "placement"
-
+const BLOCKER: String = "blocker"
+const BLOCKER_NAV: String = "blocker_nav"
 
 const tower_data = {
 	"GunT1": {
@@ -33,7 +34,9 @@ const tower_data = {
 		ROF: 1,
 		RANGE: 50,
 		PROJTYPE: "Area",
-		PLACEMENT: PLACEMENT_TYPE.MELEE
+		PLACEMENT: PLACEMENT_TYPE.MELEE,
+		BLOCKER: true,
+		BLOCKER_NAV: 10
 		}
 	}
 	

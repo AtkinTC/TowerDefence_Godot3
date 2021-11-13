@@ -21,6 +21,7 @@ texture = ExtResource( 3 )
 script = ExtResource( 4 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangeArea"]
+visible = false
 shape = SubResource( 1 )
 
 [node name="ReadyTimer" type="Timer" parent="."]

@@ -1,9 +1,10 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Resources/Tilesets/Map001.tres" type="TileSet" id=1]
 [ext_resource path="res://Scenes/Maps/EnemyTarget.gd" type="Script" id=2]
 [ext_resource path="res://Scenes/Maps/GameMap.gd" type="Script" id=3]
 [ext_resource path="res://Resources/Tilesets/path_001.tres" type="TileSet" id=4]
+[ext_resource path="res://Scenes/Maps/TowersNode.gd" type="Script" id=5]
 [ext_resource path="res://Assets/Environment/Tilesets/kenney/terrainTiles_default.png" type="Texture" id=7]
 [ext_resource path="res://Scenes/Maps/EnemySpawner.gd" type="Script" id=10]
 
@@ -87,6 +88,7 @@ __meta__ = {
 }
 
 [node name="Towers" type="Node2D" parent="."]
+script = ExtResource( 5 )
 __meta__ = {
 "_edit_lock_": true
 }

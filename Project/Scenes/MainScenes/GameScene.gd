@@ -48,7 +48,9 @@ func _ready() -> void:
 	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
 	
 	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
-	navigation_cont.initialize_navigation(levelMap.get_target_area().global_position)
+	navigation_cont.set_towers_node(levelMap.get_towers_node())
+	navigation_cont.set_goal_position(levelMap.get_target_area().global_position)
+	navigation_cont.run_navigation()
 	navigation_cont.set_debug(debug)
 
 func _process(_delta: float) -> void:
@@ -144,8 +146,11 @@ func verify_and_build() -> void:
 		var new_tower: Node2D = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
 		new_tower.position = build_location
 		new_tower.connect("create_effect", self, "_on_create_effect")
-		var towers_node: Node2D = levelMap.get_towers_node()
-		towers_node.add_child(new_tower, true)
+		#var towers_node: Node2D = levelMap.get_towers_node()
+		#towers_node.add_child(new_tower, true)
+		var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
+		(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
+		navigation_cont.run_navigation()
 		var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
 		tower_exclusion.set_cellv(build_tile, EMPTY_TILE_ID)
 		#TODO: trigger deduction of resources 
@@ -164,7 +169,7 @@ func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionar
 	var enemy_instance = (enemy_scene.instance() as Enemy)
 	enemy_instance.setup_from_attribute_dictionary(enemy_attributes_dict)
 	enemy_instance.set_navigation_controller(navigation_cont)
-	enemy_instance.set_debug(true)
+	enemy_instance.set_debug(debug)
 	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal

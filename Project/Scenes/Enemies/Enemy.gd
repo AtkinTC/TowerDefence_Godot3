@@ -102,12 +102,12 @@ func set_current_hp(hp: float) -> void:
 func get_next_navigation_position():
 	if(navigation_controller == null):
 		return null
-	return navigation_controller.get_next_world_position(self.global_position)
+	return navigation_controller.get_next_world_position(self.global_position, true)
 		
 func get_pathed_distance_to_target() -> float:
 	if(navigation_controller == null):
 		return -1.0
-	return float(navigation_controller.get_distance_to_goal(self.global_position))
+	return float(navigation_controller.get_distance_to_goal(self.global_position, true))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
@@ -161,7 +161,7 @@ func setup_nearest_point_line() -> void:
 	
 func update_debug_path_line() -> void:
 	if(pathLine != null):
-		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position))
+		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position, true))
 
 func update_nearest_point_line() -> void:
 	if(closestPointLine != null):
