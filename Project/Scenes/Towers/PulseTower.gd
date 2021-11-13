@@ -1,6 +1,6 @@
 extends Tower
 
-var pulse_effect_scene := preload("res://Scenes/Effects/PulseEffect.tscn")
+export var pulse_effect_scene: PackedScene
 
 var range_area: TowerRangeArea
 var cooldown_timer: Timer
@@ -24,12 +24,11 @@ func _ready():
 			range_area.set_range(0)
 	
 	if(active && (get_default_attribute(GameData.ROF, -1) as float) >= 0):
-		cooldown_timer = Timer.new()
+		cooldown_timer = create_and_add_timer()
 		cooldown_timer.set_one_shot(true)
 		cooldown_timer.connect("timeout", self, "_on_cooldown_timeout")
 		add_child(cooldown_timer)
 		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
-		
 #		if(debug):
 #			setup_target_line()
 

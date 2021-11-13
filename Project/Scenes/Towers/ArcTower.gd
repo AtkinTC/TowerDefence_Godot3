@@ -1,6 +1,6 @@
 extends Tower
 
-var beam_scene := preload("res://Scenes/Effects/ArcBeamEffect.tscn")
+export var arc_effect_scene : PackedScene
 
 var range_area: TowerRangeArea
 var cooldown_timer: Timer
@@ -101,7 +101,7 @@ func fire():
 			"chain_targets" : chain_targets,
 			"duration" : 1.0
 		}
-		emit_signal("create_effect", beam_scene, effect_attributes, Vector2.ZERO)
+		emit_signal("create_effect", arc_effect_scene, effect_attributes, Vector2.ZERO)
 		for target in chain_targets:
 			(target as Enemy).on_hit((get_default_attribute(GameData.DAMAGE, -1) as float))
 		on_cooldown = true

@@ -17,7 +17,7 @@ _global_script_classes=[ {
 "base": "Node2D",
 "class": "Effect",
 "language": "GDScript",
-"path": "res://Effect.gd"
+"path": "res://Scenes/Effects/Effect.gd"
 }, {
 "base": "KinematicBody2D",
 "class": "Enemy",
@@ -117,7 +117,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Tower Defence"
-run/main_scene="res://SceneHandler.tscn"
+run/main_scene="res://Scenes/MainScenes/SceneHandler.tscn"
 config/icon="res://icon.png"
 
 [autoload]
