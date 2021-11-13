@@ -165,16 +165,18 @@ func get_current_wave_index() -> int:
 	return (levelMap.get_enemy_spawner() as EnemySpawner).get_current_wave_index()
 
 #spawn enemy from create_enemy signal
-func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary):
+func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary, spawn_position: Vector2):
 	var enemy_instance = (enemy_scene.instance() as Enemy)
+	enemy_instance.set_global_position(spawn_position)
 	enemy_instance.setup_from_attribute_dictionary(enemy_attributes_dict)
 	enemy_instance.set_navigation_controller(navigation_cont)
 	enemy_instance.set_debug(debug)
 	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal
-func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictionary):
+func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictionary, spawn_position: Vector2):
 	var effect_instance = (effect_scene.instance() as Effect)
+	effect_instance.set_global_position(spawn_position)
 	effect_instance.setup_from_attribute_dictionary(effect_attributes_dict)
 	levelMap.get_effects_node().add_child(effect_instance)
 

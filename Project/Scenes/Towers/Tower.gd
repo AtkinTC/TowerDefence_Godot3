@@ -1,7 +1,7 @@
 extends Node2D
 class_name Tower
 
-signal create_effect(effect_scene, effect_attributes_dict)
+signal create_effect(effect_scene, effect_attributes_dict, position)
 
 var active: bool = true
 var tower_type: String

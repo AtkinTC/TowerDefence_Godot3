@@ -101,7 +101,7 @@ func fire():
 			"chain_targets" : chain_targets,
 			"duration" : 1.0
 		}
-		emit_signal("create_effect", beam_scene, effect_attributes)
+		emit_signal("create_effect", beam_scene, effect_attributes, Vector2.ZERO)
 		for target in chain_targets:
 			(target as Enemy).on_hit((get_default_attribute(GameData.DAMAGE, -1) as float))
 		on_cooldown = true

@@ -1,7 +1,7 @@
 extends Node2D
 class_name EnemySpawner
 
-signal create_enemy(enemy_scene, enemy_attributes_dict)
+signal create_enemy(enemy_scene, enemy_attributes_dict, position)
 
 const ENEMIES_PATH: String = "res://Scenes/Enemies/"
 const SCENE_EXT: String = ".tscn"
@@ -98,7 +98,7 @@ func spawn_enemy() -> void:
 			"source" : self,
 			"spawn_position" : spawn_position
 		}
-		emit_signal("create_enemy", enemy_scene, enemy_attributes)
+		emit_signal("create_enemy", enemy_scene, enemy_attributes, spawn_position)
 
 func _on_spawn_timeout():
 	#print("spawn timeout! " + String(spawn_index))
