@@ -64,6 +64,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/SupportScenes/RectExtents.gd"
 }, {
+"base": "Polygon2D",
+"class": "ShapePolygon2D",
+"language": "GDScript",
+"path": "res://Scenes/SupportScenes/ShapePolygon2D.gd"
+}, {
 "base": "Node2D",
 "class": "Tower",
 "language": "GDScript",
@@ -101,6 +106,7 @@ _global_script_class_icons={
 "GunTower": "",
 "NavigationController": "",
 "RectExtents": "",
+"ShapePolygon2D": "",
 "Tower": "",
 "TowerRangeArea": "",
 "TowersNode": "",
