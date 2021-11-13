@@ -37,7 +37,13 @@ const tower_data = {
 		PLACEMENT: PLACEMENT_TYPE.MELEE,
 		BLOCKER: true,
 		BLOCKER_NAV: 10
-		}
+		},
+	"PulseTower": {
+		DAMAGE: 20,
+		ROF: 1,
+		RANGE: 100,
+		PROJTYPE: "Area",
+		},
 	}
 	
 const enemy_data = {
