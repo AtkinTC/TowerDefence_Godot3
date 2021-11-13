@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Assets/Icons/kenneys/gear.png" type="Texture" id=2]
+
+[node name="TimerTextureProgress" type="TextureProgress"]
+margin_right = 34.0
+margin_bottom = 34.0
+value = 50.0
+texture_under = ExtResource( 2 )
+texture_progress = ExtResource( 2 )
+fill_mode = 4
+tint_under = Color( 0.5, 0.5, 0.5, 0.5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}

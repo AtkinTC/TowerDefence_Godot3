@@ -3,6 +3,7 @@ extends Tower
 export var arc_effect_scene : PackedScene
 
 var range_area: TowerRangeArea
+#onready var cooldown_timer: TimerProgress = get_node("TimerProgress")
 var cooldown_timer: Timer
 var target: Node2D
 var chain_targets: Array
@@ -24,10 +25,9 @@ func _ready():
 			range_area.set_range(0)
 	
 	if(active && (get_default_attribute(GameData.ROF, -1) as float) >= 0):
-		cooldown_timer = Timer.new()
+		cooldown_timer = create_and_add_timer()
 		cooldown_timer.set_one_shot(true)
 		cooldown_timer.connect("timeout", self, "_on_cooldown_timeout")
-		add_child(cooldown_timer)
 		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
 		
 		if(debug):
