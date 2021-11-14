@@ -40,7 +40,7 @@ const tower_data = {
 		},
 	"PulseTower": {
 		DAMAGE: 10,
-		ROF: 1,
+		ROF: 0.5,
 		RANGE: 100,
 		PROJTYPE: "Area",
 		},

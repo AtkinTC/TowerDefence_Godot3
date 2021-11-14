@@ -1,0 +1,42 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scenes/Effects/FirePulseEffect.gd" type="Script" id=1]
+[ext_resource path="res://Assets/Effects/kenney/effect_4.png" type="Texture" id=2]
+
+[sub_resource type="CanvasItemMaterial" id=1]
+blend_mode = 1
+
+[sub_resource type="Gradient" id=2]
+
+[sub_resource type="GradientTexture" id=3]
+gradient = SubResource( 2 )
+
+[sub_resource type="Curve" id=4]
+_data = [ Vector2( 0, 0 ), 0.0, 0.0, 0, 0, Vector2( 0.225, 0.535992 ), 1.66434, 1.66434, 0, 0, Vector2( 1, 0.745083 ), -1.22378, 0.0, 0, 0 ]
+
+[sub_resource type="CurveTexture" id=5]
+curve = SubResource( 4 )
+
+[sub_resource type="ParticlesMaterial" id=6]
+flag_disable_z = true
+gravity = Vector3( 0, 0, 0 )
+angular_velocity = -100.0
+orbit_velocity = 0.0
+orbit_velocity_random = 0.0
+angle = 360.0
+angle_random = 1.0
+scale_curve = SubResource( 5 )
+color_ramp = SubResource( 3 )
+
+[node name="FirePulseEffect" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="Particles2D" type="Particles2D" parent="."]
+modulate = Color( 3, 1, 0.3, 1 )
+material = SubResource( 1 )
+emitting = false
+lifetime = 0.5
+one_shot = true
+explosiveness = 0.3
+process_material = SubResource( 6 )
+texture = ExtResource( 2 )

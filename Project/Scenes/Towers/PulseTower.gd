@@ -66,7 +66,7 @@ func fire():
 		var effect_attributes = {
 			"source" : self,
 			"radius" : (get_default_attribute(GameData.RANGE, 0) as float),
-			"duration" : 0.3
+			"duration" : 0.5
 		}
 		emit_signal("create_effect", pulse_effect_scene, effect_attributes, self.global_position)
 		for target in range_area.enemy_array:

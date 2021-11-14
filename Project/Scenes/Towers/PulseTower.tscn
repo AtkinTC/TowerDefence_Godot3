@@ -6,7 +6,7 @@
 [ext_resource path="res://Scenes/Towers/TowerRangeArea.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/SupportScenes/TimerTextureProgress.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scenes/SupportScenes/TimerProgressDisplay.gd" type="Script" id=6]
-[ext_resource path="res://Scenes/Effects/PulseEffect.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Scenes/Effects/FirePulseEffect.tscn" type="PackedScene" id=7]
 
 [sub_resource type="CircleShape2D" id=1]
 resource_local_to_scene = true
