@@ -99,7 +99,7 @@ func fire():
 		var effect_attributes = {
 			"source" : self,
 			"chain_targets" : chain_targets,
-			"duration" : 1.0
+			"duration" : 0.5
 		}
 		emit_signal("create_effect", arc_effect_scene, effect_attributes, Vector2.ZERO)
 		for target in chain_targets:

@@ -39,7 +39,7 @@ const tower_data = {
 		BLOCKER_NAV: 10
 		},
 	"PulseTower": {
-		DAMAGE: 20,
+		DAMAGE: 10,
 		ROF: 1,
 		RANGE: 100,
 		PROJTYPE: "Area",
