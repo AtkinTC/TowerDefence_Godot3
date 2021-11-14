@@ -6,6 +6,7 @@
 [ext_resource path="res://Assets/Effects/kenney/towerDefense_tile297.png" type="Texture" id=4]
 
 [sub_resource type="CircleShape2D" id=1]
+resource_local_to_scene = true
 radius = 175.0
 
 [sub_resource type="Animation" id=2]
