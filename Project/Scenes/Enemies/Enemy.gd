@@ -10,11 +10,10 @@ var default_attributes: Dictionary = {}
 var attribute_dict: Dictionary
 
 var active = true
-var speed: float = 150
-var max_hp: float = 50
-var current_hp: float = max_hp
-
-var base_damage: float = 20
+var speed: float
+var max_hp: float
+var current_hp: float
+var base_damage: float
 
 onready var health_bar: TextureProgress = get_node("HealthBar")
 onready var health_bar_offset: Vector2 = health_bar.get_position()
@@ -34,7 +33,7 @@ var is_navigating: bool = false
 
 var debug: bool = false
 
-func _init(_enemy_type: String = "DefaultEnemy") -> void:
+func _init(_enemy_type: String = "") -> void:
 	if(_enemy_type.length() > 0):
 		enemy_type = _enemy_type
 		initialize_default_values()
@@ -44,7 +43,12 @@ func _ready() -> void:
 	var spawn_position = attribute_dict.get("spawn_position")
 	if(spawn_position != null):
 		global_position = spawn_position
-		
+	
+	speed = (get_default_attribute(GameData.MOVE_SPEED, 0) as float)
+	max_hp = (get_default_attribute(GameData.HEALTH, 0) as float)
+	current_hp = max_hp
+	base_damage = (get_default_attribute(GameData.PLAYER_DAMAGE, 0) as float)
+	
 	health_bar.max_value = max_hp
 	health_bar.value = current_hp
 	health_bar.set_as_toplevel(true)

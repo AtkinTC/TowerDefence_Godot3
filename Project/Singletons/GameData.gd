@@ -71,7 +71,7 @@ const HEALTH: String = "health"
 const REWARD: String = "reward"
 
 const ENEMY_DATA = {
-	"DefaultEnemy":  {
+	"BasicEnemy":  {
 		PLAYER_DAMAGE: 1,
 		MOVE_SPEED: 100,
 		HEALTH: 10,
@@ -86,6 +86,6 @@ const ENEMY_DATA = {
 	}
 
 const wave_data = {
-	"TEST":  ["Enemy, 2, 1.0, 5.0", "Enemy, 6, 0.5, 5.0", "Enemy, 10, 0.5, 10.0"],
-	"STREAM" : ["Enemy, 100000, 0.5, 1"]
+	"TEST":  ["BasicEnemy, 2, 1.0, 5.0", "BasicEnemy, 6, 0.5, 5.0", "BasicEnemy, 10, 0.5, 10.0"],
+	"STREAM" : ["BasicEnemy, 100000, 1, 1"]
 }
