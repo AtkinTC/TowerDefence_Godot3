@@ -3,37 +3,27 @@ class_name EnemySpawner
 
 signal create_enemy(enemy_scene, enemy_attributes_dict, position)
 
-const ENEMIES_PATH: String = "res://Scenes/Enemies/"
-const SCENE_EXT: String = ".tscn"
+var loaded_enemy_scenes: Dictionary = {}
+var wave_spawners: Dictionary = {}
 
 var map_name: String
 var wave_data_array: Array
-var wave_index: int = -1
-var spawn_index: int = -1
+var current_wave_index: int = -1
 var spawner_running: bool = false
 var spawn_points: Array = []
 
-var spawn_timer: Timer
-var wave_timer: Timer
-
 func _ready() -> void:
-	spawn_timer = Timer.new()
-	spawn_timer.set_one_shot(true)
-	spawn_timer.connect("timeout", self, "_on_spawn_timeout")
-	add_child(spawn_timer)
-	wave_timer = Timer.new()
-	wave_timer.set_one_shot(true)
-	wave_timer.connect("timeout", self, "_on_wave_timeout")
-	add_child(wave_timer)
 	reset()
 
 func reset() -> void:
-	spawn_timer.stop()
-	wave_timer.stop()
-	wave_index = -1
-	spawn_index = -1
+	current_wave_index = -1
 	spawner_running = false
 	spawn_points  = []
+	for wave_index in wave_spawners.keys():
+		var wave_spawner: WaveSpawner = wave_spawners.get(wave_index)
+		if(wave_spawner != null):
+			wave_spawner.queue_free()
+	
 	for child in get_children():
 		if(child is Position2D):
 			spawn_points.append(child)
@@ -50,92 +40,32 @@ func start_spawner() -> void:
 		if(wave_data_array != null && wave_data_array.size()):
 			start_next_wave()
 
-func start_spawn_timer(spawn_delay: float) -> void:
-	spawn_timer.start(spawn_delay)
-	
-func start_wave_timer(wave_delay: float) -> void:
-	wave_timer.start(wave_delay)
-
 func retrieve_wave_data():
 	if (map_name != null && map_name.length() > 0):
-		var wave_data_string_array : Array = (GameData.wave_data as Dictionary).get(map_name)
-		if(wave_data_string_array != null && wave_data_string_array.size() > 0):
-			wave_data_array = build_wave_data_from_string_array(wave_data_string_array)
+		wave_data_array = (GameData.WAVE_DATA as Dictionary).get(map_name)
 	
-	for wave_data in wave_data_array:
-		print(wave_data.to_string())
+		for wave_data in wave_data_array:
+			print((wave_data as Dictionary))
 
 func start_next_wave() -> void:
-	wave_index += 1
-	if(wave_index < wave_data_array.size()):
-		spawn_next_enemy()
+	current_wave_index += 1
+	if(current_wave_index < get_wave_data_array().size()):
+		create_and_start_wave_spawner(current_wave_index)
 	else:
 		spawner_running = false
+		#TODO: emit signal to indicate that there are no more waves
 	
-func spawn_next_enemy() -> void:
-	spawn_index += 1
-	var wave: WaveData = wave_data_array[wave_index]
-	if(spawn_index < wave.enemy_count):
-		start_spawn_timer(wave.spawn_delay)
-		spawn_enemy()
-	else:
-		start_wave_timer(wave.wave_delay)
-		spawn_index = -1
-		
-func spawn_enemy() -> void:
-	var wave: WaveData = wave_data_array[wave_index]
+func create_and_start_wave_spawner(_wave_index) -> bool:
+	if(_wave_index < 0 || _wave_index >= get_wave_data_array().size()):
+		return false
 	
-	var enemy_scene: PackedScene = load(ENEMIES_PATH + wave.enemy_type + SCENE_EXT)
-	if(enemy_scene != null):
-		var spawn_position := Vector2.ZERO
-		if(spawn_points.size() == 1):
-			spawn_position = (spawn_points[1] as Position2D).get_global_position()
-		elif(spawn_points.size() > 1):
-			var index := randi() % spawn_points.size()
-			spawn_position = (spawn_points[index] as Position2D).get_global_position()
-		
-		var enemy_attributes = {
-			"source" : self,
-			"spawn_position" : spawn_position
-		}
-		emit_signal("create_enemy", enemy_scene, enemy_attributes, spawn_position)
-
-func _on_spawn_timeout():
-	#print("spawn timeout! " + String(spawn_index))
-	spawn_next_enemy()
-	
-func _on_wave_timeout():
-	#print("wave timeout! " + String(wave_index))
-	start_next_wave()
-
-func build_wave_data_from_string(stringWaveData: String):
-	if(stringWaveData == null || stringWaveData.length() == 0):
-		return null
-		
-	var waveDataTokens: PoolStringArray = stringWaveData.split(",")
-	if(waveDataTokens.size() != 4):
-		return null
-	
-	var enemy_type := waveDataTokens[0].strip_edges()
-	var enemy_count := int(waveDataTokens[1].strip_edges())
-	var spawn_delay := float(waveDataTokens[2].strip_edges())
-	var wave_delay := float(waveDataTokens[3].strip_edges())
-	
-	var newWaveData = WaveData.new(enemy_type, enemy_count, spawn_delay, wave_delay)
-	
-	return newWaveData
-	
-func build_wave_data_from_string_array(stringWaveDataArray: Array) -> Array:
-	if(stringWaveDataArray == null || stringWaveDataArray.size() == 0):
-		return []
-		
-	var newWaveDataArray = []
-	for stringWaveData in stringWaveDataArray:
-		var newWaveData = build_wave_data_from_string(stringWaveData)
-		if(newWaveData != null):
-			newWaveDataArray.append(newWaveData)
-	
-	return newWaveDataArray
+	var wave_spawner = WaveSpawner.new(_wave_index, get_wave_data_array()[_wave_index], spawn_points)
+	wave_spawners[_wave_index] = wave_spawner
+	add_child(wave_spawner)
+	wave_spawner.connect("create_enemy", self, "_on_create_enemy")
+	wave_spawner.connect("wave_finished", self, "_on_wave_finished")
+	wave_spawner.start_wave_spawner()
+	return true
 
 func get_spawn_points() -> Array:
 	return spawn_points
@@ -143,8 +73,31 @@ func get_spawn_points() -> Array:
 func set_map_name(_map_name: String) -> void:
 	map_name = _map_name
 	
+func get_map_name() -> String:
+	return map_name
+	
 func get_current_wave_index() -> int:
-	return wave_index
+	return current_wave_index
 	
 func is_spawner_running() -> bool:
 	return spawner_running
+
+func get_wave_data_array() -> Array:
+	return wave_data_array
+
+func get_wave_data(_wave_index: int) -> Dictionary:
+	if(_wave_index < 0 || _wave_index >= wave_data_array.size()):
+		return {}
+	return (wave_data_array[_wave_index] as Dictionary)
+
+func _on_wave_finished(_wave_index):
+	if(wave_spawners.has(_wave_index)):
+		var wave_spawner := (wave_spawners.get(_wave_index) as WaveSpawner)
+		wave_spawners.erase(_wave_index)
+		wave_spawner.queue_free()
+		
+		if(_wave_index == current_wave_index):
+			start_next_wave()
+	
+func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary, spawn_position: Vector2):
+	emit_signal("create_enemy", enemy_scene, enemy_attributes_dict, spawn_position)

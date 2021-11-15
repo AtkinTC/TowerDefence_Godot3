@@ -77,6 +77,12 @@ const ENEMY_DATA = {
 		HEALTH: 10,
 		REWARD: {GOLD: 1}
 		},
+	"BasicEnemy2":  {
+		PLAYER_DAMAGE: 2,
+		MOVE_SPEED: 150,
+		HEALTH: 20,
+		REWARD: {GOLD: 3}
+		},
 	"BlueTank": {
 		PLAYER_DAMAGE: 1,
 		MOVE_SPEED: 150,
@@ -85,7 +91,51 @@ const ENEMY_DATA = {
 		}
 	}
 
-const wave_data = {
-	"TEST":  ["BasicEnemy, 2, 1.0, 5.0", "BasicEnemy, 6, 0.5, 5.0", "BasicEnemy, 10, 0.5, 10.0"],
-	"STREAM" : ["BasicEnemy, 100000, 1, 1"]
+############
+### WAVE ###
+############
+const ENEMY_TYPE: String = "enemy_type"
+const ENEMY_COUNT: String = "enemy_count"
+const POST_SPAWN_DELAY: String = "post_spawn_delay"
+const POST_WAVE_DELAY: String = "post_wave_delay"
+const SPAWN_POINT_INDEX: String = "spawn_point_index"
+const TARGET_POINT_INDEX: String = "target_point_index"
+const SPAWN_GROUPS: String = "spawn_groups"
+
+const WAVE_DATA = {
+	"TestWave1": [
+		{
+		POST_WAVE_DELAY: 5,
+		SPAWN_GROUPS: [{
+			ENEMY_TYPE: "BasicEnemy",
+			ENEMY_COUNT: 2,
+			POST_SPAWN_DELAY: 1
+			}]
+		},
+		{	
+		POST_WAVE_DELAY: 5,
+		SPAWN_GROUPS: [{
+			ENEMY_TYPE: "BasicEnemy2",
+			ENEMY_COUNT: 5,
+			POST_SPAWN_DELAY: 1
+			}]
+		},
+		{	
+		POST_WAVE_DELAY: 5,
+		SPAWN_GROUPS: [{
+			ENEMY_TYPE: "BasicEnemy",
+			ENEMY_COUNT: 10,
+			POST_SPAWN_DELAY: 0.5
+			}]
+		},
+	],
+	"STREAM": [
+		{
+		SPAWN_GROUPS: [{
+			ENEMY_TYPE: "BasicEnemy",
+			ENEMY_COUNT: 10000,
+			POST_SPAWN_DELAY: 1
+			}]
+		}
+	]
 }

@@ -1,0 +1,57 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scenes/SupportScenes/RectExtents.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=2]
+[ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=3]
+[ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
+[ext_resource path="res://Scenes/Enemies/BasicEnemy2.gd" type="Script" id=5]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 15, 15 )
+
+[sub_resource type="CircleShape2D" id=2]
+radius = 15.0
+
+[sub_resource type="CircleShape2D" id=3]
+radius = 12.0
+
+[node name="BasicEnemy2" type="KinematicBody2D"]
+collision_layer = 2
+script = ExtResource( 5 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="HealthBar" type="TextureProgress" parent="."]
+margin_left = -30.0
+margin_top = -30.0
+margin_right = 30.0
+margin_bottom = -24.0
+value = 50.0
+texture_under = ExtResource( 4 )
+texture_progress = ExtResource( 3 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ShapePolygon2D" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0.72549, 1 )
+polygon = PoolVector2Array( 15, 0, 13.8582, 5.74025, 10.6066, 10.6066, 5.74025, 13.8582, 9.18455e-16, 15, -5.74025, 13.8582, -10.6066, 10.6066, -13.8582, 5.74025, -15, 1.83691e-15, -13.8582, -5.74025, -10.6066, -10.6066, -5.74025, -13.8582, -2.75536e-15, -15, 5.74025, -13.8582, 10.6066, -10.6066, 13.8582, -5.74025, 15, 0 )
+script = ExtResource( 2 )
+shape = SubResource( 2 )
+
+[node name="ShapePolygon2D2" type="Polygon2D" parent="."]
+color = Color( 0, 0, 1, 1 )
+polygon = PoolVector2Array( 12, 0, 11.0866, 4.5922, 8.48528, 8.48528, 4.5922, 11.0866, 7.34764e-16, 12, -4.5922, 11.0866, -8.48528, 8.48528, -11.0866, 4.5922, -12, 1.46953e-15, -11.0866, -4.5922, -8.48528, -8.48528, -4.5922, -11.0866, -2.20429e-15, -12, 4.5922, -11.0866, 8.48528, -8.48528, 11.0866, -4.5922, 12, 0 )
+script = ExtResource( 2 )
+shape = SubResource( 3 )
+
+[node name="ImpactArea" type="Node2D" parent="."]
+script = ExtResource( 1 )
+size = Vector2( 30, 30 )
+offset = Vector2( -15, -15 )
