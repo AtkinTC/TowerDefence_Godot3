@@ -11,6 +11,7 @@ signal base_health_changed(base_health)
 
 var levelMap: GameMap
 onready var navigation_cont: NavigationController = get_node("NavigationController")
+onready var resources_cont: ResourcesController = get_node("ResourcesController")
 
 var build_mode: bool = false
 var build_valid: bool = false
@@ -38,6 +39,10 @@ func _ready() -> void:
 	ui.active_camera = camera
 	ui.initialize_health_bar(base_health, base_health)
 	
+	# TODO: make this dynamic, not hardcoded
+	ui.add_resource_display(GameData.GOLD, "$", 10)
+	ui.add_resource_display(GameData.MANA, "M", 0)
+	
 	# connect all build buttons to the build function
 	for i in (get_tree().get_nodes_in_group("build_buttons")):
 		var _error = (i as TextureButton).connect("pressed", self, "initiate_build_mode", [i.get_name()])
@@ -46,6 +51,7 @@ func _ready() -> void:
 	connect("base_health_changed", ui, "on_base_health_changed")
 	levelMap.get_target_area().connect("player_damaged", self, "on_player_damaged")
 	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
+	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
 	
 	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
 	navigation_cont.set_towers_node(levelMap.get_towers_node())
@@ -53,7 +59,7 @@ func _ready() -> void:
 	navigation_cont.run_navigation()
 	navigation_cont.set_debug(debug)
 
-func _process(_delta: float) -> void:
+func _process(_delta: float) -> void:	
 	if build_mode:
 		update_tower_preview()
 		
@@ -171,6 +177,7 @@ func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionar
 	enemy_instance.setup_from_attribute_dictionary(enemy_attributes_dict)
 	enemy_instance.set_navigation_controller(navigation_cont)
 	enemy_instance.set_debug(debug)
+	enemy_instance.connect("enemy_destroyed", self, "_on_enemy_destroyed")
 	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal
@@ -189,3 +196,9 @@ func on_player_damaged(damage: int) -> void:
 		emit_signal("game_finished", false)
 	#else:
 	#	get_node("UI").update_health_bar(base_health, true)
+
+func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
+	var enemy_data: Dictionary = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
+	var reward_data: Dictionary = enemy_data.get(GameData.REWARD, {})
+	for resource_type in reward_data.keys():
+		resources_cont.add_to_resource_quantity(resource_type, reward_data[resource_type])

@@ -1,4 +1,4 @@
-[gd_scene load_steps=39 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=2]
@@ -14,8 +14,7 @@
 [ext_resource path="res://Assets/Icons/kenneys/plus.png" type="Texture" id=12]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=13]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=14]
-[ext_resource path="res://Resources/Fonts/kfn_50_o1.tres" type="DynamicFont" id=15]
-[ext_resource path="res://Resources/Fonts/kfn_30_o1.tres" type="DynamicFont" id=16]
+[ext_resource path="res://Scenes/UIScenes/BasicResourceDisplay.tscn" type="PackedScene" id=15]
 [ext_resource path="res://Scenes/MainScenes/GameCamera2D.gd" type="Script" id=17]
 [ext_resource path="res://Scenes/MainScenes/InputHandler.gd" type="Script" id=18]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile203.png" type="Texture" id=19]
@@ -24,6 +23,8 @@
 [ext_resource path="res://Resources/build_buttongroup.tres" type="ButtonGroup" id=22]
 [ext_resource path="res://Resources/Fonts/kfn_15_o1.tres" type="DynamicFont" id=23]
 [ext_resource path="res://Scenes/UIScenes/InputButton.gd" type="Script" id=24]
+[ext_resource path="res://Scenes/MainScenes/ResourcesController.gd" type="Script" id=25]
+[ext_resource path="res://Scenes/UIScenes/ResourcesDisplayContainer.gd" type="Script" id=26]
 
 [sub_resource type="InputEventAction" id=1]
 action = "ui_1"
@@ -74,6 +75,12 @@ script = ExtResource( 5 )
 
 [node name="InputHandler" type="Node2D" parent="."]
 script = ExtResource( 18 )
+
+[node name="NavigationController" type="Node2D" parent="."]
+script = ExtResource( 20 )
+
+[node name="ResourcesController" type="Node2D" parent="."]
+script = ExtResource( 25 )
 
 [node name="Camera" type="Camera2D" parent="."]
 position = Vector2( 640, 360 )
@@ -585,33 +592,14 @@ margin_right = 70.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 70, 0 )
 
-[node name="Symbol" type="Label" parent="UI/HUD/InfoBar/H"]
+[node name="ResourcesDisplayContainer" type="HBoxContainer" parent="UI/HUD/InfoBar/H" groups=["ResourcesDisplayContainer"]]
 margin_left = 74.0
-margin_right = 134.0
-margin_bottom = 60.0
-rect_min_size = Vector2( 60, 60 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
-custom_fonts/font = ExtResource( 15 )
-text = "$"
-align = 2
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Money" type="Label" parent="UI/HUD/InfoBar/H"]
-margin_left = 138.0
 margin_right = 258.0
 margin_bottom = 60.0
-rect_min_size = Vector2( 120, 60 )
-custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
-custom_fonts/font = ExtResource( 16 )
-text = "99999"
-align = 2
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = ExtResource( 26 )
+resource_display_scene = ExtResource( 15 )
+
+[node name="BasicResourceDisplay" parent="UI/HUD/InfoBar/H/ResourcesDisplayContainer" instance=ExtResource( 15 )]
 
 [node name="HealthIcon" type="TextureRect" parent="UI/HUD/InfoBar/H"]
 margin_left = 742.0
@@ -644,9 +632,6 @@ margin_left = 1210.0
 margin_right = 1280.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 70, 0 )
-
-[node name="NavigationController" type="Node2D" parent="."]
-script = ExtResource( 20 )
 
 [connection signal="pressed" from="UI/HUD/PlayPanel/PlayBar/PausePlay" to="UI" method="_on_PausePlay_pressed"]
 [connection signal="pressed" from="UI/HUD/PlayPanel/PlayBar/FastForward" to="UI" method="_on_FastForward_pressed"]

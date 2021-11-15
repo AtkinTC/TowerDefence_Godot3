@@ -2,6 +2,10 @@ extends KinematicBody2D
 class_name Enemy
 
 signal base_damage(damage)
+signal enemy_destroyed(enemy_type, enemy_position)
+
+var enemy_type: String
+var default_attributes: Dictionary = {}
 
 var attribute_dict: Dictionary
 
@@ -30,8 +34,11 @@ var is_navigating: bool = false
 
 var debug: bool = false
 
-#func _init() -> void:
-#	pass
+func _init(_enemy_type: String = "DefaultEnemy") -> void:
+	if(_enemy_type.length() > 0):
+		enemy_type = _enemy_type
+		initialize_default_values()
+
 
 func _ready() -> void:
 	var spawn_position = attribute_dict.get("spawn_position")
@@ -46,8 +53,17 @@ func _ready() -> void:
 		#setup_debug_path_line()
 		setup_nearest_point_line()
 
-#func _process(delta) -> void:
-#	pass
+func get_default_attributes() -> Dictionary:
+	return default_attributes
+
+func get_default_attribute(_key: String, _default = null):
+	return get_default_attributes().get(_key, _default)
+
+func initialize_default_values() -> void:
+	if (enemy_type == null || enemy_type.length() == 0):
+		default_attributes = {}
+	else:
+		default_attributes = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
 
 func _physics_process(delta) -> void:
 	if(active):
@@ -89,6 +105,7 @@ func on_destroy() -> void:
 	(get_node("CollisionShape2D") as CollisionShape2D).set_disabled(true)
 	health_bar.visible = false
 	active = false
+	emit_signal("enemy_destroyed", enemy_type, get_global_position())
 	yield(get_tree().create_timer(0.5), "timeout")
 	self.queue_free()
 	

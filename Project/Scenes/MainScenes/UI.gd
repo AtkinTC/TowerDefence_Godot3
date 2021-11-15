@@ -4,6 +4,8 @@ class_name UI
 onready var hp_bar = get_node("HUD/InfoBar/H/HealthBar")
 onready var hp_bar_tween = get_node("HUD/InfoBar/H/HealthBar/Tween")
 
+const RESOURCE_DISPLAY_GROUP: String = "ResourcesDisplayContainer"
+
 const TOWERS_DIR: String = "res://Scenes/Towers/"
 const SCENE_EXT: String = ".tscn"
 const RANGE_TEXTURE_FILEPATH : String = "res://Assets/UI/range_overlay.png"
@@ -134,5 +136,14 @@ func update_health_bar(base_health: int, tween: bool) -> void:
 		hp_bar_tween.interpolate_property(hp_bar, 'tint_progress', hp_bar.tint_progress, HEALTH_LOW_TINT, 0.5, Tween.TRANS_QUART, Tween.EASE_OUT)
 		hp_bar_tween.start()
 
+func add_resource_display(_resource_type: String, _resource_symbol: String = "", _resource_quantity: int = 0):
+	get_tree().call_group(RESOURCE_DISPLAY_GROUP, "add_resource_display", _resource_type, _resource_symbol, _resource_quantity)
+
+func update_resource_display(_resource_type: String, _resource_quantity: int):
+	get_tree().call_group(RESOURCE_DISPLAY_GROUP, "update_resource_display", _resource_type, _resource_quantity)
+
 func on_base_health_changed(base_health: int) -> void:
 	update_health_bar(base_health, true)
+	
+func _on_resource_quantity_changed(resource_type: String, old_quantity: int, new_quantity: int):
+	update_resource_display(resource_type, new_quantity)

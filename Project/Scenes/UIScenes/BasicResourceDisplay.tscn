@@ -1,0 +1,40 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Resources/Fonts/kfn_30_o1.tres" type="DynamicFont" id=1]
+[ext_resource path="res://Resources/Fonts/kfn_50_o1.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Scenes/UIScenes/ResourceDisplay.gd" type="Script" id=3]
+
+[node name="ResourceDisplay" type="HBoxContainer"]
+margin_right = 184.0
+margin_bottom = 60.0
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResourceSymbol" type="Label" parent="."]
+margin_right = 60.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 60, 60 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 2 )
+text = "$"
+align = 2
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResourceQuantity" type="Label" parent="."]
+margin_left = 64.0
+margin_right = 184.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 120, 60 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 1 )
+text = "99999"
+align = 2
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
