@@ -1,6 +1,8 @@
 extends Node2D
 class_name GameMap
 
+export(String) var map_name: String
+
 onready var navigation_map: TileMap = get_node("NavigationMap")
 onready var tower_exclusion_map: TileMap = get_node("TowerExclusion")
 onready var enemy_spawner: EnemySpawner =  get_node("EnemySpawner")
@@ -12,7 +14,7 @@ onready var effects_node: Node2D = get_node("Effects")
 var debug: bool = false;
 
 func _ready() -> void:
-	enemy_spawner.set_map_name("STREAM")
+	enemy_spawner.set_map_name(map_name)
 
 func get_navigation_map() -> TileMap:
 	return navigation_map

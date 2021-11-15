@@ -123,6 +123,11 @@ _global_script_classes=[ {
 "class": "WaveSpawner",
 "language": "GDScript",
 "path": "res://Scenes/Maps/WaveSpawner.gd"
+}, {
+"base": "Node2D",
+"class": "WaveSubGroupSpawner",
+"language": "GDScript",
+"path": "res://Scenes/Maps/WaveSubGroupSpawner.gd"
 } ]
 _global_script_class_icons={
 "BlueTank": "",
@@ -147,7 +152,8 @@ _global_script_class_icons={
 "TowersNode": "",
 "UI": "",
 "WaveData": "",
-"WaveSpawner": ""
+"WaveSpawner": "",
+"WaveSubGroupSpawner": ""
 }
 
 [application]

@@ -109,7 +109,14 @@ const WAVE_DATA = {
 		SPAWN_GROUPS: [{
 			ENEMY_TYPE: "BasicEnemy",
 			ENEMY_COUNT: 2,
-			POST_SPAWN_DELAY: 1
+			POST_SPAWN_DELAY: 1,
+			SPAWN_POINT_INDEX: 0
+			},
+			{
+			ENEMY_TYPE: "BasicEnemy2",
+			ENEMY_COUNT: 2,
+			POST_SPAWN_DELAY: 1,
+			SPAWN_POINT_INDEX: 1
 			}]
 		},
 		{	
@@ -129,7 +136,7 @@ const WAVE_DATA = {
 			}]
 		},
 	],
-	"STREAM": [
+	"TestWaveStream1": [
 		{
 		SPAWN_GROUPS: [{
 			ENEMY_TYPE: "BasicEnemy",

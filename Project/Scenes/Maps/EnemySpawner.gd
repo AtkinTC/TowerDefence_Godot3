@@ -3,7 +3,6 @@ class_name EnemySpawner
 
 signal create_enemy(enemy_scene, enemy_attributes_dict, position)
 
-var loaded_enemy_scenes: Dictionary = {}
 var wave_spawners: Dictionary = {}
 
 var map_name: String
@@ -11,9 +10,6 @@ var wave_data_array: Array
 var current_wave_index: int = -1
 var spawner_running: bool = false
 var spawn_points: Array = []
-
-func _ready() -> void:
-	reset()
 
 func reset() -> void:
 	current_wave_index = -1
@@ -23,6 +19,7 @@ func reset() -> void:
 		var wave_spawner: WaveSpawner = wave_spawners.get(wave_index)
 		if(wave_spawner != null):
 			wave_spawner.queue_free()
+	wave_spawners = {}
 	
 	for child in get_children():
 		if(child is Position2D):
@@ -41,11 +38,19 @@ func start_spawner() -> void:
 			start_next_wave()
 
 func retrieve_wave_data():
-	if (map_name != null && map_name.length() > 0):
-		wave_data_array = (GameData.WAVE_DATA as Dictionary).get(map_name)
-	
-		for wave_data in wave_data_array:
-			print((wave_data as Dictionary))
+	if (map_name == null || map_name.length() == 0):
+		print("EnemySpawner: missing necessary map_name")
+		return false
+		
+	var data = (GameData.WAVE_DATA as Dictionary).get(map_name)
+	if(data == null || !(data is Array)):
+		print("EnemySpawner: map_name does not have associated wave_data")
+		return false
+		
+	wave_data_array = (GameData.WAVE_DATA as Dictionary).get(map_name)
+
+	for wave_data in wave_data_array:
+		print((wave_data as Dictionary))
 
 func start_next_wave() -> void:
 	current_wave_index += 1
