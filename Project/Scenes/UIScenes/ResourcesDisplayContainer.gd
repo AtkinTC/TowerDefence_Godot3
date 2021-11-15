@@ -21,7 +21,7 @@ func add_resource_display(_resource_type: String, _resource_symbol: String = "",
 	var resource_display: ResourceDisplay = resource_display_scene.instance()
 	add_child(resource_display)
 	resource_display.set_symbol(_resource_symbol)
-	resource_display.set_quantity(_resource_quantity)
+	resource_display.set_quantity(_resource_quantity, false)
 	resource_displays_dict[_resource_type] = resource_display
 	return true
 	
@@ -31,5 +31,5 @@ func update_resource_display(_resource_type: String, _quantity: int) -> bool:
 	if(!resource_displays_dict.has(_resource_type)):
 		return false
 		
-	(resource_displays_dict[_resource_type] as ResourceDisplay).set_quantity(_quantity)
+	(resource_displays_dict[_resource_type] as ResourceDisplay).set_quantity(_quantity, true)
 	return true

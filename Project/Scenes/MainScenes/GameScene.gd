@@ -35,13 +35,17 @@ func _ready() -> void:
 	print("Camera center : " + String(camera.get_camera_screen_center()))
 	camera.set_position(camera.get_camera_screen_center())
 	
+	# TODO: make this dynamic, not hardcoded
+	resources_cont.set_resource_quantity(GameData.GOLD, 10)
+	resources_cont.set_resource_quantity(GameData.MANA, 0)
+	
 	ui = get_node("UI")
 	ui.active_camera = camera
-	ui.initialize_health_bar(base_health, base_health)
+	ui.initialize_health_bar(base_health, base_health)	
 	
 	# TODO: make this dynamic, not hardcoded
-	ui.add_resource_display(GameData.GOLD, "$", 10)
-	ui.add_resource_display(GameData.MANA, "M", 0)
+	ui.add_resource_display(GameData.GOLD, "$", resources_cont.get_resource_quantity(GameData.GOLD))
+	ui.add_resource_display(GameData.MANA, "M", resources_cont.get_resource_quantity(GameData.MANA))
 	
 	# connect all build buttons to the build function
 	for i in (get_tree().get_nodes_in_group("build_buttons")):
