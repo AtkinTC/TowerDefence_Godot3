@@ -144,5 +144,21 @@ const WAVE_DATA = {
 			POST_SPAWN_DELAY: 1
 			}]
 		}
+	],
+	"TestWaveStream2": [
+		{
+		SPAWN_GROUPS: [{
+			ENEMY_TYPE: "BasicEnemy",
+			ENEMY_COUNT: 10000,
+			POST_SPAWN_DELAY: 1,
+			SPAWN_POINT_INDEX: 0
+			},
+			{
+			ENEMY_TYPE: "BasicEnemy2",
+			ENEMY_COUNT: 10000,
+			POST_SPAWN_DELAY: 1,
+			SPAWN_POINT_INDEX: 1
+			}]
+		}
 	]
 }
