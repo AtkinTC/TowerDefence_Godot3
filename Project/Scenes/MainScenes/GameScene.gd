@@ -53,14 +53,12 @@ func _ready() -> void:
 		
 	# connect signals
 	connect("base_health_changed", ui, "on_base_health_changed")
-	levelMap.get_target_area().connect("player_damaged", self, "on_player_damaged")
+	levelMap.get_targets_node().connect("player_damaged", self, "on_player_damaged")
 	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
 	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
 	
 	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
 	navigation_cont.set_towers_node(levelMap.get_towers_node())
-	navigation_cont.set_goal_position(levelMap.get_target_area().global_position)
-	navigation_cont.run_navigation()
 	navigation_cont.set_debug(debug)
 
 func _process(_delta: float) -> void:	
@@ -160,7 +158,7 @@ func verify_and_build() -> void:
 		#towers_node.add_child(new_tower, true)
 		var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
 		(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
-		navigation_cont.run_navigation()
+		navigation_cont.update_blockers()
 		var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
 		tower_exclusion.set_cellv(build_tile, EMPTY_TILE_ID)
 		#TODO: trigger deduction of resources 
@@ -182,6 +180,7 @@ func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionar
 	enemy_instance.set_navigation_controller(navigation_cont)
 	enemy_instance.set_debug(debug)
 	enemy_instance.connect("enemy_destroyed", self, "_on_enemy_destroyed")
+	enemy_instance.set_target_nodes(levelMap.get_targets_node().get_target_areas())
 	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal

@@ -15,6 +15,10 @@ var max_hp: float
 var current_hp: float
 var base_damage: float
 
+var nav_target_index: int = -1
+var nav_target_pos: Vector2 = Vector2.ZERO
+var nav_target_pos_set: bool = false
+
 onready var health_bar: TextureProgress = get_node("HealthBar")
 onready var health_bar_offset: Vector2 = health_bar.get_position()
 
@@ -31,6 +35,8 @@ var navigation_controller: NavigationController
 var navigation_next_position: Vector2
 var is_navigating: bool = false
 
+var target_nodes: Dictionary
+
 var debug: bool = false
 
 func _init(_enemy_type: String = "") -> void:
@@ -43,6 +49,11 @@ func _ready() -> void:
 	var spawn_position = attribute_dict.get("spawn_position")
 	if(spawn_position != null):
 		global_position = spawn_position
+		
+	nav_target_index = attribute_dict.get(GameData.TARGET_POINT_INDEX, -1)
+	var target_area = (target_nodes.get(nav_target_index) as Node2D)
+	if(target_area != null):
+		set_nav_target_position(target_area.global_position)
 	
 	speed = (get_default_attribute(GameData.MOVE_SPEED, 0) as float)
 	max_hp = (get_default_attribute(GameData.HEALTH, 0) as float)
@@ -53,9 +64,12 @@ func _ready() -> void:
 	health_bar.value = current_hp
 	health_bar.set_as_toplevel(true)
 	
-	if(debug):
-		#setup_debug_path_line()
-		setup_nearest_point_line()
+#	if(debug):
+#		setup_debug_path_line()
+#		setup_nearest_point_line()
+
+func setup_from_attribute_dictionary(_attribute_dict: Dictionary):
+	attribute_dict = _attribute_dict
 
 func get_default_attributes() -> Dictionary:
 	return default_attributes
@@ -121,14 +135,14 @@ func set_current_hp(hp: float) -> void:
 ### NavigationMap pathfinding ###
 #################################
 func get_next_navigation_position():
-	if(navigation_controller == null):
+	if(navigation_controller == null || !nav_target_pos_set):
 		return null
-	return navigation_controller.get_next_world_position(self.global_position, true)
+	return navigation_controller.get_next_world_position(self.global_position, nav_target_pos, true)
 		
 func get_pathed_distance_to_target() -> float:
-	if(navigation_controller == null):
+	if(navigation_controller == null || !nav_target_pos_set):
 		return -1.0
-	return float(navigation_controller.get_distance_to_goal(self.global_position, true))
+	return float(navigation_controller.get_distance_to_goal(self.global_position, nav_target_pos, true))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
@@ -142,7 +156,7 @@ func navigate_to_next_position() -> void:
 			if(debug):
 				update_debug_path_line()
 	
-	if(self.navigation_next_position == null):
+	if(self.navigation_next_position == null || !is_navigating):
 		#end of path reached or no path available
 		velocity = Vector2.ZERO
 	else:
@@ -150,14 +164,22 @@ func navigate_to_next_position() -> void:
 		if(debug):
 			update_nearest_point_line()
 
-func set_target(target: Node2D) -> void:
-	self.target = target
+func get_nav_target_index() -> int:
+	return nav_target_index
+
+func set_nav_target_position(_nav_target_position: Vector2) -> void:
+	nav_target_pos = _nav_target_position
+	nav_target_pos_set = true
 	
+func unset_nav_target_position() -> void:
+	nav_target_pos = Vector2.ZERO
+	nav_target_pos_set = false
+
 func set_navigation_controller(_navigation_controller: NavigationController) -> void:
 	navigation_controller = _navigation_controller
-
-func setup_from_attribute_dictionary(_attribute_dict: Dictionary):
-	attribute_dict = _attribute_dict
+	
+func set_target_nodes(_target_nodes: Dictionary) -> void:
+	target_nodes = _target_nodes
 
 ##################
 ### DEBUG code ###
@@ -181,8 +203,8 @@ func setup_nearest_point_line() -> void:
 	add_child(closestPointLine)
 	
 func update_debug_path_line() -> void:
-	if(pathLine != null):
-		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position, true))
+	if(pathLine != null && nav_target_pos_set):
+		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position, nav_target_pos, true))
 
 func update_nearest_point_line() -> void:
 	if(closestPointLine != null):

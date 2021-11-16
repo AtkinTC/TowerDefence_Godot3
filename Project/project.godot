@@ -30,9 +30,14 @@ _global_script_classes=[ {
 "path": "res://Scenes/Maps/EnemySpawner.gd"
 }, {
 "base": "Area2D",
-"class": "EnemyTarget",
+"class": "EnemyTargetArea",
 "language": "GDScript",
-"path": "res://Scenes/Maps/EnemyTarget.gd"
+"path": "res://Scenes/Maps/EnemyTargetArea.gd"
+}, {
+"base": "Node2D",
+"class": "EnemyTargetsNode",
+"language": "GDScript",
+"path": "res://Scenes/Maps/EnemyTargetsNode.gd"
 }, {
 "base": "Camera2D",
 "class": "GameCamera2D",
@@ -134,7 +139,8 @@ _global_script_class_icons={
 "Effect": "",
 "Enemy": "",
 "EnemySpawner": "",
-"EnemyTarget": "",
+"EnemyTargetArea": "",
+"EnemyTargetsNode": "",
 "GameCamera2D": "",
 "GameMap": "",
 "GameScene": "",

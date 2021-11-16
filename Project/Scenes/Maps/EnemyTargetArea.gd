@@ -1,5 +1,5 @@
 extends Area2D
-class_name EnemyTarget
+class_name EnemyTargetArea
 
 signal player_damaged(damage)
 
@@ -7,7 +7,7 @@ signal player_damaged(damage)
 #	pass
 
 func _ready() -> void:
-	connect("body_entered", self, "_on_EnemyTarget_body_entered")
+	connect("body_entered", self, "_on_EnemyTargetArea_body_entered")
 
 #func _process(delta) -> void:
 #	pass
@@ -16,9 +16,8 @@ func _ready() -> void:
 #	pass
 
 
-func _on_EnemyTarget_body_entered(body: Node) -> void:
+func _on_EnemyTargetArea_body_entered(body: Node) -> void:
 	if(body is Enemy):
-		print(String(body.get_instance_id()) + " has reached target.")
+		#(String(body.get_instance_id()) + " has reached target.")
 		(body as Enemy).has_reached_target()
 		emit_signal("player_damaged", (body as Enemy).base_damage)
-		
