@@ -89,6 +89,7 @@ position = Vector2( 608, 608 )
 
 [node name="EnemyTargetArea2" parent="EnemyTargets" instance=ExtResource( 2 )]
 position = Vector2( 736, 224 )
+index = 1
 
 [node name="Enemies" type="Node2D" parent="."]
 __meta__ = {

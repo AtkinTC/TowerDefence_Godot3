@@ -3,6 +3,8 @@ class_name EnemyTargetArea
 
 signal player_damaged(damage)
 
+export(int) var index: int = 0
+
 #func _init() -> void:
 #	pass
 
