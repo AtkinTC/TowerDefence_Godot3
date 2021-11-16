@@ -1,0 +1,13 @@
+[gd_resource type="DynamicFont" load_steps=2 format=2]
+
+[ext_resource path="res://Assets/Fonts/Kenney Future Narrow.ttf" type="DynamicFontData" id=1]
+
+[resource]
+size = 65
+outline_size = 2
+outline_color = Color( 1, 0, 0, 1 )
+use_mipmaps = true
+use_filter = true
+extra_spacing_char = -3
+extra_spacing_space = 20
+font_data = ExtResource( 1 )
