@@ -6,7 +6,7 @@ const ENEMIES_PATH: String = "res://Scenes/Enemies/"
 const SCENE_EXT: String = ".tscn"
 const EMPTY_TILE_ID: int = 5
 
-signal game_finished(result)
+signal game_finished()
 signal base_health_changed(base_health)
 
 var levelMap: GameMap
@@ -20,6 +20,8 @@ var build_location: Vector2
 var build_type: String
 var ui: UI
 var camera: GameCamera2D
+
+var game_started: bool = false
 
 var base_health: int = 10000
 
@@ -56,6 +58,9 @@ func _ready() -> void:
 	levelMap.get_targets_node().connect("player_damaged", self, "on_player_damaged")
 	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
 	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
+	ui.connect("set_paused_from_ui", self, "_on_set_paused")
+	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")
+	ui.connect("quit_from_ui", self, "_on_quit")
 	
 	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
 	navigation_cont.set_towers_node(levelMap.get_towers_node())
@@ -166,11 +171,43 @@ func verify_and_build() -> void:
 func get_camera_mouse_position() -> Vector2:
 	return camera.convert_to_camera_position(get_global_mouse_position())
 
-func start_waves() -> void:
+func start_game() -> bool:
+	if(game_started):
+		return false
+	set_pause(false)
 	levelMap.get_enemy_spawner().start_spawner()
+	game_started = true
+	return true
 	
 func get_current_wave_index() -> int:
 	return (levelMap.get_enemy_spawner() as EnemySpawner).get_current_wave_index()
+
+func set_pause(_pause: bool):
+	if(build_mode):
+		cancel_build_mode()
+	ui.set_pause_panel_visibility(_pause)
+	get_tree().set_pause(_pause)
+
+func _on_set_paused(_pause: bool):
+	set_pause(_pause)
+
+func _on_toggle_paused():
+	var done = false
+	if(!get_tree().is_paused()):
+		done = start_game()
+		
+	if(!done):
+		if(get_tree().is_paused()):
+			set_pause(false)
+		else:
+			set_pause(true)
+
+func quit_current_game():
+	emit_signal("game_finished")
+
+func _on_quit():
+	set_pause(false)
+	quit_current_game()
 
 #spawn enemy from create_enemy signal
 func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary, spawn_position: Vector2):

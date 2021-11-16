@@ -1,8 +1,14 @@
 extends CanvasLayer
 class_name UI
 
+signal set_paused_from_ui(paused)
+signal toggle_paused_from_ui()
+signal quit_from_ui()
+
 onready var hp_bar = get_node("HUD/InfoBar/H/HealthBar")
 onready var hp_bar_tween = get_node("HUD/InfoBar/H/HealthBar/Tween")
+
+onready var pause_panel: Control = get_node("PausePanel")
 
 const RESOURCE_DISPLAY_GROUP: String = "ResourcesDisplayContainer"
 
@@ -21,11 +27,14 @@ const RANGE_OVERLAY_NAME: String = "RangeOverlay"
 
 var active_camera: Camera2D
 
+var game_started: bool = false
+
 #func _init() -> void:
 #	pass
 
 func _ready() -> void:
 	update_health_bar(100, false)
+	set_pause_panel_visibility(false)
 
 #func _process(delta) -> void:
 #	pass
@@ -88,27 +97,6 @@ func remove_tower_preview() -> void:
 	tower_preview.visible = false
 	tower_preview.queue_free()
 
-##
-## Game Control Functions
-##
-
-func _on_PausePlay_pressed() -> void:
-	if get_parent().build_mode:
-		get_parent().cancel_build_mode()
-	
-	if get_tree().is_paused():
-		get_tree().paused = false
-	elif get_parent().get_current_wave_index() == -1:
-		get_parent().start_waves()
-	else:
-		get_tree().paused = true
-
-func _on_FastForward_pressed() -> void:
-	if Engine.get_time_scale() == 2.0:
-		Engine.set_time_scale(1.0)
-	else:
-		Engine.set_time_scale(2.0)
-
 func initialize_health_bar(max_health: int, current_health: int) -> void:
 	hp_bar.max_value = max_health
 	hp_bar.value = current_health
@@ -147,3 +135,30 @@ func on_base_health_changed(base_health: int) -> void:
 	
 func _on_resource_quantity_changed(resource_type: String, old_quantity: int, new_quantity: int):
 	update_resource_display(resource_type, new_quantity)
+
+func set_pause_panel_visibility(_visible: bool) -> void:
+	pause_panel.set_visible(_visible)
+
+####################
+### Game Control ###
+####################
+
+func _on_PausePlay_pressed() -> void:
+	emit_signal("toggle_paused_from_ui")
+
+func _on_FastForward_pressed() -> void:
+	if Engine.get_time_scale() == 2.0:
+		Engine.set_time_scale(1.0)
+	else:
+		Engine.set_time_scale(2.0)
+
+func _on_B_Resume_pressed():
+	emit_signal("set_paused_from_ui", false)
+
+
+func _on_B_Options_pressed():
+	pass # Replace with function body.
+
+
+func _on_B_Quit_pressed():
+	 emit_signal("quit_from_ui")
