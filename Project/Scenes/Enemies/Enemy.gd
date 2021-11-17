@@ -152,7 +152,7 @@ func get_next_navigation_position():
 func get_pathed_distance_to_target() -> float:
 	if(navigation_controller == null || !nav_target_pos_set):
 		return -1.0
-	return float(navigation_controller.get_distance_to_goal(self.global_position, get_nav_target(), true))
+	return float(navigation_controller.get_distance_to_goal_world(self.global_position, get_nav_target(), true))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
