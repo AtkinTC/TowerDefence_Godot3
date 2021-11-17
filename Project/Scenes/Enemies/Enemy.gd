@@ -40,6 +40,7 @@ var target_nodes: Dictionary
 var debug: bool = false
 
 func _init(_enemy_type: String = "") -> void:
+	self.add_to_group("enemies", true)
 	if(_enemy_type.length() > 0):
 		enemy_type = _enemy_type
 		initialize_default_values()
@@ -49,11 +50,14 @@ func _ready() -> void:
 	var spawn_position = attribute_dict.get("spawn_position")
 	if(spawn_position != null):
 		global_position = spawn_position
-		
-	nav_target_index = attribute_dict.get(GameData.TARGET_POINT_INDEX, -1)
-	var target_area = (target_nodes.get(nav_target_index) as Node2D)
-	if(target_area != null):
-		set_nav_target_position(target_area.global_position)
+	
+	# setup target from "target_areas" group if not already set
+	if(!nav_target_pos_set):
+		nav_target_index = attribute_dict.get(GameData.TARGET_POINT_INDEX, -1)
+		for member in get_tree().get_nodes_in_group("target_areas"):
+			if(member is EnemyTargetArea && (member as EnemyTargetArea).get_index() == nav_target_index):
+				set_target_node(member)
+				break
 	
 	speed = (get_default_attribute(GameData.MOVE_SPEED, 0) as float)
 	max_hp = (get_default_attribute(GameData.HEALTH, 0) as float)
@@ -86,8 +90,6 @@ func initialize_default_values() -> void:
 func _physics_process(delta) -> void:
 	if(active):
 		if(reached_target):
-			## damage the target and destroy self
-			#emit_signal("base_damage", base_damage)
 			queue_free()
 		if(navigation_controller != null):
 			navigate_to_next_position()
@@ -131,23 +133,36 @@ func set_current_hp(hp: float) -> void:
 	current_hp = max(hp, 0)
 	health_bar.value = current_hp
 
+func get_damage():
+	return base_damage
+
 #################################
 ### NavigationMap pathfinding ###
 #################################
+func get_nav_target():
+	if(!nav_target_pos_set):
+		return null
+	return nav_target_pos
+
 func get_next_navigation_position():
 	if(navigation_controller == null || !nav_target_pos_set):
 		return null
-	return navigation_controller.get_next_world_position(self.global_position, nav_target_pos, true)
+	return navigation_controller.get_next_world_position(self.global_position, get_nav_target(), true)
 		
 func get_pathed_distance_to_target() -> float:
 	if(navigation_controller == null || !nav_target_pos_set):
 		return -1.0
-	return float(navigation_controller.get_distance_to_goal(self.global_position, nav_target_pos, true))
+	return float(navigation_controller.get_distance_to_goal(self.global_position, get_nav_target(), true))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
 	if(!is_navigating || self.navigation_next_position.distance_to(self.global_position) < close_enough):
-		var nextpos = get_next_navigation_position()
+		if(!nav_target_pos_set):
+			set_target_node(get_closest_target())
+		
+		var nextpos = null
+		if(nav_target_pos_set):
+			nextpos = get_next_navigation_position()
 		if(nextpos == null):
 			is_navigating = false
 		else:
@@ -164,6 +179,17 @@ func navigate_to_next_position() -> void:
 		if(debug):
 			update_nearest_point_line()
 
+func get_closest_target() -> EnemyTargetArea:
+	var closest_target: EnemyTargetArea
+	var closest_distance: float = -1
+	for member in get_tree().get_nodes_in_group("target_areas"):
+		if(member is EnemyTargetArea):
+			var distance = navigation_controller.get_distance_to_goal_world(self.global_position, member.global_position, true)
+			if(closest_target == null || distance < closest_distance):
+				closest_target = member
+				closest_distance = distance
+	return closest_target
+
 func get_nav_target_index() -> int:
 	return nav_target_index
 
@@ -177,9 +203,27 @@ func unset_nav_target_position() -> void:
 
 func set_navigation_controller(_navigation_controller: NavigationController) -> void:
 	navigation_controller = _navigation_controller
-	
-func set_target_nodes(_target_nodes: Dictionary) -> void:
-	target_nodes = _target_nodes
+
+func setup_target_node_from_dict(_target_nodes: Dictionary) -> bool:
+	nav_target_index = attribute_dict.get(GameData.TARGET_POINT_INDEX, -1)
+	var _target_node = _target_nodes.get(nav_target_index)
+	if(_target_node != null and _target_node is EnemyTargetArea):
+		set_target_node(_target_node)
+		return true
+	return false
+		
+func set_target_node(_target_node: EnemyTargetArea):
+	if(_target_node == null):
+		unset_nav_target_position()
+	else:
+		nav_target_index = _target_node.get_index()
+		set_nav_target_position(_target_node.global_position)
+		_target_node.connect("tree_exiting", self, "_on_target_removed", [nav_target_index])
+
+func _on_target_removed(index) -> void:
+	print("target (" + String(index) + ") removed")
+	if(index == nav_target_index):
+		unset_nav_target_position()
 
 ##################
 ### DEBUG code ###

@@ -217,7 +217,7 @@ func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionar
 	enemy_instance.set_navigation_controller(navigation_cont)
 	enemy_instance.set_debug(debug)
 	enemy_instance.connect("enemy_destroyed", self, "_on_enemy_destroyed")
-	enemy_instance.set_target_nodes(levelMap.get_targets_node().get_target_areas())
+	enemy_instance.setup_target_node_from_dict(levelMap.get_targets_node().get_target_areas())
 	levelMap.get_enemies_node().add_child(enemy_instance)
 
 #spawn effect from create_effect signal
