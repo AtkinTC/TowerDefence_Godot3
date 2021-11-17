@@ -33,7 +33,7 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 	var target_nav_data: TargetNavData = navigation_data.get(goal_cell, TargetNavData.new())
 	var nav_already_run = false
 	if(navigation_data.has(goal_cell)):
-		if(force_update == UPDATE_TYPE_ENUM.NONE && !blockers_up_to_date.get(goal_cell, false) ):
+		if(force_update == UPDATE_TYPE_ENUM.NONE && blockers_up_to_date.get(goal_cell, false) ):
 			#do not run any calculation
 			return false
 		navigation_data.get(goal_cell, TargetNavData.new())
