@@ -163,6 +163,7 @@ func verify_and_build():
 	var new_tower: Tower = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
 	new_tower.position = build_location
 	new_tower.connect("create_effect", self, "_on_create_effect")
+	new_tower.set_debug(debug)
 	var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
 	(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
 	

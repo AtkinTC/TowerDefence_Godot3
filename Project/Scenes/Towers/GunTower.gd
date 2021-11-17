@@ -8,7 +8,6 @@ var tower_proj_type: String
 var ready_to_fire: bool = false
 
 var enemy_array: Array = []
-var target: Node2D
 
 func _init(_tower_type: String = "").(_tower_type):
 	pass
@@ -33,7 +32,7 @@ func _ready():
 
 func _physics_process(_delta):
 	if active && enemy_array.size() > 0:
-		select_target()
+		select_target(TARGETING_TYPE_ENUM.PROGRESS, enemy_array)
 		turn()
 		fire()
 	else:
@@ -43,33 +42,6 @@ func turn() -> void:
 	if not get_node("AnimationPlayer").is_playing():
 		if target:
 			get_node("Turret").look_at(target.position)
-	
-func select_target() -> void:
-	# farthest ahead targetting
-	target = get_target_by_progress()
-
-func get_target_by_progress() -> Node2D:
-	var lead_target: Node2D = null
-	var max_progress: float = -1.0
-	for i in enemy_array:
-		var distance: float = -1.0
-		var className = i.get_class()
-		if(i is Enemy):
-			distance = (i as Enemy).get_pathed_distance_to_target();
-		if(distance >= 0 && (distance < max_progress || max_progress == -1)):
-			max_progress = distance
-			lead_target = (i as Node2D)
-	return lead_target
-	
-func get_target_by_closest() -> Node2D:
-	var closest_target: Node2D = null
-	var closest_distance: float = -1
-	for i in enemy_array:
-		var distance: float = self.position.distance_squared_to((i as Node2D).position)
-		if(closest_distance == -1 || distance < closest_distance):
-			closest_distance = distance
-			closest_target = (i as Node2D)
-	return closest_target
 
 func fire() -> void:
 	if ready_to_fire && target:

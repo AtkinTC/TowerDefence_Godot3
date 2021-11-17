@@ -2,65 +2,17 @@ extends Tower
 
 export var arc_effect_scene : PackedScene
 
-var range_area: TowerRangeArea
-#onready var cooldown_timer: TimerProgress = get_node("TimerProgress")
-var cooldown_timer: Timer
-var target: Node2D
 var chain_targets: Array
-
-var on_cooldown: bool = true
-
-var debug: bool = false
-var target_line: Line2D
 
 func _init().("ArcTower"):
 	pass
-
-func _ready():
-	range_area = get_node("RangeArea")
-	if(range_area):
-		if(active && (get_default_attribute(GameData.RANGE, -1) as float) >= 0.0):
-			range_area.set_range((get_default_attribute(GameData.RANGE, -1) as float))
-		else:
-			range_area.set_range(0)
 	
-	if(active && (get_default_attribute(GameData.ROF, -1) as float) >= 0):
-		cooldown_timer = create_and_add_timer()
-		cooldown_timer.set_one_shot(true)
-		cooldown_timer.connect("timeout", self, "_on_cooldown_timeout")
-		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
-		
-		if(debug):
-			setup_target_line()
-
 func _physics_process(_delta):
 	if active && range_area.enemy_array.size() > 0 && !on_cooldown:
-		select_target()
+		select_target(TARGETING_TYPE_ENUM.CLOSEST, range_area.enemy_array)
 		fire()
 	else:
 		target = null
-	
-	if(debug):
-		update_target_line()
-		
-func select_target() -> void:
-	target = get_target_by_closest(range_area.enemy_array)
-	
-# find closest target
-func get_target_by_closest(_potential_targets: Array, _excluded_targets: Array = []) -> Node2D:
-	var closest_target: Node2D = null
-	var closest_distance: float = -1
-	for i in _potential_targets:
-		var valid_target := true
-		for e in _excluded_targets:
-			if((i as Node).get_instance_id() == (e as Node).get_instance_id()):
-				valid_target = false
-		if(valid_target):
-			var distance: float = self.position.distance_squared_to((i as Node2D).position)
-			if(closest_distance == -1 || distance < closest_distance):
-				closest_distance = distance
-				closest_target = (i as Node2D)
-	return closest_target
 
 # recursively find a series of unique targets in chaining range from inital target
 func get_chain_targets(_targets: Array):
@@ -107,21 +59,10 @@ func fire():
 		on_cooldown = true
 		cooldown_timer.start(1.0/(get_default_attribute(GameData.ROF, -1) as float))
 
-func _on_cooldown_timeout() -> void:
-	on_cooldown = false
-
 ##################
 ### DEBUG code ###
 ##################
-
-func setup_target_line() -> void:
-	target_line = Line2D.new()
-	target_line.visible = false
-	target_line.set_as_toplevel(true)
-	target_line.set_default_color(Color.yellow)
-	target_line.set_width(4)
-	add_child(target_line)
-
+#@Override
 func update_target_line() -> void:
 	if(target_line != null):
 		if(chain_targets.size() > 0 && chain_targets[0] != null):
