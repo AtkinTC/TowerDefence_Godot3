@@ -30,16 +30,16 @@ func run_navigation_world_pos(taget_world_pos: Vector2, force_update: int = UPDA
 
 func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NONE):
 	used_cells = navigation_map.get_used_cells()
-	var target_nav_data: TargetNavData = TargetNavData.new()
+	var target_nav_data: TargetNavData = navigation_data.get(goal_cell, TargetNavData.new())
 	var nav_already_run = false
 	if(navigation_data.has(goal_cell)):
-		if(force_update == UPDATE_TYPE_ENUM.NONE):
+		if(force_update == UPDATE_TYPE_ENUM.NONE && !blockers_up_to_date.get(goal_cell, false) ):
 			#do not run any calculation
 			return false
 		navigation_data.get(goal_cell, TargetNavData.new())
 		nav_already_run = true
 	
-	if(!nav_already_run || force_update == UPDATE_TYPE_ENUM.ALL || UPDATE_TYPE_ENUM == UPDATE_TYPE_ENUM.DEFAULT):
+	if(!nav_already_run || force_update == UPDATE_TYPE_ENUM.ALL || force_update == UPDATE_TYPE_ENUM.DEFAULT):
 		#re/calculate "default" navigation for this target position
 		target_nav_data.default_nav_maps = create_navigation_fields(goal_cell)
 	
@@ -53,7 +53,7 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 		target_nav_data.with_blockers_nav_maps = target_nav_data.default_nav_maps
 		blockers_up_to_date[goal_cell] = true
 	elif(!nav_already_run || !blockers_up_to_date.get(goal_cell, false) 
-	|| force_update == UPDATE_TYPE_ENUM.ALL || UPDATE_TYPE_ENUM == UPDATE_TYPE_ENUM.WITH_BLOCKERS):
+	|| force_update == UPDATE_TYPE_ENUM.ALL || force_update == UPDATE_TYPE_ENUM.WITH_BLOCKERS):
 		#re/calculate "with blockers" navigation for this target position
 		target_nav_data.with_blockers_nav_maps = create_navigation_fields_with_blockers(goal_cell)
 		blockers_up_to_date[goal_cell] = true
