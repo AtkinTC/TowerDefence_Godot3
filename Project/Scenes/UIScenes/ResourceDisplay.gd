@@ -35,9 +35,9 @@ func set_symbol(_symbol: String) -> void:
 func set_quantity(_quantity: int, _smooth: bool = false) -> bool:
 	resource_quantity = (clamp(_quantity, min_display, max_display) as int)
 	
-	var delta = resource_quantity - display_quantity
+	var delta_abs = abs(resource_quantity - display_quantity)
 	#scale the duration with the change in quantity
-	var duration = (delta / (delta + 10)) * duration_scale
+	var duration = (delta_abs / (delta_abs + 10)) * duration_scale
 	if(_smooth):
 		tween.interpolate_property(self, "display_quantity", display_quantity, resource_quantity,
 			duration, Tween.TRANS_QUART, Tween.EASE_OUT)

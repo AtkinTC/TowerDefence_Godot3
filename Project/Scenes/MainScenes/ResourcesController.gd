@@ -8,6 +8,10 @@ var resources: Dictionary = {}
 func add_to_resource_quantity(_resource_type: String, _quantity_addition: int):
 	var old_quantity = resources.get(_resource_type, 0)
 	set_resource_quantity(_resource_type, old_quantity + _quantity_addition)
+	
+func subtract_from_resource_quantity(_resource_type: String, _quantity_subtraction: int):
+	var old_quantity = resources.get(_resource_type, 0)
+	set_resource_quantity(_resource_type, old_quantity - _quantity_subtraction)
 
 func set_resource_quantity(_resource_type: String, _quantity: int):
 	var old_quantity = resources.get(_resource_type, 0)

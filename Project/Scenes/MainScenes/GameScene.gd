@@ -152,22 +152,42 @@ func cancel_build_mode() -> void:
 	build_mode = false
 	build_valid = false
 	ui.remove_tower_preview()
+		
+func verify_and_build():
+	if (!build_mode || !build_valid):
+		return false
 	
-func verify_and_build() -> void:
-	if build_valid:
-		#TODO: test that conditions are met to build new tower
-		var new_tower: Node2D = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
-		new_tower.position = build_location
-		new_tower.connect("create_effect", self, "_on_create_effect")
-		#var towers_node: Node2D = levelMap.get_towers_node()
-		#towers_node.add_child(new_tower, true)
-		var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
-		(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
-		navigation_cont.update_blockers()
-		var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
-		tower_exclusion.set_cellv(build_tile, EMPTY_TILE_ID)
-		#TODO: trigger deduction of resources 
+	if(!can_afford_tower(build_type)):
+		return false
+	
+	var new_tower: Tower = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
+	new_tower.position = build_location
+	new_tower.connect("create_effect", self, "_on_create_effect")
+	var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
+	(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
+	
+	navigation_cont.update_blockers()
+	
+	var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
+	tower_exclusion.set_cellv(build_tile, EMPTY_TILE_ID)
+	
+	spend_resources_to_purchase_tower(build_type)
 
+func can_afford_tower(_tower_type: String) -> bool:
+	var purchase_costs: Dictionary = GameData.tower_data.get(_tower_type, {}).get(GameData.COST, {})
+	var can_afford: bool = true;
+	for resource_type in purchase_costs.keys():
+		if(resources_cont.get_resource_quantity(resource_type) < purchase_costs[resource_type]):
+			can_afford = false
+			break
+	return can_afford
+	
+func spend_resources_to_purchase_tower(_tower_type: String):
+	var purchase_costs: Dictionary = GameData.tower_data.get(_tower_type, {}).get(GameData.COST, {})
+	var can_afford: bool = true;
+	for resource_type in purchase_costs.keys():
+		resources_cont.subtract_from_resource_quantity(resource_type, purchase_costs[resource_type])
+	
 func get_camera_mouse_position() -> Vector2:
 	return camera.convert_to_camera_position(get_global_mouse_position())
 

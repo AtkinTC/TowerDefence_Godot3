@@ -23,9 +23,6 @@ func load_main_menu():
 func _process(delta):
 	update_fps_label()
 
-#func _physics_process(delta):
-#	pass
-
 func _on_selected_new_game():
 	get_node("MainMenu").queue_free()
 	var game_scene = load("res://Scenes/MainScenes/GameScene.tscn").instance()
@@ -55,6 +52,7 @@ func setup_fps_label() -> void:
 	fps_label.text = "fps: " + str(Engine.get_frames_per_second())
 	fps_label.margin_left = 5
 	fps_label.margin_top = 5
+	fps_label.set_as_toplevel(true)
 	add_child(fps_label)
 
 func update_fps_label() -> void:

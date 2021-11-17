@@ -29,7 +29,7 @@ const tower_data = {
 		ROF: 1.0,
 		RANGE: 250,
 		PROJTYPE: "Instant",
-		COST: {GOLD: 1}},
+		COST: {GOLD: 2}},
 	"MissileT1": {
 		DAMAGE: 30,
 		ROF: 1.0/3.0,
@@ -41,7 +41,7 @@ const tower_data = {
 		RANGE: 200,
 		PROJTYPE: "Beam",
 		MAX_CHAINS: 3,
-		COST: {GOLD: 5, MANA: 1}
+		COST: {GOLD: 8}
 		},
 	"BlockerTower": {
 		DAMAGE: 20,
@@ -51,14 +51,14 @@ const tower_data = {
 		PLACEMENT: PLACEMENT_TYPE.MELEE,
 		BLOCKER: true,
 		BLOCKER_NAV: 10,
-		COST: {GOLD: 1}
+		COST: {GOLD: 3}
 		},
 	"PulseTower": {
 		DAMAGE: 10,
 		ROF: 0.5,
 		RANGE: 100,
 		PROJTYPE: "Area",
-		COST: {MANA: 2}
+		COST: {GOLD: 5}
 		},
 	}
 
