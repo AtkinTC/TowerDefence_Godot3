@@ -155,7 +155,13 @@ func get_nav_target():
 func get_next_navigation_position():
 	if(get_navigation_controller() == null || !nav_target_pos_set):
 		return null
-	return get_navigation_controller().get_next_world_position(self.global_position, get_nav_target(), true)
+	var next_pos = null
+	if(get_pathed_distance_to_target() == 0):
+		#in the same cell as target, move directly towards it
+		next_pos = get_nav_target()
+	else:
+		next_pos = get_navigation_controller().get_next_world_position(self.global_position, get_nav_target(), true)
+	return next_pos
 		
 func get_pathed_distance_to_target() -> float:
 	if(get_navigation_controller() == null || !nav_target_pos_set):
@@ -163,11 +169,12 @@ func get_pathed_distance_to_target() -> float:
 	return float(get_navigation_controller().get_distance_to_goal_world(self.global_position, get_nav_target(), true))
 	
 func navigate_to_next_position() -> void:
-	var close_enough = 10.0
+	var close_enough := 8.0
 	if(!nav_target_pos_set):
 		setup_target_node_from_targets()
 	
-	if(!is_navigating || self.navigation_next_position.distance_to(self.global_position) < close_enough):
+	if(!is_navigating || self.navigation_next_position.distance_to(self.global_position) < close_enough
+	|| get_pathed_distance_to_target() == 0):
 		if(!nav_target_pos_set):
 			set_target_node(get_closest_target())
 		

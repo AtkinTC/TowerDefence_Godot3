@@ -85,7 +85,6 @@ func create_navigation_fields(goal_cell: Vector2) -> NavTypeMaps:
 	
 	return nav_type_maps
 
-
 #tilemap navigation with blocker elements
 func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
 	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
