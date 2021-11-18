@@ -13,6 +13,10 @@ var levelMap: GameMap
 onready var navigation_cont: NavigationController = get_node("NavigationController")
 onready var resources_cont: ResourcesController = get_node("ResourcesController")
 
+onready var enemies_node: EnemiesNode = get_node("EnemiesNode")
+onready var towers_node: TowersNode = get_node("TowersNode")
+onready var effects_node: Node2D = get_node("EffectsNode")
+
 var build_mode: bool = false
 var build_valid: bool = false
 var build_tile: Vector2
@@ -26,16 +30,32 @@ var game_started: bool = false
 var base_health: int = 10000
 
 var debug: bool = false
+	
+func get_towers_node() -> TowersNode:
+	return towers_node
+	
+func get_effects_node() -> Node2D:
+	return effects_node
 
 func _ready() -> void:
 	levelMap = get_node("Map001") #TODO: change to dynamically get current map
 	#levelMap.set_debug(OS.is_debug_build())
+	
+	ControllersRef.set_controller_reference(ControllersRef.GAME_CONTROLLER, self)
+	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, navigation_cont)
+	ControllersRef.set_controller_reference(ControllersRef.RESOURCES_CONTROLLER, resources_cont)
+	ControllersRef.set_controller_reference(ControllersRef.ENEMIES_CONTROLLER, enemies_node)
+	ControllersRef.set_controller_reference(ControllersRef.TOWERS_CONTROLLER, towers_node)
+	ControllersRef.set_controller_reference(ControllersRef.EFFECTS_CONTROLLER, effects_node)
 	
 	camera = get_node("Camera")
 	print("Viewport size : " + String(camera.get_viewport().get_size()))
 	print("Camera position : " + String(camera.get_camera_position()))
 	print("Camera center : " + String(camera.get_camera_screen_center()))
 	camera.set_position(camera.get_camera_screen_center())
+	
+	enemies_node.set_map_name(levelMap.get_map_name())
+	enemies_node.set_spawn_points_node(levelMap.get_spawn_points_node())
 	
 	# TODO: make this dynamic, not hardcoded
 	resources_cont.set_resource_quantity(GameData.GOLD, 10)
@@ -56,14 +76,12 @@ func _ready() -> void:
 	# connect signals
 	connect("base_health_changed", ui, "on_base_health_changed")
 	levelMap.get_targets_node().connect("player_damaged", self, "on_player_damaged")
-	levelMap.get_enemy_spawner().connect("create_enemy", self, "_on_create_enemy")
 	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
 	ui.connect("set_paused_from_ui", self, "_on_set_paused")
 	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")
 	ui.connect("quit_from_ui", self, "_on_quit")
+	enemies_node.connect("enemy_destroyed", self, "_on_enemy_destroyed")
 	
-	navigation_cont.set_navigation_map(levelMap.get_navigation_map())
-	navigation_cont.set_towers_node(levelMap.get_towers_node())
 	navigation_cont.set_debug(debug)
 
 func _process(_delta: float) -> void:	
@@ -165,7 +183,7 @@ func verify_and_build():
 	new_tower.connect("create_effect", self, "_on_create_effect")
 	new_tower.set_debug(debug)
 	var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
-	(levelMap.get_towers_node() as TowersNode).add_tower(new_tower, build_tile)
+	get_towers_node().add_tower(new_tower, build_tile)
 	
 	navigation_cont.update_blockers()
 	
@@ -196,12 +214,12 @@ func start_game() -> bool:
 	if(game_started):
 		return false
 	set_pause(false)
-	levelMap.get_enemy_spawner().start_spawner()
+	enemies_node.start_spawner()
 	game_started = true
 	return true
 	
 func get_current_wave_index() -> int:
-	return (levelMap.get_enemy_spawner() as EnemySpawner).get_current_wave_index()
+	return enemies_node.get_current_wave_index()
 
 func set_pause(_pause: bool):
 	if(build_mode):
@@ -230,23 +248,12 @@ func _on_quit():
 	set_pause(false)
 	quit_current_game()
 
-#spawn enemy from create_enemy signal
-func _on_create_enemy(enemy_scene: PackedScene, enemy_attributes_dict: Dictionary, spawn_position: Vector2):
-	var enemy_instance = (enemy_scene.instance() as Enemy)
-	enemy_instance.set_global_position(spawn_position)
-	enemy_instance.setup_from_attribute_dictionary(enemy_attributes_dict)
-	enemy_instance.set_navigation_controller(navigation_cont)
-	enemy_instance.set_debug(debug)
-	enemy_instance.connect("enemy_destroyed", self, "_on_enemy_destroyed")
-	enemy_instance.setup_target_node_from_dict(levelMap.get_targets_node().get_target_areas())
-	levelMap.get_enemies_node().add_child(enemy_instance)
-
 #spawn effect from create_effect signal
 func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictionary, spawn_position: Vector2):
 	var effect_instance = (effect_scene.instance() as Effect)
 	effect_instance.set_global_position(spawn_position)
 	effect_instance.setup_from_attribute_dictionary(effect_attributes_dict)
-	levelMap.get_effects_node().add_child(effect_instance)
+	get_effects_node().add_child(effect_instance)
 
 func on_player_damaged(damage: int) -> void:
 	base_health -= damage;

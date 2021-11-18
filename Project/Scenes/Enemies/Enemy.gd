@@ -31,7 +31,6 @@ var closestPointLine: Line2D = null
 var reached_target: bool = false
 
 #NavigationController pathing
-var navigation_controller: NavigationController
 var navigation_next_position: Vector2
 var is_navigating: bool = false
 
@@ -91,7 +90,7 @@ func _physics_process(delta) -> void:
 	if(active):
 		if(reached_target):
 			queue_free()
-		if(navigation_controller != null):
+		if(get_navigation_controller() != null):
 			navigate_to_next_position()
 		move(delta)
 	health_bar.set_position(position + health_bar_offset)
@@ -139,23 +138,32 @@ func get_damage():
 #################################
 ### NavigationMap pathfinding ###
 #################################
+func get_navigation_controller() -> NavigationController:
+	return (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
+	
+func get_map_controller() -> GameMap:
+	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
+
 func get_nav_target():
 	if(!nav_target_pos_set):
 		return null
 	return nav_target_pos
 
 func get_next_navigation_position():
-	if(navigation_controller == null || !nav_target_pos_set):
+	if(get_navigation_controller() == null || !nav_target_pos_set):
 		return null
-	return navigation_controller.get_next_world_position(self.global_position, get_nav_target(), true)
+	return get_navigation_controller().get_next_world_position(self.global_position, get_nav_target(), true)
 		
 func get_pathed_distance_to_target() -> float:
-	if(navigation_controller == null || !nav_target_pos_set):
+	if(get_navigation_controller() == null || !nav_target_pos_set):
 		return -1.0
-	return float(navigation_controller.get_distance_to_goal_world(self.global_position, get_nav_target(), true))
+	return float(get_navigation_controller().get_distance_to_goal_world(self.global_position, get_nav_target(), true))
 	
 func navigate_to_next_position() -> void:
 	var close_enough = 10.0
+	if(!nav_target_pos_set):
+		setup_target_node_from_targets()
+	
 	if(!is_navigating || self.navigation_next_position.distance_to(self.global_position) < close_enough):
 		if(!nav_target_pos_set):
 			set_target_node(get_closest_target())
@@ -184,7 +192,7 @@ func get_closest_target() -> EnemyTargetArea:
 	var closest_distance: float = -1
 	for member in get_tree().get_nodes_in_group("target_areas"):
 		if(member is EnemyTargetArea):
-			var distance = navigation_controller.get_distance_to_goal_world(self.global_position, member.global_position, true)
+			var distance = get_navigation_controller().get_distance_to_goal_world(self.global_position, member.global_position, true)
 			if(closest_target == null || distance < closest_distance):
 				closest_target = member
 				closest_distance = distance
@@ -201,16 +209,11 @@ func unset_nav_target_position() -> void:
 	nav_target_pos = Vector2.ZERO
 	nav_target_pos_set = false
 
-func set_navigation_controller(_navigation_controller: NavigationController) -> void:
-	navigation_controller = _navigation_controller
-
-func setup_target_node_from_dict(_target_nodes: Dictionary) -> bool:
+func setup_target_node_from_targets() -> bool:
 	nav_target_index = attribute_dict.get(GameData.TARGET_POINT_INDEX, -1)
-	var _target_node = _target_nodes.get(nav_target_index)
-	if(_target_node != null and _target_node is EnemyTargetArea):
-		set_target_node(_target_node)
-		return true
-	return false
+	var _target_node = get_map_controller().get_targets_node().get_target_area(nav_target_index)
+	set_target_node(_target_node)
+	return (_target_node != null and _target_node is EnemyTargetArea)
 		
 func set_target_node(_target_node: EnemyTargetArea):
 	if(_target_node == null):
@@ -248,7 +251,7 @@ func setup_nearest_point_line() -> void:
 	
 func update_debug_path_line() -> void:
 	if(pathLine != null && nav_target_pos_set):
-		pathLine.set_points(navigation_controller.get_path_to_goal(self.global_position, nav_target_pos, true))
+		pathLine.set_points(get_navigation_controller().get_path_to_goal(self.global_position, nav_target_pos, true))
 
 func update_nearest_point_line() -> void:
 	if(closestPointLine != null):

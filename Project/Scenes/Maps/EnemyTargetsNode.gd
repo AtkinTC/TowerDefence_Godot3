@@ -22,9 +22,12 @@ func _ready() -> void:
 			child.connect("player_damaged", self, "_on_player_damaged")
 			child.connect("tree_exiting", self, "_on_target_removed", [child.index])
 
-func get_target_areas() -> Dictionary:
+func get_target_areas_dict() -> Dictionary:
 	return target_areas
 	
+func get_target_areas() -> Array:
+	return target_areas.values()	
+
 func get_target_area(_target_index: int) -> EnemyTargetArea:
 	return target_areas.get(_target_index)
 

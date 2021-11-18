@@ -4,10 +4,10 @@
 [ext_resource path="res://Scenes/Maps/MapElements/EnemyTargetArea.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/Maps/GameMap.gd" type="Script" id=3]
 [ext_resource path="res://Resources/Tilesets/path_001.tres" type="TileSet" id=4]
-[ext_resource path="res://Scenes/Maps/TowersNode.gd" type="Script" id=5]
+[ext_resource path="res://Scenes/Maps/SpawnPointsNode.gd" type="Script" id=5]
 [ext_resource path="res://Scenes/Maps/EnemyTargetsNode.gd" type="Script" id=6]
 [ext_resource path="res://Assets/Environment/Tilesets/kenney/terrainTiles_default.png" type="Texture" id=7]
-[ext_resource path="res://Scenes/Maps/EnemySpawner.gd" type="Script" id=10]
+[ext_resource path="res://Scenes/Maps/SpawnPoint.gd" type="Script" id=8]
 
 [sub_resource type="TileSet" id=1]
 0/name = "terrainTiles_default.png 0"
@@ -66,43 +66,29 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemySpawner" type="Node2D" parent="."]
-script = ExtResource( 10 )
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="SpawnPoint1" type="Position2D" parent="EnemySpawner"]
-position = Vector2( 32, 96 )
-
-[node name="SpawnPoint2" type="Position2D" parent="EnemySpawner"]
-position = Vector2( 32, 608 )
-
-[node name="EnemyTargets" type="Node2D" parent="."]
-script = ExtResource( 6 )
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="EnemyTargetArea" parent="EnemyTargets" instance=ExtResource( 2 )]
-position = Vector2( 608, 608 )
-
-[node name="EnemyTargetArea2" parent="EnemyTargets" instance=ExtResource( 2 )]
-position = Vector2( 736, 224 )
-index = 1
-
-[node name="Enemies" type="Node2D" parent="."]
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="Towers" type="Node2D" parent="."]
+[node name="SpawnPointsNode" type="Node2D" parent="."]
 script = ExtResource( 5 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Effects" type="Node2D" parent="."]
+[node name="SpawnPoint1" type="Position2D" parent="SpawnPointsNode"]
+position = Vector2( 32, 96 )
+script = ExtResource( 8 )
+
+[node name="SpawnPoint2" type="Position2D" parent="SpawnPointsNode"]
+position = Vector2( 32, 608 )
+script = ExtResource( 8 )
+
+[node name="EnemyTargetsNode" type="Node2D" parent="."]
+script = ExtResource( 6 )
 __meta__ = {
 "_edit_lock_": true
 }
+
+[node name="EnemyTargetArea1" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
+position = Vector2( 608, 608 )
+
+[node name="EnemyTargetArea2" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
+position = Vector2( 736, 224 )
+index = 1

@@ -11,8 +11,6 @@ class TargetNavData:
 
 enum NAVTYPE{BASIC,BLOCKERS}
 
-var navigation_map: TileMap
-var towers_node: TowersNode
 var navigation_data = {}
 var blockers_up_to_date = {}
 var used_cells: Array;
@@ -29,7 +27,7 @@ func run_navigation_world_pos(taget_world_pos: Vector2, force_update: int = UPDA
 	return run_navigation(goal_cell, force_update)
 
 func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NONE):
-	used_cells = navigation_map.get_used_cells()
+	used_cells = get_navigation_map().get_used_cells()
 	var target_nav_data: TargetNavData = navigation_data.get(goal_cell, TargetNavData.new())
 	var nav_already_run = false
 	if(navigation_data.has(goal_cell)):
@@ -44,8 +42,8 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 		target_nav_data.default_nav_maps = create_navigation_fields(goal_cell)
 	
 	var has_blockers = false
-	if(towers_node != null):
-		for tower in towers_node.get_all_towers():
+	if(get_towers_node() != null):
+		for tower in get_towers_node().get_all_towers():
 			if ((tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
 				has_blockers = true
 				break
@@ -100,7 +98,7 @@ func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
 		for neighbor in neighbors:
 			var neighbor_cell: Vector2 = current + neighbor
 			var step_cost := 1
-			var tower = towers_node.get_tower_at_tile(neighbor_cell)
+			var tower = get_towers_node().get_tower_at_tile(neighbor_cell)
 			if(tower != null && (tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
 				step_cost = (tower as Tower).get_default_attribute(GameData.BLOCKER_NAV, 5)
 			var neighbor_cell_cost = distance_map[current] + step_cost
@@ -166,30 +164,26 @@ func get_path_to_goal(world_current_position: Vector2, world_target_position: Ve
 	return path
 
 func convert_world_pos_to_map_pos(world_position: Vector2) -> Vector2:
-	var local_position = navigation_map.to_local(world_position)
-	var map_position = navigation_map.world_to_map(local_position)
+	var local_position = get_navigation_map().to_local(world_position)
+	var map_position = get_navigation_map().world_to_map(local_position)
 	return map_position
 
 func convert_map_pos_to_world_pos(map_position: Vector2, cell_center: bool = true) -> Vector2:
-	var local_position = navigation_map.map_to_world(map_position)
+	var local_position = get_navigation_map().map_to_world(map_position)
 	if(cell_center):
-		local_position += navigation_map.cell_size/2.0
-	var world_position = navigation_map.to_global(local_position)
+		local_position += get_navigation_map().cell_size/2.0
+	var world_position = get_navigation_map().to_global(local_position)
 	return world_position
 
 #reset blockers_up_to_date so that "with blockers" navigation will be recalculated
 func update_blockers() -> void:
 	blockers_up_to_date = {}
 
-#######################
-### Setters Getters ###
-#######################
+func get_navigation_map() -> TileMap:
+	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
 	
-func set_navigation_map(_navigation_map: TileMap) -> void:
-	navigation_map = _navigation_map
-	
-func set_towers_node(_towers_node: TowersNode) -> void:
-	towers_node = _towers_node
+func get_towers_node() -> TowersNode:
+	return (ControllersRef.get_controller_reference(ControllersRef.TOWERS_CONTROLLER) as TowersNode)
 
 ##################
 ### DEBUG code ###

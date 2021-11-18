@@ -8,17 +8,17 @@ var group_spawners: Dictionary = {}
 
 var wave_index: int
 var wave_data: Dictionary
-var spawn_points: Array
+var spawn_points_node: SpawnPointsNode
 var spawn_index: int = -1
 var spawner_running: bool = false
 
 var spawn_timer: Timer
 var wave_end_timer: Timer
 
-func _init(_wave_index: int, _wave_data: Dictionary, _spawn_points: Array) -> void:
+func _init(_wave_index: int, _wave_data: Dictionary, _spawn_points_node: SpawnPointsNode) -> void:
 	wave_index = _wave_index
 	wave_data = _wave_data
-	spawn_points = _spawn_points
+	spawn_points_node = _spawn_points_node
 
 func _ready() -> void:
 	spawn_timer = Timer.new()
@@ -67,7 +67,7 @@ func create_and_start_group_spawner(_group_index) -> bool:
 	if(_group_index < 0 || _group_index >= group_data_array.size()):
 		return false
 	
-	var group_spawner = WaveSubGroupSpawner.new(_group_index, group_data_array[_group_index], spawn_points)
+	var group_spawner = WaveSubGroupSpawner.new(_group_index, group_data_array[_group_index], spawn_points_node)
 	group_spawners[_group_index] = group_spawner
 	add_child(group_spawner)
 	group_spawner.connect("create_enemy", self, "_on_create_enemy")

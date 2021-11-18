@@ -6,16 +6,16 @@ signal wave_subgroup_finished(group_index)
 
 var group_index: int
 var group_data: Dictionary
-var spawn_points: Array
+var spawn_points_node: SpawnPointsNode
 var spawn_index: int = -1
 var spawner_running: bool = false
 
 var spawn_timer: Timer
 
-func _init(_group_index: int, _group_data: Dictionary, _spawn_points: Array) -> void:
+func _init(_group_index: int, _group_data: Dictionary, _spawn_points_node: SpawnPointsNode) -> void:
 	group_index = _group_index
 	group_data = _group_data
-	spawn_points = _spawn_points
+	spawn_points_node = _spawn_points_node
 
 func _ready() -> void:
 	spawn_timer = Timer.new()
@@ -58,29 +58,32 @@ func spawn_enemy() -> void:
 		var enemy_scene: PackedScene = SceneLoader.load_enemy_scene(enemy_type)
 		
 		if(enemy_scene != null):
-			var spawn_position := Vector2.ZERO
+			var spawn_points_size: int = spawn_points_node.get_spawn_points().size()
+			
+			var spawn_position = null
 			var desired_spawn_point_index: int = group_data.get(GameData.SPAWN_POINT_INDEX, -1)
 			var desired_target_point_index: int = group_data.get(GameData.TARGET_POINT_INDEX, -1)
 			
-			if(spawn_points.size() == 1):
+			if(spawn_points_size == 1):
 				#only one possible spawn point
-				spawn_position = (spawn_points[1] as Position2D).get_global_position()
-			elif(spawn_points.size() > 1):
+				spawn_position = (spawn_points_node.get_spawn_points()[0] as Position2D).get_global_position()
+			elif(spawn_points_size > 1):
 				var spawn_point_index: int = 0
-				if(desired_spawn_point_index >= 0 && desired_spawn_point_index < spawn_points.size()):
+				if(desired_spawn_point_index >= 0 && spawn_points_node.has_spawn_point(desired_spawn_point_index)):
 					#desired spawn point is valid
 					spawn_point_index = desired_spawn_point_index
 				else:
 					#no desired spawn point or desired spawn point is invalid
-					spawn_point_index = randi() % spawn_points.size()
-				spawn_position = (spawn_points[spawn_point_index] as Position2D).get_global_position()
+					spawn_point_index = randi() % spawn_points_size
+				spawn_position = spawn_points_node.get_spawn_point(spawn_point_index).get_global_position()
 			
-			var enemy_attributes = {
-				"source" : self,
-				"spawn_position" : spawn_position,
-				"target_point_index" : desired_target_point_index
-			}
-			emit_signal("create_enemy", enemy_scene, enemy_attributes, spawn_position)
+			if(spawn_position != null):
+				var enemy_attributes = {
+					"source" : self,
+					"spawn_position" : spawn_position,
+					"target_point_index" : desired_target_point_index
+				}
+				emit_signal("create_enemy", enemy_scene, enemy_attributes, spawn_position)
 
 func _on_spawn_timeout():
 	#print("spawn timeout! " + String(spawn_index))

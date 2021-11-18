@@ -19,15 +19,15 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Effects/Effect.gd"
 }, {
+"base": "Node2D",
+"class": "EnemiesNode",
+"language": "GDScript",
+"path": "res://Scenes/MainScenes/EnemiesNode.gd"
+}, {
 "base": "KinematicBody2D",
 "class": "Enemy",
 "language": "GDScript",
 "path": "res://Scenes/Enemies/Enemy.gd"
-}, {
-"base": "Node2D",
-"class": "EnemySpawner",
-"language": "GDScript",
-"path": "res://Scenes/Maps/EnemySpawner.gd"
 }, {
 "base": "Area2D",
 "class": "EnemyTargetArea",
@@ -99,6 +99,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/SupportScenes/ShapePolygon2D.gd"
 }, {
+"base": "Position2D",
+"class": "SpawnPoint",
+"language": "GDScript",
+"path": "res://Scenes/Maps/SpawnPoint.gd"
+}, {
+"base": "Node2D",
+"class": "SpawnPointsNode",
+"language": "GDScript",
+"path": "res://Scenes/Maps/SpawnPointsNode.gd"
+}, {
 "base": "Node2D",
 "class": "TimerProgressDisplay",
 "language": "GDScript",
@@ -142,8 +152,8 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "BlueTank": "",
 "Effect": "",
+"EnemiesNode": "",
 "Enemy": "",
-"EnemySpawner": "",
 "EnemyTargetArea": "",
 "EnemyTargetsNode": "",
 "GameCamera2D": "",
@@ -158,6 +168,8 @@ _global_script_class_icons={
 "ResourcesController": "",
 "ResourcesDisplayContainer": "",
 "ShapePolygon2D": "",
+"SpawnPoint": "",
+"SpawnPointsNode": "",
 "TimerProgressDisplay": "",
 "Tower": "",
 "TowerRangeArea": "",
@@ -178,6 +190,7 @@ config/icon="res://icon.png"
 
 GameData="*res://Singletons/GameData.gd"
 SceneLoader="*res://Singletons/SceneLoader.gd"
+ControllersRef="*res://Singletons/ControllersRef.gd"
 
 [debug]
 
