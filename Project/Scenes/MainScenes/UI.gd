@@ -3,6 +3,7 @@ class_name UI
 
 signal set_paused_from_ui(paused)
 signal toggle_paused_from_ui()
+signal toggle_speed_from_ui()
 signal quit_from_ui()
 
 onready var hp_bar = get_node("HUD/InfoBar/H/HealthBar")
@@ -36,11 +37,15 @@ func _ready() -> void:
 	update_health_bar(100, false)
 	set_pause_panel_visibility(false)
 
-#func _process(delta) -> void:
-#	pass
-
-#func _physics_process(delta) -> void:
-#	pass
+func set_pause_button_state(_paused: bool) -> void:
+	for member in get_tree().get_nodes_in_group("pause_buttons"):
+		if(member is TextureButton):
+			(member as TextureButton).pressed = !_paused
+	
+func set_speed_button_state(_fast_forward: bool) -> void:
+	for member in get_tree().get_nodes_in_group("speed_buttons"):
+		if(member is TextureButton):
+			(member as TextureButton).pressed = _fast_forward
 
 func set_tower_preview(tower_type: String, mouse_position: Vector2) -> void:
 	var drag_tower: Node2D = load(TOWERS_DIR + tower_type + SCENE_EXT).instance()
@@ -152,18 +157,13 @@ func _on_PausePlay_pressed() -> void:
 	emit_signal("toggle_paused_from_ui")
 
 func _on_FastForward_pressed() -> void:
-	if Engine.get_time_scale() == 2.0:
-		Engine.set_time_scale(1.0)
-	else:
-		Engine.set_time_scale(2.0)
+	emit_signal("toggle_speed_from_ui")
 
 func _on_B_Resume_pressed():
 	emit_signal("set_paused_from_ui", false)
 
-
 func _on_B_Options_pressed():
 	pass # Replace with function body.
-
 
 func _on_B_Quit_pressed():
 	 emit_signal("quit_from_ui")

@@ -85,6 +85,7 @@ func _ready() -> void:
 	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
 	ui.connect("set_paused_from_ui", self, "_on_set_paused")
 	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")
+	ui.connect("toggle_speed_from_ui", self, "_on_toggle_speed_from_ui")
 	ui.connect("quit_from_ui", self, "_on_quit")
 	enemies_node.connect("enemy_destroyed", self, "_on_enemy_destroyed")
 	
@@ -232,11 +233,18 @@ func start_game() -> bool:
 func get_current_wave_index() -> int:
 	return enemies_node.get_current_wave_index()
 
-func set_pause(_pause: bool):
+func set_pause(_pause: bool, _update_ui: bool = true):
 	if(build_mode):
 		cancel_build_mode()
-	ui.set_pause_panel_visibility(_pause)
+	if(_update_ui):
+		ui.set_pause_button_state(_pause)
+		ui.set_pause_panel_visibility(_pause)
 	get_tree().set_pause(_pause)
+
+func set_game_speed(_speed: float, _update_ui: bool = true):
+	if(_update_ui && _speed != Engine.get_time_scale()):
+		ui.set_speed_button_state(_speed > 1)
+	Engine.set_time_scale(_speed)
 
 func _on_set_paused(_pause: bool):
 	set_pause(_pause)
@@ -251,6 +259,12 @@ func _on_toggle_paused():
 			set_pause(false)
 		else:
 			set_pause(true)
+
+func _on_toggle_speed_from_ui():
+	if Engine.get_time_scale() == 2.0:
+		set_game_speed(1.0)
+	else:
+		set_game_speed(2.0)
 
 func quit_current_game():
 	emit_signal("game_finished")
