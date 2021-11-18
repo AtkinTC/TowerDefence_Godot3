@@ -141,25 +141,29 @@ func update_tower_preview() -> void:
 	if(placement_type == GameData.PLACEMENT_TYPE.MELEE):
 		inclusion_maps.append(levelMap.get_navigation_map())
 	
+	# Assuming all maps share cell coordinates with navigation map
+	build_tile = levelMap.get_navigation_map().world_to_map(mouse_position)
+	var tile_position: Vector2 = levelMap.get_navigation_map().map_to_world(build_tile)
+	build_location = tile_position + levelMap.get_navigation_map().get_cell_size()/2
+	
 	build_valid = true
-	#tower cannot be placed on any tiles in the exclusion maps
-	for map in exclusion_maps:
-		var current_tile: Vector2 = map.world_to_map(mouse_position)
-		var tile_position: Vector2 = map.map_to_world(current_tile)
-		build_location = tile_position + map.get_cell_size()/2
-		build_tile = current_tile
-		if (map.get_cellv(current_tile) != -1):
-			build_valid = false
-			break
-	#tower can only be placed on tiles in the inclusion map
-	for map in inclusion_maps:
-		var current_tile: Vector2 = map.world_to_map(mouse_position)
-		var tile_position: Vector2 = map.map_to_world(current_tile)
-		build_location = tile_position + map.get_cell_size()/2
-		build_tile = current_tile
-		if (map.get_cellv(current_tile) == -1):
-			build_valid = false
-			break
+	
+	if(towers_node.get_tower_at_tile(build_tile)):
+		build_valid = false
+		
+	if(build_valid):
+		#tower cannot be placed on any tiles in the exclusion maps
+		for map in exclusion_maps:
+			if (map.get_cellv(build_tile) != -1):
+				build_valid = false
+				break
+				
+	if(build_valid):
+		#tower can only be placed on tiles in the inclusion map
+		for map in inclusion_maps:
+			if (map.get_cellv(build_tile) == -1):
+				build_valid = false
+				break
 			
 	if(build_valid):
 		ui.update_tower_preview(camera.convert_to_camera_position(build_location), UI.VALID_COLOR)
@@ -186,9 +190,6 @@ func verify_and_build():
 	get_towers_node().add_tower(new_tower, build_tile)
 	
 	navigation_cont.update_blockers()
-	
-	var tower_exclusion: TileMap = levelMap.get_tower_exclusion_map()
-	tower_exclusion.set_cellv(build_tile, EMPTY_TILE_ID)
 	
 	spend_resources_to_purchase_tower(build_type)
 
