@@ -139,6 +139,11 @@ func _on_resource_quantity_changed(resource_type: String, old_quantity: int, new
 func set_pause_panel_visibility(_visible: bool) -> void:
 	pause_panel.set_visible(_visible)
 
+func set_hud_visibility(_visible: bool):
+	var hud : Control = get_node_or_null("HUD")
+	if(hud != null):
+		hud.visible = _visible
+
 ####################
 ### Game Control ###
 ####################

@@ -75,9 +75,6 @@ shortcut = SubResource( 13 )
 
 [node name="GameScene" type="Node2D"]
 script = ExtResource( 5 )
-__meta__ = {
-"_edit_lock_": true
-}
 
 [node name="Map001" parent="." instance=ExtResource( 1 )]
 
@@ -149,6 +146,7 @@ anchor_bottom = 1.0
 margin_top = -510.0
 margin_right = 80.0
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -543,6 +541,7 @@ margin_right = -10.0
 margin_bottom = -10.0
 rect_min_size = Vector2( 180, 80 )
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -611,6 +610,7 @@ self_modulate = Color( 0, 0, 0, 0.470588 )
 anchor_right = 1.0
 rect_min_size = Vector2( 0, 60 )
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
@@ -679,6 +679,7 @@ margin_top = -132.5
 margin_right = 150.0
 margin_bottom = 132.5
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 

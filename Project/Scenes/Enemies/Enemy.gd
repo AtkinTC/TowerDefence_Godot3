@@ -43,8 +43,7 @@ func _init(_enemy_type: String = "") -> void:
 	if(_enemy_type.length() > 0):
 		enemy_type = _enemy_type
 		initialize_default_values()
-
-
+		
 func _ready() -> void:
 	var spawn_position = attribute_dict.get("spawn_position")
 	if(spawn_position != null):
@@ -134,6 +133,10 @@ func set_current_hp(hp: float) -> void:
 
 func get_damage():
 	return base_damage
+
+func set_ui_element_visibility(_visible: bool):
+	if(health_bar != null):
+		health_bar.visible = _visible
 
 #################################
 ### NavigationMap pathfinding ###

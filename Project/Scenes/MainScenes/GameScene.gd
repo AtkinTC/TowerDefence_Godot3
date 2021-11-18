@@ -7,6 +7,7 @@ const SCENE_EXT: String = ".tscn"
 const EMPTY_TILE_ID: int = 5
 
 signal game_finished()
+signal game_over(screenshot_image)
 signal base_health_changed(base_health)
 
 var levelMap: GameMap
@@ -29,8 +30,13 @@ var game_started: bool = false
 
 var base_health: int = 10000
 
+var game_over: bool = false
+
 var debug: bool = false
-	
+
+func get_class() -> String:
+	return "GameScene"
+
 func get_towers_node() -> TowersNode:
 	return towers_node
 	
@@ -86,6 +92,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:	
 	if build_mode:
+		print(get_class() + " : game over")
 		update_tower_preview()
 		
 	var move_vector := Vector2.ZERO
@@ -104,7 +111,10 @@ func _process(_delta: float) -> void:
 		camera.move_camera(move_vector)
 #		print("Camera position : " + String(camera.get_camera_position()))
 #		print("Camera center : " + String(camera.get_camera_screen_center()))
-	
+
+func _physics_process(delta: float) -> void:
+	if (base_health <= 0 && !game_over):
+		game_over()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if(event.is_action_released("ui_cancel") and build_mode):
@@ -271,3 +281,19 @@ func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
 	var reward_data: Dictionary = enemy_data.get(GameData.REWARD, {})
 	for resource_type in reward_data.keys():
 		resources_cont.add_to_resource_quantity(resource_type, reward_data[resource_type])
+
+#################
+### Game Over ###
+#################
+func game_over():
+	game_over = true
+	
+	get_tree().get_root().set_disable_input(true)
+	ui.set_hud_visibility(false)
+	get_tree().call_group("enemies", "set_ui_element_visibility", false)
+	yield(get_tree().create_timer(0.1), "timeout")
+	var image = get_viewport().get_texture().get_data()
+	image.flip_y()
+	
+	get_tree().get_root().set_disable_input(false)
+	emit_signal("game_over", image)
