@@ -28,7 +28,7 @@ var camera: GameCamera2D
 
 var game_started: bool = false
 
-var base_health: int = 10000
+var base_health: int = 10
 
 var game_over: bool = false
 
@@ -282,7 +282,7 @@ func _on_create_effect(effect_scene: PackedScene, effect_attributes_dict: Dictio
 
 func on_player_damaged(damage: int) -> void:
 	base_health -= damage;
-	print("Health is now : " + String(base_health))
+	#print("Health is now : " + String(base_health))
 	emit_signal("base_health_changed", base_health)
 	if(base_health <= 0):
 		yield(get_tree().create_timer(1.0), "timeout")

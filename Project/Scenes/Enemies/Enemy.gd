@@ -99,7 +99,7 @@ func move(delta):
 	velocity = move_and_slide(velocity)
 
 func has_reached_target() -> void:
-	print(self.get_name() + ":" + String(self.get_instance_id()) + " has reached target.")
+	#print(self.get_name() + ":" + String(self.get_instance_id()) + " has reached target.")
 	reached_target = true
 
 func on_hit(damage: float) -> void:
@@ -227,7 +227,7 @@ func set_target_node(_target_node: EnemyTargetArea):
 		_target_node.connect("tree_exiting", self, "_on_target_removed", [nav_target_index])
 
 func _on_target_removed(index) -> void:
-	print("target (" + String(index) + ") removed")
+	#print("target (" + String(index) + ") removed")
 	if(index == nav_target_index):
 		unset_nav_target_position()
 
