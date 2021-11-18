@@ -302,10 +302,23 @@ func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
 func game_over():
 	game_over = true
 	
+	var slow_down_duration: float = 2
+	var slow_down_final: float = 0.1
+	var slow_down_stages: int = 6
+	var e := 2.71828
+	var slow_down_scale: float = pow(e, log(slow_down_final)/slow_down_stages)
+
 	get_tree().get_root().set_disable_input(true)
 	ui.set_hud_visibility(false)
 	get_tree().call_group("enemies", "set_ui_element_visibility", false)
-	yield(get_tree().create_timer(0.1), "timeout")
+	
+	Engine.set_time_scale(1.0)
+	for i in range(slow_down_stages):
+		Engine.set_time_scale(Engine.get_time_scale()*slow_down_scale)
+		yield(get_tree().create_timer((slow_down_duration/slow_down_stages)*Engine.get_time_scale()), "timeout")
+	
+	set_game_speed(1.0)
+	
 	var image = get_viewport().get_texture().get_data()
 	image.flip_y()
 	
