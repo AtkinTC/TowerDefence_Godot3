@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Assets/UI/Art/mm_background.png" type="Texture" id=1]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=5]
 [ext_resource path="res://Scenes/UIScenes/MainMenu.gd" type="Script" id=6]
 [ext_resource path="res://Resources/Fonts/title_font.tres" type="DynamicFont" id=7]
+[ext_resource path="res://Resources/Fonts/subtitle_font.tres" type="DynamicFont" id=8]
 
 [sub_resource type="Animation" id=1]
 resource_name = "title_float"
@@ -22,7 +23,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 2, 4 ),
 "transitions": PoolRealArray( -2, -2, -2 ),
 "update": 0,
-"values": [ Vector2( 175, 175 ), Vector2( 175, 225 ), Vector2( 175, 175 ) ]
+"values": [ Vector2( 0, -25 ), Vector2( 0, 25 ), Vector2( 0, -25 ) ]
 }
 
 [node name="MainMenu" type="Control"]
@@ -172,20 +173,38 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TitleNode" type="Node2D" parent="."]
-position = Vector2( 175, 175.045 )
-rotation = -0.174533
+[node name="TitleContainer" type="Node2D" parent="."]
+position = Vector2( 175, 200 )
 
-[node name="TitleLabel" type="Label" parent="TitleNode"]
-margin_right = 316.0
-margin_bottom = 72.0
+[node name="TitleNode" type="Node2D" parent="TitleContainer"]
+position = Vector2( 0, -20.7809 )
+rotation = -0.174533
+scale = Vector2( 1, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="TitleLabel" type="Label" parent="TitleContainer/TitleNode"]
 custom_fonts/font = ExtResource( 7 )
 text = "GAME NAME"
 __meta__ = {
+"_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="TitleNode"]
+[node name="SubTitleLabel" type="Label" parent="TitleContainer/TitleNode"]
+margin_left = 15.0
+margin_top = 70.0
+margin_right = 403.0
+margin_bottom = 144.0
+custom_fonts/font = ExtResource( 8 )
+text = "COLON : SUBTITLE"
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="TitleContainer/TitleNode"]
 autoplay = "title_float"
 anims/title_float = SubResource( 1 )
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://Assets/UI/Art/mm_background.png" type="Texture" id=1]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=2]
@@ -8,6 +8,7 @@
 [ext_resource path="res://Resources/Fonts/title_font.tres" type="DynamicFont" id=6]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=7]
 [ext_resource path="res://Assets/UI/filler_screenshot.png" type="Texture" id=8]
+[ext_resource path="res://Resources/Fonts/subtitle_font.tres" type="DynamicFont" id=9]
 
 [sub_resource type="Animation" id=1]
 resource_name = "title_float"
@@ -23,7 +24,7 @@ tracks/0/keys = {
 "times": PoolRealArray( 0, 2, 4 ),
 "transitions": PoolRealArray( -2, -2, -2 ),
 "update": 0,
-"values": [ Vector2( 175, 175 ), Vector2( 175, 225 ), Vector2( 175, 175 ) ]
+"values": [ Vector2( 0, -25 ), Vector2( 0, 25 ), Vector2( 0, -25 ) ]
 }
 
 [node name="GameOverMenu" type="Control"]
@@ -157,11 +158,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TitleNode" type="Node2D" parent="M"]
-position = Vector2( 240, 352 )
-rotation = -0.174533
+[node name="TitleContainer" type="Node2D" parent="M"]
+position = Vector2( 210, 330 )
 
-[node name="TitleLabel" type="Label" parent="M/TitleNode"]
+[node name="TitleNode" type="Node2D" parent="M/TitleContainer"]
+position = Vector2( 0, 2.06809 )
+rotation = -0.174533
+scale = Vector2( 1, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="TitleLabel" type="Label" parent="M/TitleContainer/TitleNode"]
 custom_fonts/font = ExtResource( 6 )
 text = "GAME OVER"
 __meta__ = {
@@ -169,7 +177,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="M/TitleNode"]
+[node name="SubTitleLabel" type="Label" parent="M/TitleContainer/TitleNode"]
+margin_left = 20.0
+margin_top = 70.0
+margin_right = 408.0
+margin_bottom = 144.0
+custom_fonts/font = ExtResource( 9 )
+text = "wow, you died"
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="M/TitleContainer/TitleNode"]
 autoplay = "title_float"
 anims/title_float = SubResource( 1 )
 
