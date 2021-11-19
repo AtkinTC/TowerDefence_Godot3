@@ -27,6 +27,8 @@ func get_spawn_points_dict() -> Dictionary:
 
 func get_spawn_points() -> Array:
 	if(recalculate):
+		recalculate = false
+		spawn_points_array = []
 		var keys = spawn_points.keys()
 		keys.sort()
 		for key in keys:
