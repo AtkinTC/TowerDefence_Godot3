@@ -13,7 +13,7 @@ signal base_health_changed(base_health)
 var levelMap: GameMap
 onready var navigation_cont: NavigationController = get_node("NavigationController")
 onready var resources_cont: ResourcesController = get_node("ResourcesController")
-
+onready var enemy_spawn_cont: EnemySpawnController = get_node("EnemySpawnController")
 onready var enemies_node: EnemiesNode = get_node("EnemiesNode")
 onready var towers_node: TowersNode = get_node("TowersNode")
 onready var effects_node: Node2D = get_node("EffectsNode")
@@ -50,7 +50,6 @@ func _ready() -> void:
 	ControllersRef.set_controller_reference(ControllersRef.GAME_CONTROLLER, self)
 	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, navigation_cont)
 	ControllersRef.set_controller_reference(ControllersRef.RESOURCES_CONTROLLER, resources_cont)
-	ControllersRef.set_controller_reference(ControllersRef.ENEMIES_CONTROLLER, enemies_node)
 	ControllersRef.set_controller_reference(ControllersRef.TOWERS_CONTROLLER, towers_node)
 	ControllersRef.set_controller_reference(ControllersRef.EFFECTS_CONTROLLER, effects_node)
 	
@@ -60,8 +59,8 @@ func _ready() -> void:
 	print("Camera center : " + String(camera.get_camera_screen_center()))
 	camera.set_position(camera.get_camera_screen_center())
 	
-	enemies_node.set_map_name(levelMap.get_map_name())
-	enemies_node.set_spawn_points_node(levelMap.get_spawn_points_node())
+	enemy_spawn_cont.set_map_name(levelMap.get_map_name())
+	enemy_spawn_cont.set_spawn_points_node(levelMap.get_spawn_points_node())
 	
 	# TODO: make this dynamic, not hardcoded
 	resources_cont.set_resource_quantity(GameData.GOLD, 10)
@@ -225,12 +224,12 @@ func start_game() -> bool:
 	if(game_started):
 		return false
 	set_pause(false)
-	enemies_node.start_spawner()
+	enemy_spawn_cont.start_spawner()
 	game_started = true
 	return true
 	
 func get_current_wave_index() -> int:
-	return enemies_node.get_current_wave_index()
+	return enemy_spawn_cont.get_current_wave_index()
 
 func set_pause(_pause: bool, _update_ui: bool = true):
 	if(build_mode):

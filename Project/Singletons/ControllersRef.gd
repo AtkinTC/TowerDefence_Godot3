@@ -7,6 +7,7 @@ const MAP_CONTROLLER = "map_controller"
 const NAVIGATION_CONTROLLER = "navigation_controller"
 const RESOURCES_CONTROLLER = "resources_controller"
 const ENEMIES_CONTROLLER = "enemies_controller"
+const ENEMY_SPAWN_CONTROLLER = "enemy_spawn_controller"
 const TOWERS_CONTROLLER = "towers_controller"
 const EFFECTS_CONTROLLER = "effects_controller"
 

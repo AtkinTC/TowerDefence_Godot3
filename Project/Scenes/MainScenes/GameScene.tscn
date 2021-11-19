@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=2]
+[gd_scene load_steps=47 format=2]
 
 [ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=2]
@@ -31,6 +31,7 @@
 [ext_resource path="res://Scenes/Maps/TowersNode.gd" type="Script" id=29]
 [ext_resource path="res://Scenes/MainScenes/EnemiesNode.gd" type="Script" id=30]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=31]
+[ext_resource path="res://Scenes/MainScenes/EnemySpawnController.gd" type="Script" id=32]
 
 [sub_resource type="InputEventAction" id=1]
 action = "ui_1"
@@ -93,6 +94,12 @@ __meta__ = {
 
 [node name="ResourcesController" type="Node2D" parent="."]
 script = ExtResource( 25 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="EnemySpawnController" type="Node2D" parent="."]
+script = ExtResource( 32 )
 __meta__ = {
 "_edit_lock_": true
 }
