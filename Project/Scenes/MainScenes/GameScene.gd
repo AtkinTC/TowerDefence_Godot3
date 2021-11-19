@@ -93,7 +93,6 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:	
 	if build_mode:
-		print(get_class() + " : game over")
 		update_tower_preview()
 		
 	var move_vector := Vector2.ZERO
@@ -300,6 +299,7 @@ func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
 ### Game Over ###
 #################
 func game_over():
+	print(get_class() + " : game over")
 	game_over = true
 	
 	var slow_down_duration: float = 2
