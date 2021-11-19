@@ -27,6 +27,8 @@ func _init(_tower_type: String = "") -> void:
 		initialize_default_values()
 
 func _ready() -> void:
+	self.add_to_group("towers", true)
+	
 	var _range_area = get_node_or_null("RangeArea")
 	if(_range_area != null && _range_area is TowerRangeArea):
 		range_area = _range_area

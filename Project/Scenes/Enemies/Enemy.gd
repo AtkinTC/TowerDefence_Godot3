@@ -20,6 +20,7 @@ var nav_target_pos: Vector2 = Vector2.ZERO
 var nav_target_pos_set: bool = false
 
 var engaged: bool = false
+var engager: Node2D
 var can_be_engaged: bool = true
 
 onready var health_bar: TextureProgress = get_node("HealthBar")
@@ -107,10 +108,35 @@ func _physics_process(delta) -> void:
 			queue_free()
 		elif(engaged):
 			velocity = Vector2.ZERO
+			velocity += seperation_force()
+			velocity += engager_pull_force()
 		elif(get_navigation_controller() != null):
 			navigate_to_next_position()
 		move(delta)
 	health_bar.set_position(position + health_bar_offset)
+
+func engager_pull_force() -> Vector2:
+	var force_vec = Vector2.ZERO
+	var distance_vec: Vector2 = (engager as Node2D).get_global_position() - global_position
+	var distance = distance_vec.length()
+	force_vec += distance_vec.normalized() * (distance - 64) * 10
+	return force_vec
+
+func seperation_force() -> Vector2:
+	var force_vec = Vector2.ZERO
+	for member in get_tree().get_nodes_in_group("engaged_enemies"):
+		if(member is Node2D && member != self):
+			var distance_vec: Vector2 = (member as Node2D).get_global_position() - global_position
+			var distance = distance_vec.length()
+			if(distance <= 32):
+				force_vec -= distance_vec.normalized() * 200 / distance_vec.length()
+	for member in get_tree().get_nodes_in_group("towers"):
+		if(member is Node2D):
+			var distance_vec: Vector2 = (member as Node2D).get_global_position() - global_position
+			var distance = distance_vec.length()
+			if(distance <= 75):
+				force_vec -= distance_vec.normalized() * 300 / distance_vec.length()
+	return force_vec
 
 func move(delta):
 	#set_offset(get_offset() + speed * delta)
@@ -159,22 +185,18 @@ func set_ui_element_visibility(_visible: bool):
 func is_engaged() -> bool:
 	return engaged
 
-func engage(engager: Node) -> bool:
+func engage(_engager: Node) -> bool:
 	if(engaged):
 		return false
-	var engaged_enemy_bit: int = ControllersRef.get_physics_layer_bit("engaged_enemy")
-	if(engaged_enemy_bit >= 0):
-		set_collision_layer_bit(engaged_enemy_bit, true)
-		set_collision_mask_bit(engaged_enemy_bit, true)
+	self.add_to_group("engaged_enemies", true)
+	engager = _engager
 	engaged = true
 	engager.connect("tree_exiting", self, "unengage")
 	return true
 	
 func unengage():
-	var engaged_enemy_bit: int = ControllersRef.get_physics_layer_bit("engaged_enemy")
-	if(engaged_enemy_bit >= 0):
-		set_collision_layer_bit(engaged_enemy_bit, false)
-		set_collision_mask_bit(engaged_enemy_bit, false)
+	self.remove_from_group("engaged_enemies")
+	engager = null
 	engaged = false
 
 #################################

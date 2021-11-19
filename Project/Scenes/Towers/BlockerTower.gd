@@ -10,7 +10,7 @@ func _init().("BlockerTower"):
 	pass
 	
 func _ready() -> void:
-	debug = true
+	#debug = true
 	range_area.connect("target_exited_range", self, "_on_unengaging_target")
 
 func _physics_process(_delta):

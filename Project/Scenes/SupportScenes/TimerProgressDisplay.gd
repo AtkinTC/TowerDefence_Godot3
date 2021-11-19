@@ -66,11 +66,8 @@ func _process(delta) -> void:
 				progress_texture.set_position(texture_pos)
 				displayed_timers += 1
 				
-		
 func _on_timer_created(_timer: Timer):
-	print("TimerProgressDisplay recieved timer_created signal")
 	connect_timer(_timer)
 	
 func _on_timer_removed(_timer_id: int):
-	print("TimerProgressDisplay recieved timer_removed signal")
 	disconnect_timer(_timer_id)
