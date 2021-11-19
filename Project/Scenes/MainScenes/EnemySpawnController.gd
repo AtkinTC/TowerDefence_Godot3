@@ -3,6 +3,7 @@ class_name EnemySpawnController
 
 signal wave_started(wave_index)
 signal wave_ended(wave_index)
+signal spawner_finished()
 
 var wave_spawners: Dictionary = {}
 
@@ -10,6 +11,7 @@ var map_name: String
 var wave_data_array: Array
 var current_wave_index: int = -1
 var spawner_running: bool = false
+var spawner_finished: bool = false
 var spawn_points_node: SpawnPointsNode
 
 var debug: bool = false
@@ -36,6 +38,9 @@ func set_map_name(_map_name: String) -> void:
 	
 func is_spawner_running() -> bool:
 	return spawner_running
+	
+func is_spawner_finished() -> bool:
+	return spawner_finished
 
 func get_wave_data_array() -> Array:
 	return wave_data_array
@@ -88,7 +93,8 @@ func start_next_wave() -> void:
 		create_and_start_wave_spawner(current_wave_index)
 	else:
 		spawner_running = false
-		#TODO: emit signal to indicate that there are no more waves
+		spawner_finished = true
+		emit_signal("spawner_finished")
 	
 func create_and_start_wave_spawner(_wave_index) -> bool:
 	if(_wave_index < 0 || _wave_index >= get_wave_data_array().size()):

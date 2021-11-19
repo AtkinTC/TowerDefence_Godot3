@@ -6,8 +6,8 @@ const ENEMIES_PATH: String = "res://Scenes/Enemies/"
 const SCENE_EXT: String = ".tscn"
 const EMPTY_TILE_ID: int = 5
 
-signal game_finished()
 signal game_over(screenshot_image)
+signal level_completed(screenshot_image)
 signal base_health_changed(base_health)
 
 var levelMap: GameMap
@@ -31,6 +31,7 @@ var game_started: bool = false
 var base_health: int = 1000
 
 var game_over: bool = false
+var level_complete: bool = false
 
 var debug: bool = false
 
@@ -115,8 +116,11 @@ func _process(_delta: float) -> void:
 #		print("Camera center : " + String(camera.get_camera_screen_center()))
 
 func _physics_process(delta: float) -> void:
-	if (base_health <= 0 && !game_over):
-		game_over()
+	if(game_started && !game_over && !level_complete):
+		if (base_health <= 0):
+			game_over()
+		elif(enemy_spawn_cont.is_spawner_finished() && enemies_node.get_all_enemies().size() == 0):
+			level_complete()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if(event.is_action_released("ui_cancel") and build_mode):
@@ -285,11 +289,6 @@ func on_player_damaged(damage: int) -> void:
 	base_health -= damage;
 	#print("Health is now : " + String(base_health))
 	emit_signal("base_health_changed", base_health)
-	if(base_health <= 0):
-		yield(get_tree().create_timer(1.0), "timeout")
-		emit_signal("game_finished", false)
-	#else:
-	#	get_node("UI").update_health_bar(base_health, true)
 
 func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
 	var enemy_data: Dictionary = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
@@ -297,12 +296,13 @@ func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
 	for resource_type in reward_data.keys():
 		resources_cont.add_to_resource_quantity(resource_type, reward_data[resource_type])
 
-#################
-### Game Over ###
-#################
+########################
+### Scene Transition ###
+########################
 func game_over():
 	print(get_class() + " : game over")
 	game_over = true
+	cancel_build_mode()
 	
 	var slow_down_duration: float = 2
 	var slow_down_final: float = 0.1
@@ -319,10 +319,29 @@ func game_over():
 		Engine.set_time_scale(Engine.get_time_scale()*slow_down_scale)
 		yield(get_tree().create_timer((slow_down_duration/slow_down_stages)*Engine.get_time_scale()), "timeout")
 	
-	set_game_speed(1.0)
+	Engine.set_time_scale(1.0)
 	
 	var image = get_viewport().get_texture().get_data()
 	image.flip_y()
 	
 	get_tree().get_root().set_disable_input(false)
 	emit_signal("game_over", image)
+	
+func level_complete():
+	print(get_class() + " : level complete")
+	level_complete = true
+	cancel_build_mode()
+
+	get_tree().get_root().set_disable_input(true)
+	ui.set_hud_visibility(false)
+	get_tree().call_group("enemies", "set_ui_element_visibility", false)
+	
+	Engine.set_time_scale(1.0)
+	yield(get_tree().create_timer(2), "timeout")
+	
+	var image = get_viewport().get_texture().get_data()
+	image.flip_y()
+	
+	get_tree().get_root().set_disable_input(false)
+	emit_signal("level_completed", image)
+

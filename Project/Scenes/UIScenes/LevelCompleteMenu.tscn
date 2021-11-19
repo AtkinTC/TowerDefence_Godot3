@@ -1,0 +1,197 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Assets/UI/Art/mm_background.png" type="Texture" id=1]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=2]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button10.png" type="Texture" id=3]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=4]
+[ext_resource path="res://Scenes/UIScenes/LevelCompleteMenu.gd" type="Script" id=5]
+[ext_resource path="res://Resources/Fonts/title_font.tres" type="DynamicFont" id=6]
+[ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=7]
+[ext_resource path="res://Assets/UI/filler_screenshot.png" type="Texture" id=8]
+[ext_resource path="res://Resources/Fonts/subtitle_font.tres" type="DynamicFont" id=9]
+
+[sub_resource type="Animation" id=1]
+resource_name = "title_float"
+length = 4.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath(".:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 2, 4 ),
+"transitions": PoolRealArray( -2, -2, -2 ),
+"update": 0,
+"values": [ Vector2( 0, -25 ), Vector2( 0, 25 ), Vector2( 0, -25 ) ]
+}
+
+[node name="LevelCompleteMenu" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 5 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B" type="TextureRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture = ExtResource( 1 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="BackgroundSprite" type="Sprite" parent="."]
+self_modulate = Color( 1, 1, 1, 0.5 )
+texture = ExtResource( 8 )
+centered = false
+
+[node name="M" type="MarginContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 50
+custom_constants/margin_top = 50
+custom_constants/margin_left = 50
+custom_constants/margin_bottom = 50
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VB" type="VBoxContainer" parent="M"]
+margin_left = 730.0
+margin_top = 50.0
+margin_right = 1230.0
+margin_bottom = 670.0
+rect_min_size = Vector2( 500, 0 )
+size_flags_horizontal = 8
+custom_constants/separation = 35
+alignment = 1
+
+[node name="B_BackToMain" type="TextureButton" parent="M/VB"]
+margin_left = 75.0
+margin_top = 145.0
+margin_right = 425.0
+margin_bottom = 220.0
+rect_min_size = Vector2( 350, 75 )
+rect_pivot_offset = Vector2( 859, -170 )
+size_flags_horizontal = 4
+action_mode = 0
+texture_normal = ExtResource( 4 )
+texture_pressed = ExtResource( 3 )
+texture_hover = ExtResource( 2 )
+expand = true
+
+[node name="Label" type="Label" parent="M/VB/B_BackToMain"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 7 )
+text = "Back to Menu"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="B_NewGame" type="TextureButton" parent="M/VB"]
+margin_left = 75.0
+margin_top = 255.0
+margin_right = 425.0
+margin_bottom = 330.0
+rect_min_size = Vector2( 350, 75 )
+rect_pivot_offset = Vector2( 859, -170 )
+size_flags_horizontal = 4
+action_mode = 0
+texture_normal = ExtResource( 4 )
+texture_pressed = ExtResource( 3 )
+texture_hover = ExtResource( 2 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="M/VB/B_NewGame"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 7 )
+text = "New Game"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Spacer" type="Control" parent="M/VB"]
+margin_top = 365.0
+margin_right = 500.0
+margin_bottom = 365.0
+
+[node name="B_Quit" type="TextureButton" parent="M/VB"]
+margin_left = 75.0
+margin_top = 400.0
+margin_right = 425.0
+margin_bottom = 475.0
+rect_min_size = Vector2( 350, 75 )
+size_flags_horizontal = 4
+action_mode = 0
+texture_normal = ExtResource( 4 )
+texture_pressed = ExtResource( 3 )
+texture_hover = ExtResource( 2 )
+expand = true
+
+[node name="Label" type="Label" parent="M/VB/B_Quit"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 7 )
+text = "Quit"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TitleContainer" type="Node2D" parent="M"]
+position = Vector2( 210, 330 )
+
+[node name="TitleNode" type="Node2D" parent="M/TitleContainer"]
+position = Vector2( 0, 2.06809 )
+rotation = -0.174533
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="TitleLabel" type="Label" parent="M/TitleContainer/TitleNode"]
+custom_fonts/font = ExtResource( 6 )
+text = "Victory"
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="SubTitleLabel" type="Label" parent="M/TitleContainer/TitleNode"]
+margin_left = 10.0
+margin_top = 70.0
+margin_right = 408.0
+margin_bottom = 144.0
+custom_fonts/font = ExtResource( 9 )
+text = "You did it!"
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="M/TitleContainer/TitleNode"]
+autoplay = "title_float"
+anims/title_float = SubResource( 1 )
+
+[connection signal="pressed" from="M/VB/B_BackToMain" to="." method="_on_B_BackToMain_pressed"]
+[connection signal="pressed" from="M/VB/B_NewGame" to="." method="_on_B_NewGame_pressed"]
+[connection signal="pressed" from="M/VB/B_Quit" to="." method="_on_B_Quit_pressed"]

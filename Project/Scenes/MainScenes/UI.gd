@@ -99,9 +99,10 @@ func update_tower_preview(new_position: Vector2, color: Color) -> void:
 		
 func remove_tower_preview() -> void:
 	var tower_preview: Node2D = get_node(TOWER_PREVIEW_NAME)
-	tower_preview.name += "_delete"
-	tower_preview.visible = false
-	tower_preview.queue_free()
+	if(tower_preview != null):
+		tower_preview.name += "_delete"
+		tower_preview.visible = false
+		tower_preview.queue_free()
 
 func initialize_health_bar(max_health: int, current_health: int) -> void:
 	hp_bar.max_value = max_health
