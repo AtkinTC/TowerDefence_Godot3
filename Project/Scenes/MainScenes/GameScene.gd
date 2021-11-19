@@ -28,7 +28,7 @@ var camera: GameCamera2D
 
 var game_started: bool = false
 
-var base_health: int = 10
+var base_health: int = 1000
 
 var game_over: bool = false
 

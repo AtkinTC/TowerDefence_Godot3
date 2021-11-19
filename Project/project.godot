@@ -323,6 +323,7 @@ ui_9={
 2d_physics/layer_3="enemy_projectile"
 2d_physics/layer_4="player_projectile"
 2d_physics/layer_5="obstacle"
+2d_physics/layer_6="engaged_enemy"
 
 [rendering]
 

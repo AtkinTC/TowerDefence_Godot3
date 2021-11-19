@@ -45,8 +45,8 @@ const tower_data = {
 		},
 	"BlockerTower": {
 		DAMAGE: 20,
-		ROF: 1,
-		RANGE: 50,
+		ROF: 0.5,
+		RANGE: 64,
 		PROJTYPE: "Area",
 		PLACEMENT: PLACEMENT_TYPE.MELEE,
 		BLOCKER: true,

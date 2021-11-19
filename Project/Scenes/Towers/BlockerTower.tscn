@@ -1,11 +1,14 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scenes/Towers/BlockerTower.gd" type="Script" id=1]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile181.png" type="Texture" id=2]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile229.png" type="Texture" id=3]
 [ext_resource path="res://Scenes/Towers/TowerRangeArea.gd" type="Script" id=4]
+[ext_resource path="res://Scenes/SupportScenes/TimerProgressDisplay.gd" type="Script" id=5]
+[ext_resource path="res://Scenes/SupportScenes/TimerTextureProgress.tscn" type="PackedScene" id=6]
 
 [sub_resource type="CircleShape2D" id=1]
+resource_local_to_scene = true
 radius = 175.0
 
 [node name="BlockerTower" type="Node2D"]
@@ -23,3 +26,9 @@ script = ExtResource( 4 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RangeArea"]
 visible = false
 shape = SubResource( 1 )
+
+[node name="TimerProgressDisplay" type="Node2D" parent="."]
+position = Vector2( -30, -30 )
+script = ExtResource( 5 )
+progress_texture_scene = ExtResource( 6 )
+texture_size = Vector2( 20, 20 )

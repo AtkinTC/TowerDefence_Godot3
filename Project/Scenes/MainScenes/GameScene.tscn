@@ -97,14 +97,14 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemiesNode" type="Node2D" parent="."]
-script = ExtResource( 30 )
+[node name="TowersNode" type="Node2D" parent="."]
+script = ExtResource( 29 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="TowersNode" type="Node2D" parent="."]
-script = ExtResource( 29 )
+[node name="EnemiesNode" type="Node2D" parent="."]
+script = ExtResource( 30 )
 __meta__ = {
 "_edit_lock_": true
 }

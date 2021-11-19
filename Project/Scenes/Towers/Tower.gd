@@ -136,12 +136,13 @@ func update_debug_draw() -> void:
 		target_line.visible = false
 	
 func setup_target_line() -> void:
-	target_line = Line2D.new()
-	target_line.visible = false
-	target_line.set_as_toplevel(true)
-	target_line.set_default_color(Color.yellow)
-	target_line.set_width(4)
-	add_child(target_line)
+	if(target != null):
+		target_line = Line2D.new()
+		target_line.visible = false
+		target_line.set_as_toplevel(true)
+		target_line.set_default_color(Color.yellow)
+		target_line.set_width(4)
+		add_child(target_line)
 
 func update_target_line() -> void:
 	if(target_line != null):

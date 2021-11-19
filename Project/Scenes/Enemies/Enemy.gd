@@ -19,6 +19,9 @@ var nav_target_index: int = -1
 var nav_target_pos: Vector2 = Vector2.ZERO
 var nav_target_pos_set: bool = false
 
+var engaged: bool = false
+var can_be_engaged: bool = true
+
 onready var health_bar: TextureProgress = get_node("HealthBar")
 onready var health_bar_offset: Vector2 = health_bar.get_position()
 
@@ -45,6 +48,13 @@ func _init(_enemy_type: String = "") -> void:
 		initialize_default_values()
 		
 func _ready() -> void:
+	var enemy_bit: int = ControllersRef.get_physics_layer_bit("enemy")
+	if(enemy_bit >= 0):
+		set_collision_layer(pow(2, enemy_bit))
+	var player_bit: int = ControllersRef.get_physics_layer_bit("player")
+	if(player_bit >= 0):
+		set_collision_mask(pow(2, player_bit))
+	
 	var spawn_position = attribute_dict.get("spawn_position")
 	if(spawn_position != null):
 		global_position = spawn_position
@@ -85,11 +95,19 @@ func initialize_default_values() -> void:
 	else:
 		default_attributes = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
 
+func _process(delta: float) -> void:
+	if(current_hp == max_hp):
+		health_bar.set_modulate(Color(1,1,1,0))
+	else:
+		health_bar.set_modulate(Color(1,1,1,1))
+
 func _physics_process(delta) -> void:
 	if(active):
 		if(reached_target):
 			queue_free()
-		if(get_navigation_controller() != null):
+		elif(engaged):
+			velocity = Vector2.ZERO
+		elif(get_navigation_controller() != null):
 			navigate_to_next_position()
 		move(delta)
 	health_bar.set_position(position + health_bar_offset)
@@ -137,6 +155,27 @@ func get_damage():
 func set_ui_element_visibility(_visible: bool):
 	if(health_bar != null):
 		health_bar.visible = _visible
+
+func is_engaged() -> bool:
+	return engaged
+
+func engage(engager: Node) -> bool:
+	if(engaged):
+		return false
+	var engaged_enemy_bit: int = ControllersRef.get_physics_layer_bit("engaged_enemy")
+	if(engaged_enemy_bit >= 0):
+		set_collision_layer_bit(engaged_enemy_bit, true)
+		set_collision_mask_bit(engaged_enemy_bit, true)
+	engaged = true
+	engager.connect("tree_exiting", self, "unengage")
+	return true
+	
+func unengage():
+	var engaged_enemy_bit: int = ControllersRef.get_physics_layer_bit("engaged_enemy")
+	if(engaged_enemy_bit >= 0):
+		set_collision_layer_bit(engaged_enemy_bit, false)
+		set_collision_mask_bit(engaged_enemy_bit, false)
+	engaged = false
 
 #################################
 ### NavigationMap pathfinding ###

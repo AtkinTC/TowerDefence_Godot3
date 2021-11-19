@@ -13,7 +13,7 @@ func get_index() -> int:
 
 func _on_EnemyTargetArea_body_entered(body: Node) -> void:
 	if(body.is_in_group("enemies")):
-		#(String(body.get_instance_id()) + " has reached target.")
+		(String(body.get_instance_id()) + " has reached target.")
 		if(body.has_method("has_reached_target")):
 			body.has_reached_target()
 		if(body.has_method("get_damage")):
