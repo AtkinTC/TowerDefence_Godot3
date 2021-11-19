@@ -69,7 +69,9 @@ func _ready() -> void:
 	ui = get_node("UI")
 	ui.active_camera = camera
 	ui.initialize_health_bar(base_health, base_health)	
-	
+	ui.set_current_wave_number(1)
+	var total_number_of_waves = enemy_spawn_cont.get_wave_data_array().size()
+	ui.set_total_number_of_waves(total_number_of_waves)
 	# TODO: make this dynamic, not hardcoded
 	ui.add_resource_display(GameData.GOLD, "$", resources_cont.get_resource_quantity(GameData.GOLD))
 	ui.add_resource_display(GameData.MANA, "M", resources_cont.get_resource_quantity(GameData.MANA))
@@ -87,6 +89,7 @@ func _ready() -> void:
 	ui.connect("toggle_speed_from_ui", self, "_on_toggle_speed_from_ui")
 	ui.connect("quit_from_ui", self, "_on_quit")
 	enemies_node.connect("enemy_destroyed", self, "_on_enemy_destroyed")
+	enemy_spawn_cont.connect("wave_started", ui, "_on_wave_started")
 	
 	navigation_cont.set_debug(debug)
 

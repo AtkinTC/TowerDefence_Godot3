@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=1]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=2]
@@ -32,6 +32,7 @@
 [ext_resource path="res://Scenes/MainScenes/EnemiesNode.gd" type="Script" id=30]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=31]
 [ext_resource path="res://Scenes/MainScenes/EnemySpawnController.gd" type="Script" id=32]
+[ext_resource path="res://Scenes/UIScenes/WaveInfoDisplay.tscn" type="PackedScene" id=33]
 
 [sub_resource type="InputEventAction" id=1]
 action = "ui_1"
@@ -77,6 +78,9 @@ shortcut = SubResource( 13 )
 
 [node name="GameScene" type="Node2D"]
 script = ExtResource( 5 )
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="Map001" parent="." instance=ExtResource( 1 )]
 
@@ -616,52 +620,62 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="InfoBar" type="ColorRect" parent="UI/HUD"]
+[node name="InfoPanel" type="Panel" parent="UI/HUD"]
+self_modulate = Color( 1, 1, 1, 0 )
+anchor_right = 1.0
+margin_bottom = 60.0
+__meta__ = {
+"_edit_lock_": true,
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="UI/HUD/InfoPanel"]
 self_modulate = Color( 0, 0, 0, 0.470588 )
 anchor_right = 1.0
+anchor_bottom = 1.0
 rect_min_size = Vector2( 0, 60 )
 __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
 }
 
-[node name="H" type="HBoxContainer" parent="UI/HUD/InfoBar"]
-self_modulate = Color( 0, 0, 0, 1 )
-anchor_right = 1.0
-anchor_bottom = 1.0
+[node name="H" type="HBoxContainer" parent="UI/HUD/InfoPanel"]
+self_modulate = Color( 1, 1, 1, 0 )
+margin_right = 1280.0
+margin_bottom = 60.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Padding" type="Control" parent="UI/HUD/InfoBar/H"]
+[node name="Padding" type="Control" parent="UI/HUD/InfoPanel/H"]
 margin_right = 70.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 70, 0 )
 
-[node name="ResourcesDisplayContainer" type="HBoxContainer" parent="UI/HUD/InfoBar/H" groups=["ResourcesDisplayContainer"]]
+[node name="ResourcesDisplayContainer" type="HBoxContainer" parent="UI/HUD/InfoPanel/H" groups=["ResourcesDisplayContainer"]]
 margin_left = 74.0
 margin_right = 258.0
 margin_bottom = 60.0
 script = ExtResource( 26 )
 resource_display_scene = ExtResource( 15 )
 
-[node name="BasicResourceDisplay" parent="UI/HUD/InfoBar/H/ResourcesDisplayContainer" instance=ExtResource( 15 )]
+[node name="BasicResourceDisplay" parent="UI/HUD/InfoPanel/H/ResourcesDisplayContainer" instance=ExtResource( 15 )]
 
-[node name="HealthIcon" type="TextureRect" parent="UI/HUD/InfoBar/H"]
-margin_left = 742.0
-margin_right = 802.0
+[node name="HealthIcon" type="TextureRect" parent="UI/HUD/InfoPanel/H"]
+margin_left = 842.0
+margin_right = 902.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 60, 60 )
 size_flags_horizontal = 10
 texture = ExtResource( 12 )
 expand = true
 
-[node name="HealthBar" type="TextureProgress" parent="UI/HUD/InfoBar/H"]
-margin_left = 806.0
+[node name="HealthBar" type="TextureProgress" parent="UI/HUD/InfoPanel/H"]
+margin_left = 906.0
 margin_top = 15.0
 margin_right = 1206.0
 margin_bottom = 45.0
-rect_min_size = Vector2( 400, 30 )
+rect_min_size = Vector2( 300, 30 )
 size_flags_vertical = 4
 value = 50.0
 texture_under = ExtResource( 13 )
@@ -671,13 +685,43 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Tween" type="Tween" parent="UI/HUD/InfoBar/H/HealthBar"]
+[node name="Tween" type="Tween" parent="UI/HUD/InfoPanel/H/HealthBar"]
 
-[node name="Padding2" type="Control" parent="UI/HUD/InfoBar/H"]
+[node name="Padding2" type="Control" parent="UI/HUD/InfoPanel/H"]
 margin_left = 1210.0
 margin_right = 1280.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 70, 0 )
+
+[node name="Panel" type="Panel" parent="UI/HUD"]
+self_modulate = Color( 0, 0, 0, 0 )
+margin_top = 64.0
+margin_right = 192.0
+margin_bottom = 144.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="UI/HUD/Panel"]
+self_modulate = Color( 0, 0, 0, 0.5 )
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/HUD/Panel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 5.0
+margin_top = 5.0
+margin_right = -5.0
+margin_bottom = -5.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WaveInfoDisplay" parent="UI/HUD/Panel/MarginContainer" instance=ExtResource( 33 )]
 
 [node name="PausePanel" type="Control" parent="UI"]
 pause_mode = 2

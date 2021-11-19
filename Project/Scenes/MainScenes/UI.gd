@@ -6,12 +6,13 @@ signal toggle_paused_from_ui()
 signal toggle_speed_from_ui()
 signal quit_from_ui()
 
-onready var hp_bar = get_node("HUD/InfoBar/H/HealthBar")
-onready var hp_bar_tween = get_node("HUD/InfoBar/H/HealthBar/Tween")
+onready var hp_bar = get_node("HUD/InfoPanel/H/HealthBar")
+onready var hp_bar_tween = get_node("HUD/InfoPanel/H/HealthBar/Tween")
 
 onready var pause_panel: Control = get_node("PausePanel")
 
 const RESOURCE_DISPLAY_GROUP: String = "ResourcesDisplayContainer"
+const WAVE_INFO_DISPLAY_GROUP: String = "WaveInfoDisplay"
 
 const TOWERS_DIR: String = "res://Scenes/Towers/"
 const SCENE_EXT: String = ".tscn"
@@ -143,6 +144,15 @@ func _on_resource_quantity_changed(resource_type: String, old_quantity: int, new
 
 func set_pause_panel_visibility(_visible: bool) -> void:
 	pause_panel.set_visible(_visible)
+
+func set_current_wave_number(_wave_number: int):
+	get_tree().call_group(WAVE_INFO_DISPLAY_GROUP, "set_current_wave_number", _wave_number)
+	
+func set_total_number_of_waves(_count: int):
+	get_tree().call_group(WAVE_INFO_DISPLAY_GROUP, "set_total_number_of_waves", _count)
+	
+func _on_wave_started(_wave_index: int):
+	set_current_wave_number(_wave_index+1)
 
 func set_hud_visibility(_visible: bool):
 	var hud : Control = get_node_or_null("HUD")
