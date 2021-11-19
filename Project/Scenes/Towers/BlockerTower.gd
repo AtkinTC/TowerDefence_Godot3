@@ -5,8 +5,8 @@ func _init().("BlockerTower"):
 	pass
 
 func _physics_process(_delta):
-	if active && range_area.enemy_array.size() > 0 && !on_cooldown:
 		select_target(TARGETING_TYPE_ENUM.CLOSEST, range_area.enemy_array)
+	if active && range_area.get_targets_array().size() > 0 && !on_cooldown:
 		fire()
 	else:
 		target = null
