@@ -152,7 +152,7 @@ func get_nav_target():
 		return null
 	return nav_target_pos
 
-func get_next_navigation_position():
+func get_next_navigation_position(_randomness: float = 0.0):
 	if(get_navigation_controller() == null || !nav_target_pos_set):
 		return null
 	var next_pos = null
@@ -161,6 +161,12 @@ func get_next_navigation_position():
 		next_pos = get_nav_target()
 	else:
 		next_pos = get_navigation_controller().get_next_world_position(self.global_position, get_nav_target(), true)
+		if(_randomness > 0):
+			randomize()
+			var x_rand = (1.0-2*randf()) * _randomness
+			randomize()
+			var y_rand = (1.0-2*randf()) * _randomness
+			next_pos += Vector2(x_rand, y_rand)
 	return next_pos
 		
 func get_pathed_distance_to_target() -> float:
@@ -180,7 +186,7 @@ func navigate_to_next_position() -> void:
 		
 		var nextpos = null
 		if(nav_target_pos_set):
-			nextpos = get_next_navigation_position()
+			nextpos = get_next_navigation_position(8)
 		if(nextpos == null):
 			is_navigating = false
 		else:
