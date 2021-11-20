@@ -1,0 +1,46 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://Scenes/UIScenes/LevelSelectButton.gd" type="Script" id=1]
+[ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=2]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=3]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button10.png" type="Texture" id=4]
+[ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=5]
+
+[node name="LevelSelectButton" type="TextureButton"]
+margin_left = 75.0
+margin_right = 425.0
+margin_bottom = 50.0
+rect_min_size = Vector2( 350, 50 )
+rect_pivot_offset = Vector2( 859, -170 )
+action_mode = 0
+texture_normal = ExtResource( 3 )
+texture_pressed = ExtResource( 4 )
+texture_hover = ExtResource( 5 )
+expand = true
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CompletionIcon" type="ColorRect" parent="."]
+margin_left = 15.0
+margin_top = 15.0
+margin_right = 35.0
+margin_bottom = 35.0
+color = Color( 1, 0, 0, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LevelLabel" type="Label" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 2 )
+text = "Level 1"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}

@@ -33,6 +33,8 @@ var base_health: int = 1000
 var game_over: bool = false
 var level_complete: bool = false
 
+var level_id: String
+
 var debug: bool = false
 
 func get_class() -> String:
@@ -60,7 +62,8 @@ func _ready() -> void:
 	print("Camera center : " + String(camera.get_camera_screen_center()))
 	camera.set_position(camera.get_camera_screen_center())
 	
-	enemy_spawn_cont.set_map_name(levelMap.get_map_name())
+	#enemy_spawn_cont.set_map_name(levelMap.get_map_name())
+	enemy_spawn_cont.set_map_name(level_id)
 	enemy_spawn_cont.set_spawn_points_node(levelMap.get_spawn_points_node())
 	
 	# TODO: make this dynamic, not hardcoded
@@ -133,6 +136,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		camera.change_zoom_level(-1)
 	if(event.is_action_pressed("zoom_out")):
 		camera.change_zoom_level(1)
+
+func set_level_id(_level_id: String):
+	level_id = _level_id
 
 ##
 ## Tower Building Functions
