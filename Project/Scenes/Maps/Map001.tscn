@@ -39,7 +39,7 @@ script = ExtResource( 3 )
 __meta__ = {
 "_edit_lock_": true
 }
-map_name = "TestWaveStream2"
+map_name = "TestWave1"
 
 [node name="Ground" type="TileMap" parent="."]
 visible = false
