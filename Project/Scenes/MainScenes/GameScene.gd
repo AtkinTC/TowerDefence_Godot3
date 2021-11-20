@@ -7,6 +7,7 @@ const SCENE_EXT: String = ".tscn"
 const EMPTY_TILE_ID: int = 5
 
 signal game_over(screenshot_image)
+signal exit_level()
 signal level_completed(screenshot_image)
 signal base_health_changed(base_health)
 
@@ -278,7 +279,7 @@ func _on_toggle_speed_from_ui():
 		set_game_speed(2.0)
 
 func quit_current_game():
-	emit_signal("game_finished")
+	emit_signal("exit_level")
 
 func _on_quit():
 	set_pause(false)
@@ -341,6 +342,15 @@ func level_complete():
 	get_tree().get_root().set_disable_input(true)
 	ui.set_hud_visibility(false)
 	get_tree().call_group("enemies", "set_ui_element_visibility", false)
+	
+	var level_completion_record := {
+		"level_id": level_id,
+		"completed": true,
+		"score": 999,
+		"time": 1234
+	}
+	SaveGameController.add_level_completion_record(level_id, level_completion_record)
+	SaveGameController.save_game()
 	
 	Engine.set_time_scale(1.0)
 	yield(get_tree().create_timer(2), "timeout")

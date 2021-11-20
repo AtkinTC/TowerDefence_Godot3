@@ -21,6 +21,7 @@ func set_current_child_scene(_current_child_scene: Node) -> void:
 	current_child_scene = _current_child_scene
 
 func load_main_menu():
+	SaveGameController.reset_game_save()
 	var main_menu = get_node_or_null("MainMenu")
 	if(main_menu == null || !(main_menu is MainMenu)):
 		main_menu = load("res://Scenes/UIScenes/MainMenu.tscn").instance()
@@ -55,12 +56,13 @@ func load_game_over(_background_image: Image):
 func load_level(_level_id: String):
 	var game_scene := (load("res://Scenes/MainScenes/GameScene.tscn").instance() as GameScene)
 	game_scene.set_level_id(_level_id)
-	game_scene.connect("game_finished", self, "_on_game_finished")
+	game_scene.connect("exit_level", self, "_on_selected_level_select")
 	game_scene.connect("level_completed", self, "_on_level_completed")
 	game_scene.connect("game_over", self, "_on_game_over")
 	set_current_child_scene(game_scene)
 
 func _on_selected_new_game():
+	SaveGameController.load_game()
 	load_level_select()
 	
 func _on_selected_level(_level_id: String):
@@ -86,6 +88,7 @@ func _on_selected_back_to_main():
 	
 func _on_selected_level_select():
 	load_level_select()
+	
 
 ###############
 ### Utility ###

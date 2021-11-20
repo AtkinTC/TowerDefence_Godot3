@@ -105,7 +105,7 @@ const SPAWN_GROUPS: String = "spawn_groups"
 const WAVE_DATA = {
 	"TestWave1": [
 		{
-		POST_WAVE_DELAY: 10,
+		POST_WAVE_DELAY: 5,
 		SPAWN_GROUPS: [{
 			ENEMY_TYPE: "BasicEnemy",
 			ENEMY_COUNT: 2,
@@ -113,7 +113,7 @@ const WAVE_DATA = {
 			}]
 		},
 		{	
-		POST_WAVE_DELAY: 10,
+		POST_WAVE_DELAY: 5,
 		SPAWN_GROUPS: [{
 			ENEMY_TYPE: "BasicEnemy2",
 			ENEMY_COUNT: 4,
@@ -121,7 +121,7 @@ const WAVE_DATA = {
 			}]
 		},
 		{	
-		POST_WAVE_DELAY: 10,
+		POST_WAVE_DELAY: 5,
 		SPAWN_GROUPS: [{
 			ENEMY_TYPE: "BasicEnemy",
 			ENEMY_COUNT: 10,

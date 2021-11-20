@@ -177,4 +177,4 @@ func _on_B_Options_pressed():
 	pass # Replace with function body.
 
 func _on_B_Quit_pressed():
-	 emit_signal("quit_from_ui")
+	emit_signal("quit_from_ui")

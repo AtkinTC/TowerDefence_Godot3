@@ -11,8 +11,10 @@ func _ready() -> void:
 	for child in level_buttons_container.get_children():
 		child.queue_free()
 	for level_id in GameData.WAVE_DATA.keys():
+		var level_completion_record: Dictionary = SaveGameController.get_level_completion_record(level_id)
 		var level_button: LevelSelectButton = level_button_scene.instance()
 		level_buttons_container.add_child(level_button)
+		level_button.set_level_completion(level_completion_record.get("completed", false))
 		level_button.set_level_label_text(level_id)
 		level_button.connect("pressed", self, "_on_level_button_pressed", [level_id])
 

@@ -59,6 +59,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/UIScenes/GameOverMenu.gd"
 }, {
+"base": "Resource",
+"class": "GameSave",
+"language": "GDScript",
+"path": "res://Scenes/GameSave.gd"
+}, {
 "base": "Node2D",
 "class": "GameScene",
 "language": "GDScript",
@@ -185,6 +190,7 @@ _global_script_class_icons={
 "GameCamera2D": "",
 "GameMap": "",
 "GameOverMenu": "",
+"GameSave": "",
 "GameScene": "",
 "GunTower": "",
 "InputButton": "",
@@ -221,6 +227,7 @@ config/icon="res://icon.png"
 GameData="*res://Singletons/GameData.gd"
 SceneLoader="*res://Singletons/SceneLoader.gd"
 ControllersRef="*res://Singletons/ControllersRef.gd"
+SaveGameController="*res://Singletons/SaveGameController.gd"
 
 [debug]
 
