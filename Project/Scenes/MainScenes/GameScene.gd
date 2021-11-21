@@ -350,7 +350,7 @@ func level_complete():
 		"time": 1234
 	}
 	SaveGameController.add_level_completion_record(level_id, level_completion_record)
-	SaveGameController.save_game()
+	SaveGameController.save_current_game()
 	
 	Engine.set_time_scale(1.0)
 	yield(get_tree().create_timer(2), "timeout")

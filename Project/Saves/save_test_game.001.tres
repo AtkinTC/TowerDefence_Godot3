@@ -1,0 +1,29 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://Scenes/GameSave.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+save_name = "test_game.001"
+creation_date_time = {
+"day": 20,
+"dst": false,
+"hour": 22,
+"minute": 35,
+"month": 11,
+"second": 13,
+"weekday": 6,
+"year": 2021
+}
+save_date_time = {
+"day": 20,
+"dst": false,
+"hour": 22,
+"minute": 35,
+"month": 11,
+"second": 13,
+"weekday": 6,
+"year": 2021
+}
+level_completion_records = {
+}

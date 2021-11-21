@@ -28,8 +28,20 @@ func load_main_menu():
 		set_current_child_scene(main_menu)
 	main_menu.connect("selected_new_game", self, "_on_selected_new_game")
 	main_menu.connect("selected_settings", self, "_on_selected_settings")
-	main_menu.connect("selected_about", self, "_on_selected_about")
+	main_menu.connect("selected_continue", self, "_on_selected_continue")
 	main_menu.connect("selected_quit", self, "_on_selected_quit")
+
+func load_new_game_scene():
+	var new_game := (load("res://Scenes/UIScenes/NewGameScreen.tscn").instance() as NewGameScreen)
+	set_current_child_scene(new_game)
+	new_game.connect("selected_back_to_main", self, "_on_selected_back_to_main")
+	new_game.connect("created_new_game", self, "_on_created_new_game")
+	
+func load_save_selection_scene():
+	var profile_select := (load("res://Scenes/UIScenes/ProfileSelectScreen.tscn").instance() as ProfileSelectScreen)
+	set_current_child_scene(profile_select)
+	profile_select.connect("selected_back_to_main", self, "_on_selected_back_to_main")
+	profile_select.connect("loaded_continue_profile", self, "_on_loaded_continue_profile")
 
 func load_level_select():
 	var level_select := (load("res://Scenes/UIScenes/LevelSelectMenu.tscn").instance() as LevelSelectMenu)
@@ -62,9 +74,17 @@ func load_level(_level_id: String):
 	set_current_child_scene(game_scene)
 
 func _on_selected_new_game():
-	SaveGameController.load_game()
+	load_new_game_scene()
+	
+func _on_selected_continue():
+	load_save_selection_scene()
+
+func _on_created_new_game():
 	load_level_select()
 	
+func _on_loaded_continue_profile():
+	load_level_select()
+
 func _on_selected_level(_level_id: String):
 	load_level(_level_id)
 	
