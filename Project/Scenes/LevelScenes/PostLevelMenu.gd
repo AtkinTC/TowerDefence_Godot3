@@ -1,8 +1,8 @@
 extends Control
-class_name GameOverMenu
+class_name PostLevelMenu
 
-signal selected_level_select()
-signal selected_back_to_main()
+signal selected_restart_level()
+signal selected_back()
 signal selected_quit()
 
 onready var background_sprite: Sprite = get_node_or_null("BackgroundSprite")
@@ -19,12 +19,11 @@ func set_background_image(_background_image: Image):
 		new_texture.create_from_image(_background_image)
 		background_sprite.set_texture(new_texture)
 
-func _on_B_LevelSelect_pressed() -> void:
-	emit_signal("selected_level_select")
+func _on_B_Retry_pressed() -> void:
+	emit_signal("selected_restart_level")
 
-func _on_B_BackToMain_pressed() -> void:
-	emit_signal("selected_back_to_main")
+func _on_B_Back_pressed() -> void:
+	emit_signal("selected_back")
 
 func _on_B_Quit_pressed() -> void:
 	emit_signal("selected_quit")
-

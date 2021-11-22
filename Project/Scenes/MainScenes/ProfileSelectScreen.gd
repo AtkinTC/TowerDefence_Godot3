@@ -3,6 +3,9 @@ class_name ProfileSelectScreen
 
 const CLASS_NAME: String = "ProfileSelectScreen"
 
+func get_class() -> String:
+	return CLASS_NAME
+
 signal selected_back_to_main()
 signal loaded_continue_profile()
 

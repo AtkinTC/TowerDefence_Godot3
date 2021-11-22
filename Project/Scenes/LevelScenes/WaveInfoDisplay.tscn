@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Resources/Fonts/kfn_20_o1.tres" type="DynamicFont" id=1]
-[ext_resource path="res://Scenes/UIScenes/WaveInfoDisplay.gd" type="Script" id=2]
+[ext_resource path="res://Scenes/LevelScenes/WaveInfoDisplay.gd" type="Script" id=2]
 [ext_resource path="res://Resources/Fonts/kfn_30_o1.tres" type="DynamicFont" id=3]
 
 [node name="WaveInfoDisplay" type="Control" groups=["WaveInfoDisplay"]]

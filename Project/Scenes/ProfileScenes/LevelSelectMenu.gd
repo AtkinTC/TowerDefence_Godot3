@@ -1,7 +1,12 @@
 extends Control
 class_name LevelSelectMenu
 
-signal selected_back_to_main()
+const CLASS_NAME = "LevelSelectMenu"
+
+func get_class() -> String:
+	return CLASS_NAME
+
+signal selected_back()
 signal selected_level(level_id)
 
 export(PackedScene) var level_button_scene: PackedScene
@@ -18,8 +23,8 @@ func _ready() -> void:
 		level_button.set_level_label_text(level_id)
 		level_button.connect("pressed", self, "_on_level_button_pressed", [level_id])
 
-func _on_level_button_pressed(_level: String):
-	emit_signal("selected_level", _level)
+func _on_level_button_pressed(_level_id: String):
+	emit_signal("selected_level", _level_id)
 
 func _on_B_BackToMain_pressed() -> void:
-	emit_signal("selected_back_to_main")
+	emit_signal("selected_back")

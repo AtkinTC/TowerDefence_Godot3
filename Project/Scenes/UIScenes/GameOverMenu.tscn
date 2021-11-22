@@ -4,11 +4,45 @@
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=2]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button10.png" type="Texture" id=3]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=4]
-[ext_resource path="res://Scenes/UIScenes/GameOverMenu.gd" type="Script" id=5]
 [ext_resource path="res://Resources/Fonts/title_font.tres" type="DynamicFont" id=6]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=7]
 [ext_resource path="res://Assets/UI/filler_screenshot.png" type="Texture" id=8]
 [ext_resource path="res://Resources/Fonts/subtitle_font.tres" type="DynamicFont" id=9]
+
+[sub_resource type="GDScript" id=2]
+script/source = "extends Control
+class_name GameOverMenu
+
+signal selected_restart_level()
+signal selected_back()
+signal selected_quit()
+
+onready var background_sprite: Sprite = get_node_or_null(\"BackgroundSprite\")
+var background_image: Image
+
+func _ready() -> void:
+	if(background_sprite != null && background_image != null):
+		set_background_image(background_image)
+	
+func set_background_image(_background_image: Image):
+	background_image = _background_image
+	if(background_sprite != null):
+		var new_texture = ImageTexture.new()
+		new_texture.create_from_image(_background_image)
+		background_sprite.set_texture(new_texture)
+
+func _on_B_Retry_pressed() -> void:
+	emit_signal(\"selected_restart_level\")
+
+func _on_B_Back_pressed() -> void:
+	emit_signal(\"selected_back\")
+
+func _on_B_Quit_pressed() -> void:
+	emit_signal(\"selected_quit\")
+
+
+
+"
 
 [sub_resource type="Animation" id=1]
 resource_name = "title_float"
@@ -30,7 +64,7 @@ tracks/0/keys = {
 [node name="GameOverMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource( 5 )
+script = SubResource( 2 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -70,7 +104,7 @@ size_flags_horizontal = 8
 custom_constants/separation = 35
 alignment = 1
 
-[node name="B_LevelSelect" type="TextureButton" parent="M/VB"]
+[node name="B_Retry" type="TextureButton" parent="M/VB"]
 margin_left = 75.0
 margin_top = 145.0
 margin_right = 425.0
@@ -87,7 +121,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="M/VB/B_LevelSelect"]
+[node name="Label" type="Label" parent="M/VB/B_Retry"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_vertical = 5
@@ -105,7 +139,7 @@ margin_top = 255.0
 margin_right = 500.0
 margin_bottom = 255.0
 
-[node name="B_BackToMain" type="TextureButton" parent="M/VB"]
+[node name="B_Back" type="TextureButton" parent="M/VB"]
 margin_left = 75.0
 margin_top = 290.0
 margin_right = 425.0
@@ -119,7 +153,7 @@ texture_pressed = ExtResource( 3 )
 texture_hover = ExtResource( 2 )
 expand = true
 
-[node name="Label" type="Label" parent="M/VB/B_BackToMain"]
+[node name="Label" type="Label" parent="M/VB/B_Back"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_vertical = 5
@@ -192,6 +226,6 @@ __meta__ = {
 autoplay = "title_float"
 anims/title_float = SubResource( 1 )
 
-[connection signal="pressed" from="M/VB/B_LevelSelect" to="." method="_on_B_LevelSelect_pressed"]
-[connection signal="pressed" from="M/VB/B_BackToMain" to="." method="_on_B_BackToMain_pressed"]
+[connection signal="pressed" from="M/VB/B_Retry" to="." method="_on_B_Retry_pressed"]
+[connection signal="pressed" from="M/VB/B_Back" to="." method="_on_B_Back_pressed"]
 [connection signal="pressed" from="M/VB/B_Quit" to="." method="_on_B_Quit_pressed"]

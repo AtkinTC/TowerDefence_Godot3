@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Resources/Fonts/kfn_30_o1.tres" type="DynamicFont" id=1]
 [ext_resource path="res://Resources/Fonts/kfn_50_o1.tres" type="DynamicFont" id=2]
-[ext_resource path="res://Scenes/UIScenes/ResourceDisplay.gd" type="Script" id=3]
+[ext_resource path="res://Scenes/LevelScenes/ResourceDisplay.gd" type="Script" id=3]
 
 [node name="ResourceDisplay" type="HBoxContainer"]
 margin_right = 184.0

@@ -9,7 +9,7 @@ var demo_save_filename_post: String = ".tres"
 var current_game_save: GameSave
 
 func reset_game_save():
-	current_game_save = GameSave.new()
+	current_game_save = null
 
 # create a new game save, set intial values, and trigger save
 func create_new_game_save(_profile_name):

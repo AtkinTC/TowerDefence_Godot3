@@ -1,6 +1,11 @@
 extends Control
 class_name NewGameScreen
 
+const CLASS_NAME = "NewGameScreen"
+
+func get_class() -> String:
+	return CLASS_NAME
+
 signal selected_back_to_main()
 signal created_new_game()
 

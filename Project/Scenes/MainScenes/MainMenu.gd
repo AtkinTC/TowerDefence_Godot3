@@ -1,6 +1,11 @@
 extends Control
 class_name MainMenu
 
+const CLASS_NAME = "MainMenu"
+
+func get_class() -> String:
+	return CLASS_NAME
+
 signal selected_new_game()
 signal selected_continue()
 signal selected_settings()

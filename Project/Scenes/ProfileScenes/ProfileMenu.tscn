@@ -1,13 +1,11 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=8 format=2]
 
-[ext_resource path="res://Assets/UI/Art/mm_background.png" type="Texture" id=1]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=2]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=3]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button10.png" type="Texture" id=4]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=5]
-[ext_resource path="res://Scenes/UIScenes/MainMenu.gd" type="Script" id=6]
+[ext_resource path="res://Scenes/ProfileScenes/ProfileMenu.gd" type="Script" id=6]
 [ext_resource path="res://Resources/Fonts/title_font.tres" type="DynamicFont" id=7]
-[ext_resource path="res://Resources/Fonts/subtitle_font.tres" type="DynamicFont" id=8]
 
 [sub_resource type="Animation" id=1]
 resource_name = "title_float"
@@ -26,19 +24,10 @@ tracks/0/keys = {
 "values": [ Vector2( 0, -25 ), Vector2( 0, 25 ), Vector2( 0, -25 ) ]
 }
 
-[node name="MainMenu" type="Control"]
+[node name="ProfileMenu" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource( 6 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="B" type="TextureRect" parent="."]
-anchor_right = 1.0
-anchor_bottom = 1.0
-texture = ExtResource( 1 )
-expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -64,11 +53,11 @@ size_flags_horizontal = 8
 custom_constants/separation = 35
 alignment = 1
 
-[node name="B_NewGame" type="TextureButton" parent="M/VB"]
+[node name="B_LevelSelect" type="TextureButton" parent="M/VB"]
 margin_left = 75.0
-margin_top = 90.0
+margin_top = 145.0
 margin_right = 425.0
-margin_bottom = 165.0
+margin_bottom = 220.0
 rect_min_size = Vector2( 350, 75 )
 size_flags_horizontal = 4
 action_mode = 0
@@ -77,65 +66,13 @@ texture_pressed = ExtResource( 4 )
 texture_hover = ExtResource( 3 )
 expand = true
 
-[node name="Label" type="Label" parent="M/VB/B_NewGame"]
+[node name="Label" type="Label" parent="M/VB/B_LevelSelect"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 size_flags_vertical = 5
 custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
 custom_fonts/font = ExtResource( 5 )
-text = "New Game"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="B_Continue" type="TextureButton" parent="M/VB"]
-margin_left = 75.0
-margin_top = 200.0
-margin_right = 425.0
-margin_bottom = 275.0
-rect_min_size = Vector2( 350, 75 )
-size_flags_horizontal = 4
-action_mode = 0
-texture_normal = ExtResource( 2 )
-texture_pressed = ExtResource( 4 )
-texture_hover = ExtResource( 3 )
-expand = true
-
-[node name="Label" type="Label" parent="M/VB/B_Continue"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-size_flags_vertical = 5
-custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
-custom_fonts/font = ExtResource( 5 )
-text = "Continue"
-align = 1
-valign = 1
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="B_Settings" type="TextureButton" parent="M/VB"]
-margin_left = 75.0
-margin_top = 310.0
-margin_right = 425.0
-margin_bottom = 385.0
-rect_min_size = Vector2( 350, 75 )
-size_flags_horizontal = 4
-action_mode = 0
-texture_normal = ExtResource( 2 )
-texture_pressed = ExtResource( 4 )
-texture_hover = ExtResource( 3 )
-expand = true
-
-[node name="Label" type="Label" parent="M/VB/B_Settings"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-size_flags_vertical = 5
-custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
-custom_fonts/font = ExtResource( 5 )
-text = "Settings"
+text = "Level Select"
 align = 1
 valign = 1
 __meta__ = {
@@ -143,15 +80,41 @@ __meta__ = {
 }
 
 [node name="Spacer" type="Control" parent="M/VB"]
-margin_top = 420.0
+margin_top = 255.0
 margin_right = 500.0
-margin_bottom = 420.0
+margin_bottom = 255.0
+
+[node name="B_Back" type="TextureButton" parent="M/VB"]
+margin_left = 75.0
+margin_top = 290.0
+margin_right = 425.0
+margin_bottom = 365.0
+rect_min_size = Vector2( 350, 75 )
+size_flags_horizontal = 4
+action_mode = 0
+texture_normal = ExtResource( 2 )
+texture_pressed = ExtResource( 4 )
+texture_hover = ExtResource( 3 )
+expand = true
+
+[node name="Label" type="Label" parent="M/VB/B_Back"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_vertical = 5
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.705882 )
+custom_fonts/font = ExtResource( 5 )
+text = "Back to Menu"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="B_Quit" type="TextureButton" parent="M/VB"]
 margin_left = 75.0
-margin_top = 455.0
+margin_top = 400.0
 margin_right = 425.0
-margin_bottom = 530.0
+margin_bottom = 475.0
 rect_min_size = Vector2( 350, 75 )
 size_flags_horizontal = 4
 action_mode = 0
@@ -185,19 +148,7 @@ __meta__ = {
 
 [node name="TitleLabel" type="Label" parent="TitleContainer/TitleNode"]
 custom_fonts/font = ExtResource( 7 )
-text = "GAME NAME"
-__meta__ = {
-"_edit_lock_": true,
-"_edit_use_anchors_": false
-}
-
-[node name="SubTitleLabel" type="Label" parent="TitleContainer/TitleNode"]
-margin_left = 15.0
-margin_top = 70.0
-margin_right = 403.0
-margin_bottom = 144.0
-custom_fonts/font = ExtResource( 8 )
-text = "COLON : SUBTITLE"
+text = "Campaign"
 __meta__ = {
 "_edit_lock_": true,
 "_edit_use_anchors_": false
@@ -207,7 +158,6 @@ __meta__ = {
 autoplay = "title_float"
 anims/title_float = SubResource( 1 )
 
-[connection signal="pressed" from="M/VB/B_NewGame" to="." method="_on_B_NewGame_pressed"]
-[connection signal="pressed" from="M/VB/B_Continue" to="." method="_on_B_Continue_pressed"]
-[connection signal="pressed" from="M/VB/B_Settings" to="." method="_on_B_Settings_pressed"]
+[connection signal="pressed" from="M/VB/B_LevelSelect" to="." method="_on_B_LevelSelect_pressed"]
+[connection signal="pressed" from="M/VB/B_Back" to="." method="_on_B_Back_pressed"]
 [connection signal="pressed" from="M/VB/B_Quit" to="." method="_on_B_Quit_pressed"]
