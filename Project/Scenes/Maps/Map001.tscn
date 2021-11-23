@@ -76,21 +76,12 @@ __meta__ = {
 position = Vector2( 32, 96 )
 script = ExtResource( 8 )
 
-[node name="SpawnPoint2" type="Position2D" parent="SpawnPointsNode"]
-position = Vector2( 32, 608 )
-script = ExtResource( 8 )
-
 [node name="EnemyTargetsNode" type="Node2D" parent="."]
 script = ExtResource( 6 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemyTargetArea1" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
+[node name="EnemyTargetArea2" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
 position = Vector2( 608, 608 )
 collision_layer = 2
-
-[node name="EnemyTargetArea2" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
-position = Vector2( 736, 224 )
-collision_layer = 2
-index = 1

@@ -1,5 +1,13 @@
 extends Node
 
+##################
+### STRUCTURES ###
+##################
+
+const SPAWN_DELAY: String = "spawnn_delay"
+
+const STRUCTURE_DATA = {}
+
 #################
 ### RESOURCES ###
 #################

@@ -19,6 +19,8 @@ onready var enemies_node: EnemiesNode = get_node("EnemiesNode")
 onready var towers_node: TowersNode = get_node("TowersNode")
 onready var effects_node: Node2D = get_node("EffectsNode")
 
+onready var enemy_faction_controller: FactionController = get_node("EnemyFactionController")
+
 var build_mode: bool = false
 var build_valid: bool = false
 var build_tile: Vector2
@@ -64,8 +66,8 @@ func _ready() -> void:
 	camera.set_position(camera.get_camera_screen_center())
 	
 	#enemy_spawn_cont.set_map_name(levelMap.get_map_name())
-	enemy_spawn_cont.set_map_name(level_id)
-	enemy_spawn_cont.set_spawn_points_node(levelMap.get_spawn_points_node())
+	#enemy_spawn_cont.set_map_name(level_id)
+	#enemy_spawn_cont.set_spawn_points_node(levelMap.get_spawn_points_node())
 	
 	# TODO: make this dynamic, not hardcoded
 	resources_cont.set_resource_quantity(GameData.GOLD, 10)
@@ -97,6 +99,7 @@ func _ready() -> void:
 	enemy_spawn_cont.connect("wave_started", ui, "_on_wave_started")
 	
 	navigation_cont.set_debug(debug)
+	enemy_faction_controller.start_running()
 
 func _process(_delta: float) -> void:	
 	if build_mode:
@@ -120,11 +123,12 @@ func _process(_delta: float) -> void:
 #		print("Camera center : " + String(camera.get_camera_screen_center()))
 
 func _physics_process(delta: float) -> void:
-	if(game_started && !game_over && !level_complete):
-		if (base_health <= 0):
-			game_over()
-		elif(enemy_spawn_cont.is_spawner_finished() && enemies_node.get_all_enemies().size() == 0):
-			level_complete()
+	pass
+#	if(game_started && !game_over && !level_complete):
+#		if (base_health <= 0):
+#			game_over()
+#		elif(enemy_spawn_cont.is_spawner_finished() && enemies_node.get_all_enemies().size() == 0):
+#			level_complete()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if(event.is_action_released("ui_cancel") and build_mode):
@@ -238,8 +242,8 @@ func start_game() -> bool:
 	if(game_started):
 		return false
 	set_pause(false)
-	enemy_spawn_cont.start_spawner()
-	game_started = true
+	#enemy_spawn_cont.start_spawner()
+	#game_started = true
 	return true
 	
 func get_current_wave_index() -> int:

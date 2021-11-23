@@ -121,6 +121,7 @@ func get_next_position(current_cell: Vector2, target_cell: Vector2, with_blocker
 		return (navigation_data[target_cell] as TargetNavData).with_blockers_nav_maps.next_cell_map.get(current_cell)
 	else:
 		return (navigation_data[target_cell] as TargetNavData).default_nav_maps.next_cell_map.get(current_cell)
+		
 	
 func get_next_world_position(world_current_position: Vector2, world_target_position: Vector2, with_blockers: bool = false):
 	var current_cell = convert_world_pos_to_map_pos(world_current_position)
@@ -130,6 +131,43 @@ func get_next_world_position(world_current_position: Vector2, world_target_posit
 		return null
 	var next_world_position = convert_map_pos_to_world_pos(next_position)
 	return next_world_position
+
+# gets all the next positions (max 4 in an orthoginal grid) that are closer to the target
+func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_blockers: bool = false) -> Array:
+	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
+	var next_positions := []
+	var next_positions_distance := []
+	
+	var distance_from_current = get_distance_to_goal(current_cell, target_cell, with_blockers)
+	if(distance_from_current == null || distance_from_current <= 0):
+		#no path of already at target, returning empty array
+		return next_positions
+		
+	for neighbor in neighbors:
+		var neighbor_cell: Vector2 = current_cell + neighbor
+		var distance_from_neighbor = get_distance_to_goal(neighbor_cell, target_cell, with_blockers)
+		
+		if(distance_from_neighbor >= 0 && distance_from_neighbor < distance_from_current):
+			for index in next_positions.size()+1:
+				if(index >= next_positions.size()):
+					next_positions.append(neighbor_cell)
+					next_positions_distance.append(distance_from_neighbor)
+					break
+				elif(distance_from_neighbor < next_positions_distance[index]):
+					next_positions.insert(index, neighbor_cell)
+					next_positions_distance.insert(index, distance_from_neighbor)
+					break
+	
+	return next_positions
+
+func get_potential_next_positions(current_position: Vector2, target_position: Vector2, with_blockers: bool = false) -> Array:
+	var current_cell = convert_world_pos_to_map_pos(current_position)
+	var target_cell = convert_world_pos_to_map_pos(target_position)
+	var next_cells := get_potential_next_cells(current_cell, target_cell, with_blockers)
+	var next_positions = []
+	for cell in next_cells:
+		next_positions.append(convert_map_pos_to_world_pos(cell))
+	return next_positions
 
 # get the distance to goal for current_cell to target_cell
 # triggers navigation calculation if nav data doesn't already exist for that target_cell
