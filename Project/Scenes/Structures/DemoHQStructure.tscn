@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
-[ext_resource path="res://Scenes/Structures/SpawnerStructure.gd" type="Script" id=2]
-[ext_resource path="res://Scenes/Units/BasicUnit.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Structures/HQStructure.gd" type="Script" id=2]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=5]
 
@@ -15,12 +14,11 @@ extents = Vector2( 25, 25 )
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 22, 22 )
 
-[node name="DemoSpawner" type="Area2D"]
+[node name="DemoHQStructure" type="Area2D"]
 script = ExtResource( 2 )
-structure_type = "DemoSpawner"
+structure_type = "DemoHQStructure"
 blocker = true
-faction = "enemy"
-spawn_unit_scene = ExtResource( 3 )
+faction = "player"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
@@ -49,7 +47,7 @@ script = ExtResource( 1 )
 shape = SubResource( 3 )
 
 [node name="ShapePolygon2D2" type="Polygon2D" parent="."]
-color = Color( 1, 0, 0, 1 )
+color = Color( 0, 1, 0, 1 )
 polygon = PoolVector2Array( -22, -22, 22, -22, 22, 22, -22, 22 )
 script = ExtResource( 1 )
 shape = SubResource( 2 )

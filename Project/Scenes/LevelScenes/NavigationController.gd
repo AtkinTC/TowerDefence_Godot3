@@ -22,6 +22,9 @@ var debug_cell_labels: Node2D
 
 enum UPDATE_TYPE_ENUM{NONE, ALL, DEFAULT, WITH_BLOCKERS}
 
+func _ready() -> void:
+	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, self)
+
 func run_navigation_world_pos(taget_world_pos: Vector2, force_update: int = UPDATE_TYPE_ENUM.NONE):
 	var goal_cell = convert_world_pos_to_map_pos(taget_world_pos)
 	return run_navigation(goal_cell, force_update)

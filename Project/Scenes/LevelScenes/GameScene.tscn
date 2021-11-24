@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=2]
+[gd_scene load_steps=49 format=2]
 
 [ext_resource path="res://Resources/build_buttongroup.tres" type="ButtonGroup" id=1]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Scenes/LevelScenes/StructuresNode.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/LevelScenes/BasicResourceDisplay.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=6]
+[ext_resource path="res://Scenes/Structures/DemoHQStructure.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Scenes/LevelScenes/NavigationController.gd" type="Script" id=8]
 [ext_resource path="res://Scenes/LevelScenes/ResourcesController.gd" type="Script" id=9]
 [ext_resource path="res://Scenes/LevelScenes/GameScene.gd" type="Script" id=10]
@@ -96,17 +97,10 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="ResourcesController" type="Node2D" parent="."]
-script = ExtResource( 9 )
-__meta__ = {
-"_edit_lock_": true
-}
-
 [node name="EnemyFactionController" type="Node2D" parent="."]
 script = ExtResource( 34 )
 faction_id = "enemy"
-
-[node name="Node2D" type="Node2D" parent="EnemyFactionController"]
+target_faction_id = "player"
 
 [node name="StructuresNode" type="Node2D" parent="."]
 script = ExtResource( 4 )
@@ -119,6 +113,15 @@ position = Vector2( 160, 288 )
 
 [node name="DemoSpawner2" parent="StructuresNode" instance=ExtResource( 36 )]
 position = Vector2( 224, 608 )
+
+[node name="DemoHQStructure" parent="StructuresNode" instance=ExtResource( 7 )]
+position = Vector2( 928, 352 )
+
+[node name="ResourcesController" type="Node2D" parent="."]
+script = ExtResource( 9 )
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="UnitsNode" type="Node2D" parent="."]
 script = ExtResource( 28 )

@@ -18,7 +18,7 @@ func set_controller_reference(_controller_name: String, _controller: Node) -> vo
 	controllers_dict[_controller_name] = _controller
 	
 func get_controller_reference(_controller_name: String) -> Node:
-	return controllers_dict[_controller_name]
+	return controllers_dict.get(_controller_name)
 
 var physics_layers = {}
 

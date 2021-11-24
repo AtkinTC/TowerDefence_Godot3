@@ -17,11 +17,17 @@ var taking_turn: bool = false
 var finished_turn: bool = false
 
 var active = true
-#var speed: float
+
 export(int) var move_delay_time: int = 1
-var move_delay_remaining: int
-var move_animation_time: float = 1.0
-var remaining_move_animation_time: float = 0
+var move_delay_time_remaining: int
+var move_animation_time: float = 0.5
+
+export(int) var attack_delay_time: int = 1
+var attack_delay_time_remaining: int
+var attack_animation_time: float = 0.5
+var attack_range: int = 2
+
+var remaining_animation_time: float = 0
 var base_health: float
 var current_health: float
 var base_damage: float
@@ -29,6 +35,9 @@ var base_damage: float
 var previous_position: Vector2 = Vector2.ZERO
 var move_target: Vector2 = Vector2.ZERO
 var move_target_set: bool = false
+
+var attack_target: Node2D
+var attack_target_set: bool = false
 
 var nav_target_index: int = -1
 var nav_target_pos: Vector2 = Vector2.ZERO
@@ -52,6 +61,8 @@ var is_navigating: bool = false
 var target_nodes: Dictionary
 
 var debug: bool = false
+var debug_move_line: Line2D
+var debug_attack_line: Line2D
 
 func _init(_unit_type: String = "") -> void:
 	#self.add_to_group("enemies", true)
@@ -70,21 +81,30 @@ func _ready() -> void:
 	current_health = base_health
 	base_damage = (get_default_attribute(GameData.PLAYER_DAMAGE, 0) as float)
 	
-	move_delay_remaining = move_delay_time
+	move_delay_time_remaining = move_delay_time
+	attack_delay_time_remaining = attack_delay_time
 	
 	health_bar.max_value = base_health
 	health_bar.value = current_health
 	health_bar.set_as_toplevel(true)
 	
+	debug = true
 #	if(debug):
 #		setup_debug_path_line()
 #		setup_nearest_point_line()
 
 func advance_time_units(units: int = 1):
-	move_delay_remaining = max(0, move_delay_remaining - units)
+	move_delay_time_remaining = max(0, move_delay_time_remaining - units)
+	attack_delay_time_remaining = max(0, attack_delay_time_remaining - units)
 	
-func get_time_until_move() -> int:
-	return move_delay_remaining
+func get_move_delay_time_remaining() -> int:
+	return move_delay_time_remaining
+	
+func get_attack_delay_time_remaining() -> int:
+	return attack_delay_time_remaining
+
+func get_attack_range() -> int:
+	return attack_range
 
 func setup_from_attribute_dictionary(_attribute_dict: Dictionary):
 	attribute_dict = _attribute_dict
@@ -110,36 +130,56 @@ func _process(delta: float) -> void:
 		health_bar.set_modulate(Color(1,1,1,0))
 	else:
 		health_bar.set_modulate(Color(1,1,1,1))
-
+	
 func _physics_process(delta) -> void:
 	if(taking_turn):
 		if(move_target_set):
-			remaining_move_animation_time = max(0, remaining_move_animation_time-delta)
-			var move_progress: float = (move_animation_time - remaining_move_animation_time)/ move_animation_time
-			global_position = previous_position.linear_interpolate(move_target, move_progress)
-			
-			if(move_progress >= 1.0):
+			if(remaining_animation_time <= 0):
+				global_position = move_target
 				finish_turn_movement()
+			else:
+				remaining_animation_time = max(0, remaining_animation_time-delta)
+				var move_progress: float = (move_animation_time - remaining_animation_time)/ move_animation_time
+				global_position = previous_position.linear_interpolate(move_target, move_progress)
+			
+		if(attack_target_set):
+			if(remaining_animation_time <= 0):
+				finish_turn_attack()
+			else:
+				remaining_animation_time = max(0, remaining_animation_time-delta)
 		
 	health_bar.set_position(position + health_bar_offset)
+	debug_draw()
 
-func start_turn_movement(_move_target: Vector2, _move_animate_time: float = move_animation_time):
+func start_turn_movement(_move_target: Vector2):
 	previous_position = get_global_position()
 	move_target = _move_target
 	move_target_set = true
-	move_animation_time = _move_animate_time
-	remaining_move_animation_time = move_animation_time
+	remaining_animation_time = move_animation_time
 	start_turn()
-
-func start_turn() -> void:
-	taking_turn = true
-	finished_turn = false
 
 func finish_turn_movement():
 	#Vector2 cannot be set to null, so move_target is not unset
 	move_target_set = false
-	move_delay_remaining = move_delay_time
+	move_delay_time_remaining = move_delay_time
 	end_turn()
+	
+func start_turn_attack(_attack_target: Node2D):
+	previous_position = get_global_position()
+	attack_target = _attack_target
+	attack_target_set = true
+	remaining_animation_time = attack_animation_time
+	start_turn()
+	
+func finish_turn_attack():
+	attack_target = null
+	attack_target_set = false
+	attack_delay_time_remaining = move_delay_time
+	end_turn()
+
+func start_turn() -> void:
+	taking_turn = true
+	finished_turn = false
 
 func end_turn() -> void:
 	taking_turn = false
@@ -198,25 +238,38 @@ func set_ui_element_visibility(_visible: bool):
 
 func set_debug(debug: bool) -> void:
 	self.debug = debug
-	
-#func setup_debug_path_line() -> void:
-#	pathLine = Line2D.new()
-#	pathLine.set_as_toplevel(true)
-#	pathLine.set_default_color(Color.green)
-#	pathLine.set_width(1)
-#	add_child(pathLine)
-#
-#func setup_nearest_point_line() -> void:
-#	closestPointLine = Line2D.new()
-#	closestPointLine.set_as_toplevel(true)
-#	closestPointLine.set_default_color(Color.red)
-#	closestPointLine.set_width(4)
-#	add_child(closestPointLine)
-	
-#func update_debug_path_line() -> void:
-#	if(pathLine != null && nav_target_pos_set):
-#		pathLine.set_points(get_navigation_controller().get_path_to_goal(self.global_position, nav_target_pos, true))
 
-#func update_nearest_point_line() -> void:
-#	if(closestPointLine != null):
-#		closestPointLine.set_points([global_position, self.navigation_next_position])
+func debug_draw():
+	if(debug):
+		update_debug_move_line()
+		update_debug_attack_line()
+
+func update_debug_move_line():
+	if(debug_move_line == null):
+		debug_move_line = Line2D.new()
+		debug_move_line.set_as_toplevel(true)
+		debug_move_line.set_default_color(Color.green)
+		debug_move_line.set_width(2)
+		debug_move_line.set_visible(false)
+		add_child(debug_move_line)
+	if(move_target_set && move_target != null):
+		debug_move_line.set_visible(true)
+		var pos := get_global_position()
+		debug_move_line.set_points([pos, move_target])
+	else:
+		debug_move_line.set_visible(false)
+		
+func update_debug_attack_line():
+	if(debug_attack_line == null):
+		debug_attack_line = Line2D.new()
+		debug_attack_line.set_as_toplevel(true)
+		debug_attack_line.set_default_color(Color.red)
+		debug_attack_line.set_width(2)
+		debug_attack_line.set_visible(false)
+		add_child(debug_attack_line)
+	if(attack_target_set && attack_target != null):
+		debug_attack_line.set_visible(true)
+		var pos := get_global_position()
+		debug_attack_line.set_points([pos, attack_target.global_position])
+	else:
+		debug_attack_line.set_visible(false)
