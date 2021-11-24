@@ -127,7 +127,7 @@ func initialize_default_values() -> void:
 	if (unit_type == null || unit_type.length() == 0):
 		default_attributes = {}
 	else:
-		default_attributes = (GameData.ENEMY_DATA as Dictionary).get(unit_type, {})
+		default_attributes = (GameData.UNIT_DATA as Dictionary).get(unit_type, {})
 
 func _process(delta: float) -> void:
 	if(current_health == base_health):

@@ -66,15 +66,24 @@ func end_faction_turn() -> void:
 	taking_turn = false
 	emit_signal("finished_turn()")
 
-func run_unit_spawning() -> void:
+func run_unit_spawning():
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
-	var target_position = (map_cont.get_targets_node().get_target_area(0) as Node2D).get_global_position()
+	
+	var target_node: Node2D
+	for member in get_tree().get_nodes_in_group(target_faction_id + "_hq"):
+		if(member is Node2D):
+			target_node = member
+			break
+	
+	if(target_node == null):
+		return false
+		
+	var target_position = target_node.get_global_position()
 	var target_cell = navigation_cont.convert_world_pos_to_map_pos(target_position)
 	
 	#get all faction structures
 	var faction_structures: Array = get_tree().get_nodes_in_group(faction_id + "_structure")
-	
 	
 	#get all structures that can spawn and are ready to spawn
 	var faction_structures_to_spawn: Array = []
