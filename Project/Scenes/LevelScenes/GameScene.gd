@@ -80,7 +80,6 @@ func _ready() -> void:
 		
 	# connect signals
 	connect("base_health_changed", ui, "on_base_health_changed")
-	levelMap.get_targets_node().connect("player_damaged", self, "on_player_damaged")
 	resources_cont.connect("resource_quantity_changed", ui, '_on_resource_quantity_changed')
 	ui.connect("set_paused_from_ui", self, "_on_set_paused")
 	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")

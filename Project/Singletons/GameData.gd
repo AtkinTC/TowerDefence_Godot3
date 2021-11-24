@@ -4,7 +4,7 @@ extends Node
 ### STRUCTURES ###
 ##################
 
-const SPAWN_DELAY: String = "spawnn_delay"
+const SPAWN_DELAY: String = "spawn_delay"
 
 const STRUCTURE_DATA = {}
 
@@ -71,31 +71,28 @@ const tower_data = {
 	}
 
 ###############
-### ENEMIES ###
+### UNITS ###
 ###############
-const PLAYER_DAMAGE: String = "player_damage"
-const MOVE_SPEED: String = "move_speed"
+const ATTACK_DAMAGE: String = "attack_damage"
+const MOVE_DELAY: String = "move_delay"
+const ATTACK_DELAY: String = "attack_delay"
 const HEALTH: String = "health"
 const REWARD: String = "reward"
 
-const ENEMY_DATA = {
-	"BasicEnemy":  {
-		PLAYER_DAMAGE: 1,
-		MOVE_SPEED: 100,
-		HEALTH: 10,
+const UNIT_DATA = {
+	"BasicUnit":  {
+		ATTACK_DAMAGE: 1,
+		MOVE_DELAY: 1,
+		ATTACK_DELAY: 1,
+		HEALTH: 2,
 		REWARD: {GOLD: 1}
 		},
-	"BasicEnemy2":  {
-		PLAYER_DAMAGE: 2,
-		MOVE_SPEED: 150,
-		HEALTH: 20,
+	"BasicUnit2":  {
+		ATTACK_DAMAGE: 2,
+		MOVE_DELAY: 1,
+		ATTACK_DELAY: 1,
+		HEALTH: 4,
 		REWARD: {GOLD: 3}
-		},
-	"BlueTank": {
-		PLAYER_DAMAGE: 1,
-		MOVE_SPEED: 150,
-		HEALTH: 50,
-		REWARD: {GOLD: 1}
 		}
 	}
 

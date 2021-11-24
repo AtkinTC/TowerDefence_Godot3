@@ -18,6 +18,8 @@ radius = 12.0
 [node name="BasicUnit" type="Area2D" groups=["enemies"]]
 collision_mask = 2
 script = ExtResource( 5 )
+base_health = 2
+attack_damage = 1
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false

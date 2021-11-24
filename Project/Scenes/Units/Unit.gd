@@ -28,15 +28,16 @@ var attack_animation_time: float = 0.5
 var attack_range: int = 2
 
 var remaining_animation_time: float = 0
-var base_health: float
+export(int) var base_health: float = -1
 var current_health: float
-var base_damage: float
+export(int) var attack_damage: float = -1
 
 var previous_position: Vector2 = Vector2.ZERO
 var move_target: Vector2 = Vector2.ZERO
 var move_target_set: bool = false
 
 var attack_target: Node2D
+var attack_target_pos: Vector2 = Vector2.ZERO
 var attack_target_set: bool = false
 
 var nav_target_index: int = -1
@@ -77,9 +78,12 @@ func _ready() -> void:
 	self.add_to_group(faction+"_unit", true)
 	self.add_to_group(faction, true)
 	
-	base_health = (get_default_attribute(GameData.HEALTH, 0) as float)
+	if(base_health < 0):
+		base_health = (get_default_attribute(GameData.HEALTH, 0) as float)
 	current_health = base_health
-	base_damage = (get_default_attribute(GameData.PLAYER_DAMAGE, 0) as float)
+	
+	if(attack_damage < 0):
+		attack_damage = (get_default_attribute(GameData.ATTACK_DAMAGE, 0) as float)
 	
 	move_delay_time_remaining = move_delay_time
 	attack_delay_time_remaining = attack_delay_time
@@ -165,10 +169,11 @@ func finish_turn_movement():
 	end_turn()
 	
 func start_turn_attack(_attack_target: Node2D):
-	previous_position = get_global_position()
 	attack_target = _attack_target
+	attack_target_pos = _attack_target.get_global_position()
 	attack_target_set = true
 	remaining_animation_time = attack_animation_time
+	send_attack(attack_target)
 	start_turn()
 	
 func finish_turn_attack():
@@ -186,9 +191,13 @@ func end_turn() -> void:
 	finished_turn = true
 	emit_signal("finished_turn")
 
-#func move(delta):
-#	set_offset(get_offset() + speed * delta)
-#	velocity = move_and_slide(velocity)
+func send_attack(_target: Node):
+	if(!_target.has_method("take_attack")):
+		return false
+	var attack_attributes := {
+		"damage" : attack_damage
+	}
+	_target.take_attack(attack_attributes)
 
 func has_reached_target() -> void:
 	#print(self.get_name() + ":" + String(self.get_instance_id()) + " has reached target.")
@@ -224,7 +233,7 @@ func set_current_hp(hp: float) -> void:
 	health_bar.value = current_health
 
 func get_damage():
-	return base_damage
+	return attack_damage
 
 func set_ui_element_visibility(_visible: bool):
 	if(health_bar != null):
@@ -270,6 +279,6 @@ func update_debug_attack_line():
 	if(attack_target_set && attack_target != null):
 		debug_attack_line.set_visible(true)
 		var pos := get_global_position()
-		debug_attack_line.set_points([pos, attack_target.global_position])
+		debug_attack_line.set_points([pos, attack_target_pos])
 	else:
 		debug_attack_line.set_visible(false)

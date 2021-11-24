@@ -1,10 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Resources/Tilesets/Map001.tres" type="TileSet" id=1]
-[ext_resource path="res://Scenes/Maps/MapElements/EnemyTargetArea.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/Maps/GameMap.gd" type="Script" id=3]
 [ext_resource path="res://Resources/Tilesets/path_001.tres" type="TileSet" id=4]
-[ext_resource path="res://Scenes/Maps/EnemyTargetsNode.gd" type="Script" id=6]
 [ext_resource path="res://Assets/Environment/Tilesets/kenney/terrainTiles_default.png" type="Texture" id=7]
 
 [sub_resource type="TileSet" id=1]
@@ -64,13 +62,3 @@ tile_data = PoolIntArray( 10, 3, 0, 12, 1, 0, 65540, 1, 0, 65546, 2, 0, 196608, 
 __meta__ = {
 "_edit_lock_": true
 }
-
-[node name="EnemyTargetsNode" type="Node2D" parent="."]
-script = ExtResource( 6 )
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="EnemyTargetArea2" parent="EnemyTargetsNode" instance=ExtResource( 2 )]
-position = Vector2( 608, 608 )
-collision_layer = 2

@@ -24,16 +24,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Enemies/Enemy.gd"
 }, {
-"base": "Area2D",
-"class": "EnemyTargetArea",
-"language": "GDScript",
-"path": "res://Scenes/Maps/EnemyTargetArea.gd"
-}, {
-"base": "Node2D",
-"class": "EnemyTargetsNode",
-"language": "GDScript",
-"path": "res://Scenes/Maps/EnemyTargetsNode.gd"
-}, {
 "base": "Node2D",
 "class": "FactionController",
 "language": "GDScript",
@@ -213,8 +203,6 @@ _global_script_class_icons={
 "DestructableStructure": "",
 "Effect": "",
 "Enemy": "",
-"EnemyTargetArea": "",
-"EnemyTargetsNode": "",
 "FactionController": "",
 "GameCamera2D": "",
 "GameMap": "",
