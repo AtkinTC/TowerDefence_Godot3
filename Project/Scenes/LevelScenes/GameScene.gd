@@ -14,9 +14,6 @@ signal base_health_changed(base_health)
 var levelMap: GameMap
 onready var navigation_cont: NavigationController = get_node("NavigationController")
 onready var resources_cont: ResourcesController = get_node("ResourcesController")
-onready var enemy_spawn_cont: EnemySpawnController = get_node("EnemySpawnController")
-onready var enemies_node: EnemiesNode = get_node("EnemiesNode")
-onready var towers_node: TowersNode = get_node("TowersNode")
 onready var effects_node: Node2D = get_node("EffectsNode")
 
 onready var enemy_faction_controller: FactionController = get_node("EnemyFactionController")
@@ -42,9 +39,6 @@ var debug: bool = false
 
 func get_class() -> String:
 	return "GameScene"
-
-func get_towers_node() -> TowersNode:
-	return towers_node
 	
 func get_effects_node() -> Node2D:
 	return effects_node
@@ -56,7 +50,6 @@ func _ready() -> void:
 	ControllersRef.set_controller_reference(ControllersRef.GAME_CONTROLLER, self)
 	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, navigation_cont)
 	ControllersRef.set_controller_reference(ControllersRef.RESOURCES_CONTROLLER, resources_cont)
-	ControllersRef.set_controller_reference(ControllersRef.TOWERS_CONTROLLER, towers_node)
 	ControllersRef.set_controller_reference(ControllersRef.EFFECTS_CONTROLLER, effects_node)
 	
 	camera = get_node("Camera")
@@ -76,9 +69,7 @@ func _ready() -> void:
 	ui = get_node("UI")
 	ui.active_camera = camera
 	ui.initialize_health_bar(base_health, base_health)	
-	ui.set_current_wave_number(1)
-	var total_number_of_waves = enemy_spawn_cont.get_wave_data_array().size()
-	ui.set_total_number_of_waves(total_number_of_waves)
+
 	# TODO: make this dynamic, not hardcoded
 	ui.add_resource_display(GameData.GOLD, "$", resources_cont.get_resource_quantity(GameData.GOLD))
 	ui.add_resource_display(GameData.MANA, "M", resources_cont.get_resource_quantity(GameData.MANA))
@@ -95,8 +86,6 @@ func _ready() -> void:
 	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")
 	ui.connect("toggle_speed_from_ui", self, "_on_toggle_speed_from_ui")
 	ui.connect("quit_from_ui", self, "_on_quit")
-	enemies_node.connect("enemy_destroyed", self, "_on_enemy_destroyed")
-	enemy_spawn_cont.connect("wave_started", ui, "_on_wave_started")
 	
 	navigation_cont.set_debug(debug)
 	enemy_faction_controller.start_running()
@@ -175,8 +164,8 @@ func update_tower_preview() -> void:
 	
 	build_valid = true
 	
-	if(towers_node.get_tower_at_tile(build_tile)):
-		build_valid = false
+	#if(towers_node.get_tower_at_tile(build_tile)):
+#		build_valid = false
 		
 	if(build_valid):
 		#tower cannot be placed on any tiles in the exclusion maps
@@ -214,7 +203,7 @@ func verify_and_build():
 	new_tower.connect("create_effect", self, "_on_create_effect")
 	new_tower.set_debug(debug)
 	var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
-	get_towers_node().add_tower(new_tower, build_tile)
+	#get_towers_node().add_tower(new_tower, build_tile)
 	
 	navigation_cont.update_blockers()
 	
@@ -242,12 +231,7 @@ func start_game() -> bool:
 	if(game_started):
 		return false
 	set_pause(false)
-	#enemy_spawn_cont.start_spawner()
-	#game_started = true
 	return true
-	
-func get_current_wave_index() -> int:
-	return enemy_spawn_cont.get_current_wave_index()
 
 func set_pause(_pause: bool, _update_ui: bool = true):
 	if(build_mode):
@@ -301,12 +285,13 @@ func on_player_damaged(damage: int) -> void:
 	#print("Health is now : " + String(base_health))
 	emit_signal("base_health_changed", base_health)
 
-func _on_enemy_destroyed(enemy_type: String, enemy_pos: Vector2):
-	var enemy_data: Dictionary = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
-	var reward_data: Dictionary = enemy_data.get(GameData.REWARD, {})
-	for resource_type in reward_data.keys():
-		resources_cont.add_to_resource_quantity(resource_type, reward_data[resource_type])
-
+func _on_unit_destroyed(enemy_type: String, enemy_pos: Vector2, faction: String):
+	pass
+#	var enemy_data: Dictionary = (GameData.ENEMY_DATA as Dictionary).get(enemy_type, {})
+#	var reward_data: Dictionary = enemy_data.get(GameData.REWARD, {})
+#	for resource_type in reward_data.keys():
+#		resources_cont.add_to_resource_quantity(resource_type, reward_data[resource_type])
+		
 ########################
 ### Scene Transition ###
 ########################

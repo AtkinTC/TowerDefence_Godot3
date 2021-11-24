@@ -1,18 +1,23 @@
 extends Node2D
 class_name FactionController
 
+signal finished_turn()
+
 var CLASS_NAME = "FactionController"
 
 func get_class() -> String:
 	return CLASS_NAME
 
-var debug: bool = false
-
 export(String) var faction_id: String
 
-var waiting_for_units: Dictionary = {}
-var waiting_for_structures: Dictionary = {}
 var running: bool = false
+var taking_turn: bool = false
+var ran_movement: bool = false
+var ran_spawning: bool = false
+var waiting_for: Dictionary = {}
+
+
+var debug: bool = false
 
 func start_running():
 	running = true
@@ -22,16 +27,33 @@ func stop_running():
 
 func _physics_process(delta: float) -> void:
 	if(running):
-		if(waiting_for_units.size() == 0 && waiting_for_structures.size() == 0):
-			run_faction_turn()
+		if(taking_turn):
+			# run one part of the turn and then wait
+			# continue until all parts are done and then end turn
+			if(waiting_for.size() == 0):
+				if(!ran_movement):
+					run_unit_movement()
+					ran_movement = true
+				elif(!ran_spawning):
+					run_unit_spawning()
+					ran_spawning = true
+				else:
+					end_faction_turn()
+		else:
+			start_faction_turn()
+		
 
-func run_faction_turn() -> void:
-	waiting_for_units = {}
-	waiting_for_structures = {}
-	run_unit_movement()
-	run_structure_actions()
+func start_faction_turn() -> void:
+	taking_turn = true
+	ran_movement = false
+	ran_spawning = false
+	waiting_for = {}
+	
+func end_faction_turn() -> void:
+	taking_turn = false
+	emit_signal("finished_turn()")
 
-func run_structure_actions() -> void:
+func run_unit_spawning() -> void:
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
 	var target_position = (map_cont.get_targets_node().get_target_area(0) as Node2D).get_global_position()
@@ -101,13 +123,14 @@ func run_structure_actions() -> void:
 		var spawn_cell = spawner_target_cells[structure.get_instance_id()]
 		debug_print(str(structure.get_name()," : ",spawn_cell))
 		#trigger the spawns
-		waiting_for_structures[structure.get_instance_id()] = structure
-		structure.connect("finished_turn", self, "_on_structure_finished_turn", [structure.get_instance_id()])
+		waiting_for[structure.get_instance_id()] = structure
+		structure.connect("finished_turn", self, "_on_member_finished_turn", [structure.get_instance_id()])
 		structure.start_spawn_action(navigation_cont.convert_map_pos_to_world_pos(spawner_target_cells[structure.get_instance_id()]))
 		
-	
-	
 func run_unit_movement() -> void:
+	# TODO: sort units by some Priority before calculating movement
+	#	priority could consider how long since the unit successfully moves and the age of the unit
+	#	this way units wont't get stuck as other units move in and out of their desired position
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
 	var target_position = (map_cont.get_targets_node().get_target_area(0) as Node2D).get_global_position()
@@ -227,19 +250,14 @@ func run_unit_movement() -> void:
 		var unit := (_unit as Unit)
 		var unit_next_cell = faction_units_moved_cell.get(unit.get_instance_id())
 		debug_print(str(unit.get_name()," : ",unit_next_cell))
-		waiting_for_units[unit.get_instance_id()] = unit
-		unit.connect("finished_turn", self, "_on_unit_finished_turn", [unit.get_instance_id()])
+		waiting_for[unit.get_instance_id()] = unit
+		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()])
 		unit.start_turn_movement(navigation_cont.convert_map_pos_to_world_pos(unit_next_cell), 0.5)
 
-func _on_unit_finished_turn(_instance_id: int):
-	if(waiting_for_units.has(_instance_id)):
-		debug_print(str(CLASS_NAME, " : unit (", _instance_id, ") has finished its turn"))
-		waiting_for_units.erase(_instance_id)
-
-func _on_structure_finished_turn(_instance_id: int):
-	if(waiting_for_structures.has(_instance_id)):
-		debug_print(str(CLASS_NAME, " : structure (", _instance_id, ") has finished its turn"))
-		waiting_for_structures.erase(_instance_id)
+func _on_member_finished_turn(_instance_id: int):
+	if(waiting_for.has(_instance_id)):
+		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has finished its action"))
+		waiting_for.erase(_instance_id)
 
 func debug_print(_message: String):
 	if(debug):

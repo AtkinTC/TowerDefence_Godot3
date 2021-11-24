@@ -9,11 +9,6 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "PathFollow2D",
-"class": "BlueTank",
-"language": "GDScript",
-"path": "res://Scenes/Enemies/BlueTank.gd"
-}, {
 "base": "Structure",
 "class": "DestructableStructure",
 "language": "GDScript",
@@ -24,20 +19,10 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Effects/Effect.gd"
 }, {
-"base": "Node2D",
-"class": "EnemiesNode",
-"language": "GDScript",
-"path": "res://Scenes/LevelScenes/EnemiesNode.gd"
-}, {
 "base": "KinematicBody2D",
 "class": "Enemy",
 "language": "GDScript",
 "path": "res://Scenes/Enemies/Enemy.gd"
-}, {
-"base": "Node2D",
-"class": "EnemySpawnController",
-"language": "GDScript",
-"path": "res://Scenes/LevelScenes/EnemySpawnController.gd"
 }, {
 "base": "Area2D",
 "class": "EnemyTargetArea",
@@ -174,16 +159,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/SupportScenes/ShapePolygon2D.gd"
 }, {
-"base": "Position2D",
-"class": "SpawnPoint",
-"language": "GDScript",
-"path": "res://Scenes/Maps/SpawnPoint.gd"
-}, {
-"base": "Node2D",
-"class": "SpawnPointsNode",
-"language": "GDScript",
-"path": "res://Scenes/Maps/SpawnPointsNode.gd"
-}, {
 "base": "DestructableStructure",
 "class": "SpawnerStructure",
 "language": "GDScript",
@@ -193,6 +168,11 @@ _global_script_classes=[ {
 "class": "Structure",
 "language": "GDScript",
 "path": "res://Scenes/Structures/Structure.gd"
+}, {
+"base": "Node2D",
+"class": "StructuresNode",
+"language": "GDScript",
+"path": "res://Scenes/LevelScenes/StructuresNode.gd"
 }, {
 "base": "Node2D",
 "class": "TimerProgressDisplay",
@@ -209,11 +189,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Towers/TowerRangeArea.gd"
 }, {
-"base": "Node2D",
-"class": "TowersNode",
-"language": "GDScript",
-"path": "res://Scenes/Maps/TowersNode.gd"
-}, {
 "base": "CanvasLayer",
 "class": "UI",
 "language": "GDScript",
@@ -224,28 +199,15 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/Units/Unit.gd"
 }, {
-"base": "Reference",
-"class": "WaveData",
-"language": "GDScript",
-"path": "res://Scenes/Maps/WaveData.gd"
-}, {
 "base": "Node2D",
-"class": "WaveSpawner",
+"class": "UnitsNode",
 "language": "GDScript",
-"path": "res://Scenes/Maps/WaveSpawner.gd"
-}, {
-"base": "Node2D",
-"class": "WaveSubGroupSpawner",
-"language": "GDScript",
-"path": "res://Scenes/Maps/WaveSubGroupSpawner.gd"
+"path": "res://Scenes/LevelScenes/UnitsNode.gd"
 } ]
 _global_script_class_icons={
-"BlueTank": "",
 "DestructableStructure": "",
 "Effect": "",
-"EnemiesNode": "",
 "Enemy": "",
-"EnemySpawnController": "",
 "EnemyTargetArea": "",
 "EnemyTargetsNode": "",
 "FactionController": "",
@@ -273,24 +235,20 @@ _global_script_class_icons={
 "ResourcesDisplayContainer": "",
 "SceneHandler": "",
 "ShapePolygon2D": "",
-"SpawnPoint": "",
-"SpawnPointsNode": "",
 "SpawnerStructure": "",
 "Structure": "",
+"StructuresNode": "",
 "TimerProgressDisplay": "",
 "Tower": "",
 "TowerRangeArea": "",
-"TowersNode": "",
 "UI": "",
 "Unit": "",
-"WaveData": "",
-"WaveSpawner": "",
-"WaveSubGroupSpawner": ""
+"UnitsNode": ""
 }
 
 [application]
 
-config/name="Tower Defence"
+config/name="Spread Defence"
 run/main_scene="res://Scenes/MainScenes/SceneHandler.tscn"
 config/icon="res://icon.png"
 

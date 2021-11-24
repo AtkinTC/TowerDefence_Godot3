@@ -5,7 +5,6 @@ export(String) var map_name: String
 
 onready var navigation_map: TileMap = get_node("NavigationMap")
 onready var tower_exclusion_map: TileMap = get_node("TowerExclusion")
-onready var spawn_points_node: SpawnPointsNode =  get_node("SpawnPointsNode")
 onready var targets_node: EnemyTargetsNode = get_node("EnemyTargetsNode")
 
 var debug: bool = false;
@@ -21,9 +20,6 @@ func get_navigation_map() -> TileMap:
 
 func get_tower_exclusion_map() -> TileMap:
 	return tower_exclusion_map
-
-func get_spawn_points_node() -> SpawnPointsNode:
-	return spawn_points_node
 
 func get_targets_node() -> EnemyTargetsNode:
 	return targets_node

@@ -1,12 +1,11 @@
-[gd_scene load_steps=50 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://Resources/build_buttongroup.tres" type="ButtonGroup" id=1]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=2]
 [ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=3]
-[ext_resource path="res://Scenes/LevelScenes/WaveInfoDisplay.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Scenes/LevelScenes/StructuresNode.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/LevelScenes/BasicResourceDisplay.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=6]
-[ext_resource path="res://Scenes/Maps/TowersNode.gd" type="Script" id=7]
 [ext_resource path="res://Scenes/LevelScenes/NavigationController.gd" type="Script" id=8]
 [ext_resource path="res://Scenes/LevelScenes/ResourcesController.gd" type="Script" id=9]
 [ext_resource path="res://Scenes/LevelScenes/GameScene.gd" type="Script" id=10]
@@ -27,8 +26,7 @@
 [ext_resource path="res://Assets/UI/Art/kenney/glassPanel.png" type="Texture" id=25]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=26]
 [ext_resource path="res://Scenes/LevelScenes/ResourcesDisplayContainer.gd" type="Script" id=27]
-[ext_resource path="res://Scenes/LevelScenes/EnemiesNode.gd" type="Script" id=28]
-[ext_resource path="res://Scenes/LevelScenes/EnemySpawnController.gd" type="Script" id=29]
+[ext_resource path="res://Scenes/LevelScenes/UnitsNode.gd" type="Script" id=28]
 [ext_resource path="res://Scenes/LevelScenes/GameCamera2D.gd" type="Script" id=30]
 [ext_resource path="res://Scenes/LevelScenes/InputButton.gd" type="Script" id=31]
 [ext_resource path="res://Scenes/LevelScenes/InputHandler.gd" type="Script" id=32]
@@ -104,30 +102,29 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemySpawnController" type="Node2D" parent="."]
-script = ExtResource( 29 )
-__meta__ = {
-"_edit_lock_": true
-}
-
 [node name="EnemyFactionController" type="Node2D" parent="."]
 script = ExtResource( 34 )
 faction_id = "enemy"
 
-[node name="TowersNode" type="Node2D" parent="."]
-script = ExtResource( 7 )
+[node name="Node2D" type="Node2D" parent="EnemyFactionController"]
+
+[node name="StructuresNode" type="Node2D" parent="."]
+script = ExtResource( 4 )
 __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemiesNode" type="Node2D" parent="."]
+[node name="DemoSpawner" parent="StructuresNode" instance=ExtResource( 36 )]
+position = Vector2( 160, 288 )
+
+[node name="DemoSpawner2" parent="StructuresNode" instance=ExtResource( 36 )]
+position = Vector2( 224, 608 )
+
+[node name="UnitsNode" type="Node2D" parent="."]
 script = ExtResource( 28 )
 __meta__ = {
 "_edit_lock_": true
 }
-
-[node name="DemoSpawner" parent="EnemiesNode" instance=ExtResource( 36 )]
-position = Vector2( 672, 416 )
 
 [node name="EffectsNode" type="Node2D" parent="."]
 __meta__ = {
@@ -701,36 +698,6 @@ margin_left = 1210.0
 margin_right = 1280.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 70, 0 )
-
-[node name="Panel" type="Panel" parent="UI/HUD"]
-self_modulate = Color( 0, 0, 0, 0 )
-margin_top = 64.0
-margin_right = 192.0
-margin_bottom = 144.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ColorRect" type="ColorRect" parent="UI/HUD/Panel"]
-self_modulate = Color( 0, 0, 0, 0.5 )
-anchor_right = 1.0
-anchor_bottom = 1.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="MarginContainer" type="MarginContainer" parent="UI/HUD/Panel"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 5.0
-margin_top = 5.0
-margin_right = -5.0
-margin_bottom = -5.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="WaveInfoDisplay" parent="UI/HUD/Panel/MarginContainer" instance=ExtResource( 4 )]
 
 [node name="PausePanel" type="Control" parent="UI"]
 pause_mode = 2

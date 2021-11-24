@@ -42,11 +42,11 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 		target_nav_data.default_nav_maps = create_navigation_fields(goal_cell)
 	
 	var has_blockers = false
-	if(get_towers_node() != null):
-		for tower in get_towers_node().get_all_towers():
-			if ((tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
-				has_blockers = true
-				break
+#	if(get_towers_node() != null):
+#		for tower in get_towers_node().get_all_towers():
+#			if ((tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
+#				has_blockers = true
+#				break
 	if(!has_blockers):
 		target_nav_data.with_blockers_nav_maps = target_nav_data.default_nav_maps
 		blockers_up_to_date[goal_cell] = true
@@ -97,7 +97,7 @@ func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
 		for neighbor in neighbors:
 			var neighbor_cell: Vector2 = current + neighbor
 			var step_cost := 1
-			var tower = get_towers_node().get_tower_at_tile(neighbor_cell)
+			var tower = null #get_towers_node().get_tower_at_tile(neighbor_cell)
 			if(tower != null && (tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
 				step_cost = (tower as Tower).get_default_attribute(GameData.BLOCKER_NAV, 5)
 			var neighbor_cell_cost = distance_map[current] + step_cost
@@ -218,9 +218,6 @@ func update_blockers() -> void:
 
 func get_navigation_map() -> TileMap:
 	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
-	
-func get_towers_node() -> TowersNode:
-	return (ControllersRef.get_controller_reference(ControllersRef.TOWERS_CONTROLLER) as TowersNode)
 
 ##################
 ### DEBUG code ###

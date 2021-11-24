@@ -46,5 +46,5 @@ func spawn_unit():
 		var unit_instance := (spawn_unit_scene.instance() as Unit)
 		unit_instance.set_global_position(spawn_position)
 		unit_instance.setup_from_attribute_dictionary({"faction": faction})
-		var enemy_controller := (ControllersRef.get_controller_reference(ControllersRef.ENEMIES_CONTROLLER) as EnemiesNode)
-		enemy_controller.add_enemy(unit_instance)
+		var unit_controller := (ControllersRef.get_controller_reference("units_node") as UnitsNode)
+		unit_controller.add_unit(unit_instance)
