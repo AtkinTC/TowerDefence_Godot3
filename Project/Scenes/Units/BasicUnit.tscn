@@ -18,6 +18,8 @@ radius = 13.0
 [node name="BasicUnit" type="Area2D" groups=["enemies"]]
 collision_mask = 2
 script = ExtResource( 5 )
+move_delay_time = 2
+attack_delay_time = 2
 base_health = 2
 attack_damage = 1
 

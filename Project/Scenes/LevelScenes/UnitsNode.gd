@@ -32,7 +32,8 @@ func add_unit(_unit: Node2D) -> bool:
 	cell_to_unit[unit_cell] = _unit.get_instance_id()
 	unit_to_cell[_unit.get_instance_id()] = unit_cell
 	
-	_unit.set_debug(debug)
+	if(debug):
+		_unit.set_debug(debug)
 	_unit.connect("unit_destroyed", self, "_on_unit_destroyed")
 	_unit.connect("position_changed", self, "_on_unit_position_changed")
 	_unit.connect("tree_exiting", self, "_on_unit_exiting", [_unit.get_instance_id()])

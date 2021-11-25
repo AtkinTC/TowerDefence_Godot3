@@ -21,6 +21,11 @@ func _ready() -> void:
 	health_bar.max_value = base_health
 	health_bar.value = current_health
 	health_bar.set_as_toplevel(true)
+	
+	if(current_health == base_health):
+		health_bar.set_modulate(Color(1,1,1,0))
+	else:
+		health_bar.set_modulate(Color(1,1,1,1))
 
 func _process(delta: float) -> void:
 	if(active):

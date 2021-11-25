@@ -8,7 +8,7 @@ func get_class() -> String:
 
 onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 
-var active: bool = true
+export(bool) var active: bool = true
 export(String) var structure_type: String
 var default_attributes: Dictionary = {}
 export(bool) var blocker: bool = false

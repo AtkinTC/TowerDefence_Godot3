@@ -85,11 +85,11 @@ func _ready() -> void:
 	self.add_to_group(faction, true)
 	
 	if(base_health < 0):
-		base_health = (get_default_attribute(GameData.HEALTH, 0) as float)
+		base_health = (get_default_attribute(GameData.HEALTH, 1) as float)
 	current_health = base_health
 	
 	if(attack_damage < 0):
-		attack_damage = (get_default_attribute(GameData.ATTACK_DAMAGE, 0) as float)
+		attack_damage = (get_default_attribute(GameData.ATTACK_DAMAGE, 1) as float)
 	
 	move_delay_time_remaining = move_delay_time
 	attack_delay_time_remaining = attack_delay_time

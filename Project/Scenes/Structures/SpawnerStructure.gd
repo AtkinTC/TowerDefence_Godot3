@@ -6,14 +6,15 @@ func get_class() -> String:
 
 export(PackedScene) var spawn_unit_scene: PackedScene
 
-var spawn_delay_time: int = 1
+export(int) var spawn_delay_time: int = -1
 var spawn_delay_remaining: int
 
 var spawn_position_set: bool = false
 var spawn_position: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
-	spawn_delay_time = (get_default_attribute(GameData.SPAWN_DELAY, spawn_delay_time) as float)
+	if(spawn_delay_time <= 0):
+		spawn_delay_time = (get_default_attribute(GameData.SPAWN_DELAY, 1) as float)
 	spawn_delay_remaining = spawn_delay_time
 
 func _physics_process(delta: float) -> void:

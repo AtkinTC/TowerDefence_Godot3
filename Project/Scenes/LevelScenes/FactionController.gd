@@ -91,7 +91,7 @@ func run_unit_spawning():
 	
 	for _structure in faction_structures:
 		var structure := (_structure as Structure)
-		if(structure.has_method("get_time_until_spawn") && structure.get_time_until_spawn() <= 0):
+		if(structure.is_active() && structure.has_method("get_time_until_spawn") && structure.get_time_until_spawn() <= 0):
 			faction_structures_to_spawn.append(structure)
 			
 	
