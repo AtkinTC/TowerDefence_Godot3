@@ -4,7 +4,7 @@
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=2]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=3]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
-[ext_resource path="res://Scenes/Units/BasicUnit.gd" type="Script" id=5]
+[ext_resource path="res://Scenes/Units/Unit.gd" type="Script" id=5]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 15, 15 )
@@ -18,10 +18,12 @@ radius = 13.0
 [node name="BasicUnit" type="Area2D" groups=["enemies"]]
 collision_mask = 2
 script = ExtResource( 5 )
+unit_type = "BasicUnit"
 move_delay_time = 2
 attack_delay_time = 2
 base_health = 2
 attack_damage = 1
+debug = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false

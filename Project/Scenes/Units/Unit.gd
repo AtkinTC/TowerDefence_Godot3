@@ -11,7 +11,7 @@ signal finished_turn()
 
 onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 
-var unit_type: String
+export(String) var unit_type: String
 var default_attributes: Dictionary = {}
 
 var attribute_dict: Dictionary
@@ -32,12 +32,12 @@ var turns_since_last_move: int = 0
 export(int) var attack_delay_time: int = 1
 var attack_delay_time_remaining: int
 var attack_animation_time: float = 0.25
-var attack_range: int = 2
 
 var remaining_animation_time: float = 0
 export(int) var base_health: float = -1
 var current_health: float
 export(int) var attack_damage: float = -1
+export(int) var attack_range: int = 2
 
 var previous_position: Vector2 = Vector2.ZERO
 var move_target: Vector2 = Vector2.ZERO
@@ -46,10 +46,6 @@ var move_target_set: bool = false
 var attack_target: Node2D
 var attack_target_pos: Vector2 = Vector2.ZERO
 var attack_target_set: bool = false
-
-var nav_target_index: int = -1
-var nav_target_pos: Vector2 = Vector2.ZERO
-var nav_target_pos_set: bool = false
 
 onready var health_bar: TextureProgress = get_node("HealthBar")
 onready var health_bar_offset: Vector2 = health_bar.get_position()
@@ -68,7 +64,7 @@ var is_navigating: bool = false
 
 var target_nodes: Dictionary
 
-var debug: bool = false
+export(bool) var debug: bool = false
 var debug_move_line: Line2D
 var debug_attack_line: Line2D
 var debug_label: Label
@@ -92,6 +88,9 @@ func _ready() -> void:
 	
 	if(attack_damage < 0):
 		attack_damage = (get_default_attribute(GameData.ATTACK_DAMAGE, 1) as float)
+		
+	if(attack_range < 0):
+		attack_range = (get_default_attribute(GameData.ATTACK_RANGE, 1) as float)
 	
 	move_delay_time_remaining = move_delay_time
 	attack_delay_time_remaining = attack_delay_time
@@ -110,7 +109,6 @@ func _ready() -> void:
 		else:
 			color_shape.color = Color.gray
 	
-	debug = true
 #	if(debug):
 #		setup_debug_path_line()
 #		setup_nearest_point_line()
@@ -211,7 +209,7 @@ func start_turn_attack(_attack_target: Node2D):
 func finish_turn_attack():
 	attack_target = null
 	attack_target_set = false
-	attack_delay_time_remaining = move_delay_time
+	attack_delay_time_remaining = attack_delay_time
 	end_turn()
 
 func start_turn() -> void:
@@ -361,6 +359,3 @@ func update_debug_label():
 			add_child(debug_label)
 		debug_label.set_global_position(get_global_position() + Vector2(-18, 10))
 		debug_label.set_visible(true)
-	
-	
-		
