@@ -16,6 +16,9 @@ onready var navigation_cont: NavigationController = get_node("NavigationControll
 onready var resources_cont: ResourcesController = get_node("ResourcesController")
 onready var effects_node: Node2D = get_node("EffectsNode")
 
+onready var structure_cont: StructuresNode = get_node("StructuresNode")
+onready var units_cont: UnitsNode = get_node("UnitsNode")
+
 onready var turn_controller: TurnController = get_node("TurnController")
 
 var build_mode: bool = false
@@ -85,6 +88,7 @@ func _ready() -> void:
 	ui.connect("toggle_paused_from_ui", self, "_on_toggle_paused")
 	ui.connect("toggle_speed_from_ui", self, "_on_toggle_speed_from_ui")
 	ui.connect("quit_from_ui", self, "_on_quit")
+	structure_cont.connect("structure_updated", navigation_cont, "_on_structure_updated")
 	
 	navigation_cont.set_debug(debug)
 	turn_controller.start_running()

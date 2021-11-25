@@ -7,12 +7,14 @@ class NavTypeMaps:
 
 class TargetNavData:
 	var default_nav_maps: NavTypeMaps = null
-	var with_blockers_nav_maps: NavTypeMaps = null
+	var with_structures_nav_maps: NavTypeMaps = null
+	var with_structures_and_units_nav_maps: NavTypeMaps = null
 
-enum NAVTYPE{BASIC,BLOCKERS}
+enum NAVTYPE{BASIC,structures,ALL}
 
 var navigation_data = {}
-var blockers_up_to_date = {}
+var structures_up_to_date = {}
+var units_up_to_date = {}
 var used_cells: Array;
 
 var debug: bool = false setget set_debug
@@ -20,7 +22,7 @@ var debug_type: int = NAVTYPE.BASIC setget set_debug_type
 var debug_flow_lines: Node2D
 var debug_cell_labels: Node2D
 
-enum UPDATE_TYPE_ENUM{NONE, ALL, DEFAULT, WITH_BLOCKERS}
+enum UPDATE_TYPE_ENUM{NONE, ALL, DEFAULT, WITH_structures}
 
 func _ready() -> void:
 	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, self)
@@ -34,7 +36,7 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 	var target_nav_data: TargetNavData = navigation_data.get(goal_cell, TargetNavData.new())
 	var nav_already_run = false
 	if(navigation_data.has(goal_cell)):
-		if(force_update == UPDATE_TYPE_ENUM.NONE && blockers_up_to_date.get(goal_cell, false) ):
+		if(force_update == UPDATE_TYPE_ENUM.NONE && structures_up_to_date.get(goal_cell, false) ):
 			#do not run any calculation
 			return false
 		navigation_data.get(goal_cell, TargetNavData.new())
@@ -44,20 +46,20 @@ func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NON
 		#re/calculate "default" navigation for this target position
 		target_nav_data.default_nav_maps = create_navigation_fields(goal_cell)
 	
-	var has_blockers = false
-#	if(get_towers_node() != null):
-#		for tower in get_towers_node().get_all_towers():
-#			if ((tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
-#				has_blockers = true
-#				break
-	if(!has_blockers):
-		target_nav_data.with_blockers_nav_maps = target_nav_data.default_nav_maps
-		blockers_up_to_date[goal_cell] = true
-	elif(!nav_already_run || !blockers_up_to_date.get(goal_cell, false) 
-	|| force_update == UPDATE_TYPE_ENUM.ALL || force_update == UPDATE_TYPE_ENUM.WITH_BLOCKERS):
-		#re/calculate "with blockers" navigation for this target position
-		target_nav_data.with_blockers_nav_maps = create_navigation_fields_with_blockers(goal_cell)
-		blockers_up_to_date[goal_cell] = true
+	var has_structures = false
+	if(get_structures_node() != null):
+		for _structure in get_structures_node().get_all_structures():
+			if((_structure as Structure).is_blocker()):
+				has_structures = true
+				break
+	if(!has_structures):
+		target_nav_data.with_structures_nav_maps = target_nav_data.default_nav_maps
+		structures_up_to_date[goal_cell] = true
+	elif(!nav_already_run || !structures_up_to_date.get(goal_cell, false) 
+	|| force_update == UPDATE_TYPE_ENUM.ALL || force_update == UPDATE_TYPE_ENUM.WITH_structures):
+		#re/calculate "with structures" navigation for this target position
+		target_nav_data.with_structures_nav_maps = create_navigation_fields_with_structures(goal_cell)
+		structures_up_to_date[goal_cell] = true
 		
 	navigation_data[goal_cell] = target_nav_data
 	return true
@@ -89,7 +91,7 @@ func create_navigation_fields(goal_cell: Vector2) -> NavTypeMaps:
 	return nav_type_maps
 
 #tilemap navigation with blocker elements
-func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
+func create_navigation_fields_with_structures(goal_cell: Vector2) -> NavTypeMaps:
 	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 	var frontier: Array = [goal_cell]
 	var distance_map = {goal_cell : 0}
@@ -99,13 +101,17 @@ func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
 		var current: Vector2 = frontier.pop_front()
 		for neighbor in neighbors:
 			var neighbor_cell: Vector2 = current + neighbor
+			if(!used_cells.has(neighbor_cell)):
+				#not in navigation map
+				continue
+			var structure = get_structures_node().get_structure_at_cell(neighbor_cell)
+			if(structure is Structure && (structure as Structure).is_blocker()):
+				#cannot move through blocker structure
+				continue
 			var step_cost := 1
-			var tower = null #get_towers_node().get_tower_at_tile(neighbor_cell)
-			if(tower != null && (tower as Tower).get_default_attribute(GameData.BLOCKER, false)):
-				step_cost = (tower as Tower).get_default_attribute(GameData.BLOCKER_NAV, 5)
 			var neighbor_cell_cost = distance_map[current] + step_cost
 
-			if(used_cells.has(neighbor_cell) && (!distance_map.has(neighbor_cell) || neighbor_cell_cost < distance_map[neighbor_cell])):
+			if(!distance_map.has(neighbor_cell) || neighbor_cell_cost < distance_map[neighbor_cell]):
 				frontier.append(neighbor_cell)
 				distance_map[neighbor_cell] = neighbor_cell_cost
 				next_cell_map[neighbor_cell] = current
@@ -118,37 +124,37 @@ func create_navigation_fields_with_blockers(goal_cell: Vector2) -> NavTypeMaps:
 
 # get the next position navigation for current_cell to target_cell
 # triggers navigation calculation if nav data doesn't already exist for that target_cell
-func get_next_position(current_cell: Vector2, target_cell: Vector2, with_blockers: bool = false):
+func get_next_position(current_cell: Vector2, target_cell: Vector2, with_structures: bool = false):
 	run_navigation(target_cell)
-	if(with_blockers):
-		return (navigation_data[target_cell] as TargetNavData).with_blockers_nav_maps.next_cell_map.get(current_cell)
+	if(with_structures):
+		return (navigation_data[target_cell] as TargetNavData).with_structures_nav_maps.next_cell_map.get(current_cell)
 	else:
 		return (navigation_data[target_cell] as TargetNavData).default_nav_maps.next_cell_map.get(current_cell)
 		
 	
-func get_next_world_position(world_current_position: Vector2, world_target_position: Vector2, with_blockers: bool = false):
+func get_next_world_position(world_current_position: Vector2, world_target_position: Vector2, with_structures: bool = false):
 	var current_cell = convert_world_pos_to_map_pos(world_current_position)
 	var target_cell = convert_world_pos_to_map_pos(world_target_position)
-	var next_position = get_next_position(current_cell, target_cell, with_blockers)
+	var next_position = get_next_position(current_cell, target_cell, with_structures)
 	if(next_position == null):
 		return null
 	var next_world_position = convert_map_pos_to_world_pos(next_position)
 	return next_world_position
 
 # gets all the next positions (max 4 in an orthoginal grid) that are closer to the target
-func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_blockers: bool = false) -> Array:
+func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_structures: bool = false) -> Array:
 	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 	var next_positions := []
 	var next_positions_distance := []
 	
-	var distance_from_current = get_distance_to_goal(current_cell, target_cell, with_blockers)
+	var distance_from_current = get_distance_to_goal(current_cell, target_cell, with_structures)
 	if(distance_from_current == null || distance_from_current <= 0):
 		#no path of already at target, returning empty array
 		return next_positions
 		
 	for neighbor in neighbors:
 		var neighbor_cell: Vector2 = current_cell + neighbor
-		var distance_from_neighbor = get_distance_to_goal(neighbor_cell, target_cell, with_blockers)
+		var distance_from_neighbor = get_distance_to_goal(neighbor_cell, target_cell, with_structures)
 		
 		if(distance_from_neighbor >= 0 && distance_from_neighbor < distance_from_current):
 			for index in next_positions.size()+1:
@@ -163,10 +169,10 @@ func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_
 	
 	return next_positions
 
-func get_potential_next_positions(current_position: Vector2, target_position: Vector2, with_blockers: bool = false) -> Array:
+func get_potential_next_positions(current_position: Vector2, target_position: Vector2, with_structures: bool = false) -> Array:
 	var current_cell = convert_world_pos_to_map_pos(current_position)
 	var target_cell = convert_world_pos_to_map_pos(target_position)
-	var next_cells := get_potential_next_cells(current_cell, target_cell, with_blockers)
+	var next_cells := get_potential_next_cells(current_cell, target_cell, with_structures)
 	var next_positions = []
 	for cell in next_cells:
 		next_positions.append(convert_map_pos_to_world_pos(cell))
@@ -174,22 +180,22 @@ func get_potential_next_positions(current_position: Vector2, target_position: Ve
 
 # get the distance to goal for current_cell to target_cell
 # triggers navigation calculation if nav data doesn't already exist for that target_cell
-func get_distance_to_goal(current_cell: Vector2, target_cell: Vector2, with_blockers: bool = false) -> int:
+func get_distance_to_goal(current_cell: Vector2, target_cell: Vector2, with_structures: bool = false) -> int:
 	run_navigation(target_cell)
-	if(with_blockers):
-		return (navigation_data[target_cell] as TargetNavData).with_blockers_nav_maps.distance_map.get(current_cell, -1)
+	if(with_structures):
+		return (navigation_data[target_cell] as TargetNavData).with_structures_nav_maps.distance_map.get(current_cell, -1)
 	else:
 		return (navigation_data[target_cell] as TargetNavData).default_nav_maps.distance_map.get(current_cell, -1)
 
-func get_distance_to_goal_world(world_current_position: Vector2, world_target_position: Vector2, with_blockers: bool = false) -> int:
+func get_distance_to_goal_world(world_current_position: Vector2, world_target_position: Vector2, with_structures: bool = false) -> int:
 	var current_cell = convert_world_pos_to_map_pos(world_current_position)
 	var target_cell = convert_world_pos_to_map_pos(world_target_position)
-	var distance = get_distance_to_goal(current_cell, target_cell, with_blockers)
+	var distance = get_distance_to_goal(current_cell, target_cell, with_structures)
 	if(distance == null):
 		return -1
 	return distance
 
-func get_path_to_goal(world_current_position: Vector2, world_target_position: Vector2, with_blockers: bool = false) -> Array:
+func get_path_to_goal(world_current_position: Vector2, world_target_position: Vector2, with_structures: bool = false) -> Array:
 	if(world_current_position == null):
 		return []
 	
@@ -197,7 +203,7 @@ func get_path_to_goal(world_current_position: Vector2, world_target_position: Ve
 	var target_cell = convert_world_pos_to_map_pos(world_target_position)
 	var path: Array = []
 	while(current_cell != null):
-		var next_cell = get_next_position(current_cell, target_cell, with_blockers)
+		var next_cell = get_next_position(current_cell, target_cell, with_structures)
 		if(next_cell != null):
 			path.append(convert_map_pos_to_world_pos(next_cell))
 		current_cell = next_cell
@@ -215,12 +221,18 @@ func convert_map_pos_to_world_pos(map_position: Vector2, cell_center: bool = tru
 	var world_position = get_navigation_map().to_global(local_position)
 	return world_position
 
-#reset blockers_up_to_date so that "with blockers" navigation will be recalculated
-func update_blockers() -> void:
-	blockers_up_to_date = {}
+#reset structures_up_to_date so that "with structures" navigation will be recalculated
+func update_structures() -> void:
+	structures_up_to_date = {}
 
 func get_navigation_map() -> TileMap:
 	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
+
+func get_structures_node() -> StructuresNode:
+	return (ControllersRef.get_controller_reference("structures_node") as StructuresNode)
+
+func _on_structure_updated() -> void:
+	structures_up_to_date = {}
 
 ##################
 ### DEBUG code ###
@@ -257,8 +269,8 @@ func refresh_debug() -> void:
 #		var _distance_map: Dictionary = {}
 #		if(debug_type == NAVTYPE.BASIC):
 #			_distance_map = distance_map
-#		elif(debug_type == NAVTYPE.BLOCKERS):
-#			_distance_map = distance_map_with_blockers
+#		elif(debug_type == NAVTYPE.structures):
+#			_distance_map = distance_map_with_structures
 #
 #		for cell in used_cells:
 #			var cell_label: Label = Label.new()
@@ -283,8 +295,8 @@ func refresh_debug() -> void:
 #		var _next_cell_map: Dictionary = {}
 #		if(debug_type == NAVTYPE.BASIC):
 #			_next_cell_map = next_cell_map
-#		elif(debug_type == NAVTYPE.BLOCKERS):
-#			_next_cell_map = next_cell_map_with_blockers
+#		elif(debug_type == NAVTYPE.structures):
+#			_next_cell_map = next_cell_map_with_structures
 #
 #		for cell in next_cell_map.keys():
 #			if(next_cell_map[cell] != null):

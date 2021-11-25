@@ -5,6 +5,7 @@ func get_class() -> String:
 	return "StructuresNode"
 
 signal structure_destroyed(structure_type, enemy_position)
+signal structure_updated()
 
 var structures_dict: Dictionary = {}
 var cell_to_structure: Dictionary = {}
@@ -19,6 +20,14 @@ func _ready() -> void:
 		if(child is Structure):
 			add_structure(child)
 
+func get_navigation_map() -> TileMap:
+	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
+
+func convert_world_pos_to_map_cell(world_position: Vector2) -> Vector2:
+	var local_position = get_navigation_map().to_local(world_position)
+	var map_position = get_navigation_map().world_to_map(local_position)
+	return map_position
+
 # adds structure instance to the node, and to the dictionary
 func add_structure(_structure: Node2D) -> bool:
 	if(_structure == null):
@@ -26,10 +35,9 @@ func add_structure(_structure: Node2D) -> bool:
 	if(structures_dict.has(_structure.get_instance_id())):
 		return false
 		
-	var nav_cont: NavigationController = ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER)
 	structures_dict[_structure.get_instance_id()] = _structure
 	
-	var structure_cell = nav_cont.convert_world_pos_to_map_pos(_structure.get_global_position())
+	var structure_cell = convert_world_pos_to_map_cell(_structure.get_global_position())
 	cell_to_structure[structure_cell] = _structure.get_instance_id()
 	structure_to_cell[_structure.get_instance_id()] = structure_cell
 	
@@ -37,6 +45,7 @@ func add_structure(_structure: Node2D) -> bool:
 	_structure.connect("structure_destroyed", self, "_on_structure_destroyed")
 	_structure.connect("tree_exiting", self, "_on_structure_exiting", [_structure.get_instance_id()])
 	add_child(_structure)
+	emit_signal("structure_updated")
 	return true
 	
 func get_structure(_instance_id: int):
@@ -60,6 +69,7 @@ func _on_structure_exiting(_instance_id: int) -> void:
 		var cell = structure_to_cell[_instance_id]
 		structure_to_cell.erase(_instance_id)
 		cell_to_structure.erase(cell)
+		emit_signal("structure_updated")
 
 func _on_structure_destroyed(structure_type: String, structure_pos: Vector2):
 	emit_signal("structure_destroyed", structure_type, structure_pos)
