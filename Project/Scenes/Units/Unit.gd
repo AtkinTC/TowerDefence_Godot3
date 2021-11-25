@@ -22,10 +22,12 @@ var taking_turn: bool = false
 var finished_turn: bool = false
 
 var active = true
+var age: int = 0
 
 export(int) var move_delay_time: int = 1
 var move_delay_time_remaining: int
 var move_animation_time: float = 0.5
+var turns_since_last_move: int = 0
 
 export(int) var attack_delay_time: int = 1
 var attack_delay_time_remaining: int
@@ -114,9 +116,18 @@ func _ready() -> void:
 #		setup_nearest_point_line()
 
 func advance_time_units(units: int = 1):
+	age += units
+	turns_since_last_move += units
+	
 	move_delay_time_remaining = max(0, move_delay_time_remaining - units)
 	attack_delay_time_remaining = max(0, attack_delay_time_remaining - units)
+
+func get_age() -> int:
+	return age
 	
+func get_turns_since_last_move() -> int:
+	return turns_since_last_move
+
 func get_move_delay_time_remaining() -> int:
 	return move_delay_time_remaining
 	
@@ -179,6 +190,7 @@ func start_turn_movement(_move_target: Vector2):
 	move_target = _move_target
 	move_target_set = true
 	remaining_animation_time = move_animation_time
+	turns_since_last_move = 0
 	start_turn()
 
 func finish_turn_movement():

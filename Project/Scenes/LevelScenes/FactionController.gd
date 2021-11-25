@@ -148,6 +148,22 @@ func run_unit_spawning():
 		waiting_for[structure.get_instance_id()] = structure
 		structure.connect("finished_turn", self, "_on_member_finished_turn", [structure.get_instance_id()])
 		structure.start_spawn_action(navigation_cont.convert_map_pos_to_world_pos(spawner_target_cells[structure.get_instance_id()]))
+
+#compares the move priority of two units
+# (unit1 >  unit2) >  0
+# (unit1 == unit2) == 0
+# (unit1 <  unit2) <  0
+func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
+	var wait_time1 = unit1.get_turns_since_last_move()
+	var age1 = unit1.get_age()
+	var wait_time2: int = unit2.get_turns_since_last_move()
+	var age2: int = unit2.get_age()
+	
+	if(wait_time1 != wait_time2):
+		return wait_time1 - wait_time2
+	if(age1 != age2):
+		return age1 - age2
+	return 0
 	
 func run_unit_movement():
 	# TODO: sort units by some Priority before calculating movement
@@ -188,15 +204,26 @@ func run_unit_movement():
 	
 	for _unit in faction_units:
 		var unit := (_unit as Unit)
-		#countdown all faction units delay time by one time unit
 		if(unit.get_move_delay_time_remaining() <= 0 && unit.has_method("start_turn_movement")):
 			debug_print(str("added to faction_units_to_move : ", unit.get_name(), " : ", navigation_cont.convert_world_pos_to_map_pos(unit.global_position)))
-			faction_units_to_move.append(unit)
 			faction_units_to_move_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+			
+			#sort faction_units_to_move by a priority (using time since unit's last move and unit's age)
+			for i in faction_units_to_move.size()+1:
+				if(i >= faction_units_to_move.size()):
+					#reached the end of the array
+					faction_units_to_move.append(unit)
+					break
+				else:
+					if(compare_units_move_priority(unit, faction_units_to_move[i]) > 0):
+						#higher priority
+						faction_units_to_move.insert(i, unit)
+						break
 		else:
 			debug_print(str("added to units_unmoving : ", unit.get_name(), " : ", navigation_cont.convert_world_pos_to_map_pos(unit.global_position)))
 			units_unmoving.append(unit)
 			units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+	
 	
 	debug_print(str("faction_units_to_move.size() = ", faction_units_to_move.size()))
 	debug_print(str("units_unmoving.size() = ", units_unmoving.size()))
