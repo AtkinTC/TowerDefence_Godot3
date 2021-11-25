@@ -322,14 +322,16 @@ func run_unit_attacks():
 		for r in range(1, unit.get_attack_range()+1):
 			for range_cell in get_exact_range_cells(r):
 				var target_cell = range_cell + unit_cell
+				#any destructable unit/structure not part of the current faction is a potential target
 				#TODO: get all the potential targets and then pick the "best" one by some priority
+				#TODO: prioritize "target_faction" targets over others
 				var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
-				if(target_structure != null && target_structure.has_method("take_attack") && target_structure.is_in_group(target_faction_id)):
+				if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
 					attack_target = target_structure
 					break
 				
 				var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
-				if(target_unit != null && target_unit.has_method("take_attack") && target_unit.is_in_group(target_faction_id)):
+				if(target_unit != null && target_unit.has_method("take_attack") && !target_unit.is_in_group(faction_id)):
 					attack_target = target_unit
 					break
 				

@@ -104,11 +104,17 @@ func create_navigation_fields_with_structures(goal_cell: Vector2) -> NavTypeMaps
 			if(!used_cells.has(neighbor_cell)):
 				#not in navigation map
 				continue
+			var step_cost := 1
 			var structure = get_structures_node().get_structure_at_cell(neighbor_cell)
 			if(structure is Structure && (structure as Structure).is_blocker()):
-				#cannot move through blocker structure
-				continue
-			var step_cost := 1
+				if(structure.has_method("take_attack")):
+					#destructable blocker
+					#high step cost to make this a last resort option if there is not other path
+					step_cost = 10000
+				else:
+					#non destructable, never a valid option
+					continue
+			
 			var neighbor_cell_cost = distance_map[current] + step_cost
 
 			if(!distance_map.has(neighbor_cell) || neighbor_cell_cost < distance_map[neighbor_cell]):
