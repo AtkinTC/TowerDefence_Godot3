@@ -69,6 +69,7 @@ var target_nodes: Dictionary
 var debug: bool = false
 var debug_move_line: Line2D
 var debug_attack_line: Line2D
+var debug_label: Label
 
 func _init(_unit_type: String = "") -> void:
 	#self.add_to_group("enemies", true)
@@ -283,45 +284,71 @@ func set_debug(debug: bool) -> void:
 	self.debug = debug
 
 func debug_draw():
-	if(debug):
-		update_debug_move_line()
-		update_debug_attack_line()
+	update_debug_move_line()
+	update_debug_attack_line()
+	update_debug_label()
 
 func update_debug_move_line():
-	if(debug_move_line == null):
-		debug_move_line = Line2D.new()
-		debug_move_line.set_as_toplevel(true)
-		debug_move_line.set_default_color(Color.green)
-		debug_move_line.set_width(3)
-		debug_move_line.set_visible(false)
-		add_child(debug_move_line)
-	if(move_target_set && move_target != null):
-		debug_move_line.set_visible(true)
-		var points := [get_global_position(), move_target]
-		var unit_vector: Vector2 = (move_target - get_global_position()).normalized()
-		points.append(move_target - (unit_vector.rotated(deg2rad(45)) * 10))
-		points.append(move_target - (unit_vector.rotated(deg2rad(-45)) * 10))
-		points.append(move_target)
-		debug_move_line.set_points(points)
+	if(!debug):
+		if(debug_move_line != null):
+			debug_move_line.set_visible(false)
 	else:
-		debug_move_line.set_visible(false)
+		if(debug_move_line == null):
+			debug_move_line = Line2D.new()
+			debug_move_line.set_as_toplevel(true)
+			debug_move_line.set_default_color(Color.green)
+			debug_move_line.set_width(3)
+			debug_move_line.set_visible(false)
+			add_child(debug_move_line)
+		if(move_target_set && move_target != null):
+			debug_move_line.set_visible(true)
+			var points := [get_global_position(), move_target]
+			var unit_vector: Vector2 = (move_target - get_global_position()).normalized()
+			points.append(move_target - (unit_vector.rotated(deg2rad(45)) * 10))
+			points.append(move_target - (unit_vector.rotated(deg2rad(-45)) * 10))
+			points.append(move_target)
+			debug_move_line.set_points(points)
+		else:
+			debug_move_line.set_visible(false)
 		
 func update_debug_attack_line():
-	if(debug_attack_line == null):
-		debug_attack_line = Line2D.new()
-		debug_attack_line.set_as_toplevel(true)
-		debug_attack_line.set_default_color(Color.darkred)
-		debug_attack_line.set_width(3)
-		debug_attack_line.set_visible(false)
-		add_child(debug_attack_line)
-	if(attack_target_set && attack_target != null):
-		debug_attack_line.set_visible(true)
-		var points := [get_global_position(), attack_target_pos]
-		var unit_vector: Vector2 = (attack_target_pos - get_global_position()).normalized()
-		points.append(attack_target_pos - (unit_vector.rotated(deg2rad(45)) * 10))
-		points.append(attack_target_pos - (unit_vector.rotated(deg2rad(-45)) * 10))
-		points.append(attack_target_pos)
-		
-		debug_attack_line.set_points(points)
+	if(!debug):
+		if(debug_attack_line != null):
+			debug_attack_line.set_visible(false)
 	else:
-		debug_attack_line.set_visible(false)
+		if(debug_attack_line == null):
+			debug_attack_line = Line2D.new()
+			debug_attack_line.set_as_toplevel(true)
+			debug_attack_line.set_default_color(Color.darkred)
+			debug_attack_line.set_width(3)
+			debug_attack_line.set_visible(false)
+			add_child(debug_attack_line)
+		if(attack_target_set && attack_target != null):
+			debug_attack_line.set_visible(true)
+			var points := [get_global_position(), attack_target_pos]
+			var unit_vector: Vector2 = (attack_target_pos - get_global_position()).normalized()
+			points.append(attack_target_pos - (unit_vector.rotated(deg2rad(45)) * 10))
+			points.append(attack_target_pos - (unit_vector.rotated(deg2rad(-45)) * 10))
+			points.append(attack_target_pos)
+			
+			debug_attack_line.set_points(points)
+		else:
+			debug_attack_line.set_visible(false)
+
+func update_debug_label():
+	if(!debug):
+		if(debug_label != null):
+			debug_label.set_visible(false)
+	else:
+		if(debug_label == null):
+			debug_label = Label.new()
+			debug_label.set_as_toplevel(true)
+			debug_label.set_visible(false)
+			debug_label.text = str(get_instance_id())
+			debug_label.set_scale(Vector2(0.85,0.85))
+			add_child(debug_label)
+		debug_label.set_global_position(get_global_position() + Vector2(-18, 10))
+		debug_label.set_visible(true)
+	
+	
+		
