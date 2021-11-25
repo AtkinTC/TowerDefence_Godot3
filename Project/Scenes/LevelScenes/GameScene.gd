@@ -16,7 +16,7 @@ onready var navigation_cont: NavigationController = get_node("NavigationControll
 onready var resources_cont: ResourcesController = get_node("ResourcesController")
 onready var effects_node: Node2D = get_node("EffectsNode")
 
-onready var enemy_faction_controller: FactionController = get_node("EnemyFactionController")
+onready var turn_controller: TurnController = get_node("TurnController")
 
 var build_mode: bool = false
 var build_valid: bool = false
@@ -87,7 +87,7 @@ func _ready() -> void:
 	ui.connect("quit_from_ui", self, "_on_quit")
 	
 	navigation_cont.set_debug(debug)
-	enemy_faction_controller.start_running()
+	turn_controller.start_running()
 
 func _process(_delta: float) -> void:	
 	if build_mode:

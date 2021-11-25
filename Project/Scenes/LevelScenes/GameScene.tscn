@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=2]
+[gd_scene load_steps=50 format=2]
 
 [ext_resource path="res://Resources/build_buttongroup.tres" type="ButtonGroup" id=1]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=2]
@@ -28,6 +28,7 @@
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=26]
 [ext_resource path="res://Scenes/LevelScenes/ResourcesDisplayContainer.gd" type="Script" id=27]
 [ext_resource path="res://Scenes/LevelScenes/UnitsNode.gd" type="Script" id=28]
+[ext_resource path="res://Scenes/LevelScenes/TurnController.gd" type="Script" id=29]
 [ext_resource path="res://Scenes/LevelScenes/GameCamera2D.gd" type="Script" id=30]
 [ext_resource path="res://Scenes/LevelScenes/InputButton.gd" type="Script" id=31]
 [ext_resource path="res://Scenes/LevelScenes/InputHandler.gd" type="Script" id=32]
@@ -97,10 +98,24 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="EnemyFactionController" type="Node2D" parent="."]
+[node name="TurnController" type="Node2D" parent="."]
+script = ExtResource( 29 )
+
+[node name="PlayerFactionController" type="Node2D" parent="TurnController" groups=["player_controller"]]
+script = ExtResource( 34 )
+faction_id = "player"
+target_faction_id = "enemy"
+
+[node name="EnemyFactionController" type="Node2D" parent="TurnController" groups=["enemy_controller"]]
 script = ExtResource( 34 )
 faction_id = "enemy"
 target_faction_id = "player"
+
+[node name="ResourcesController" type="Node2D" parent="."]
+script = ExtResource( 9 )
+__meta__ = {
+"_edit_lock_": true
+}
 
 [node name="StructuresNode" type="Node2D" parent="."]
 script = ExtResource( 4 )
@@ -108,20 +123,22 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="DemoSpawner" parent="StructuresNode" instance=ExtResource( 36 )]
+[node name="E-DemoSpawner" parent="StructuresNode" instance=ExtResource( 36 )]
 position = Vector2( 160, 288 )
 
-[node name="DemoSpawner2" parent="StructuresNode" instance=ExtResource( 36 )]
+[node name="E-DemoSpawner2" parent="StructuresNode" instance=ExtResource( 36 )]
 position = Vector2( 224, 608 )
 
-[node name="DemoHQStructure" parent="StructuresNode" instance=ExtResource( 7 )]
+[node name="E-DemoHQStructure" parent="StructuresNode" instance=ExtResource( 7 )]
+position = Vector2( 160, 448 )
+faction = "enemy"
+
+[node name="P-DemoHQStructure" parent="StructuresNode" instance=ExtResource( 7 )]
 position = Vector2( 928, 352 )
 
-[node name="ResourcesController" type="Node2D" parent="."]
-script = ExtResource( 9 )
-__meta__ = {
-"_edit_lock_": true
-}
+[node name="P-DemoSpawner" parent="StructuresNode" instance=ExtResource( 36 )]
+position = Vector2( 992, 480 )
+faction = "player"
 
 [node name="UnitsNode" type="Node2D" parent="."]
 script = ExtResource( 28 )
@@ -704,7 +721,6 @@ rect_min_size = Vector2( 70, 0 )
 
 [node name="PausePanel" type="Control" parent="UI"]
 pause_mode = 2
-visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5

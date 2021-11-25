@@ -48,8 +48,7 @@ polygon = PoolVector2Array( -25, -25, 25, -25, 25, 25, -25, 25 )
 script = ExtResource( 1 )
 shape = SubResource( 3 )
 
-[node name="ShapePolygon2D2" type="Polygon2D" parent="."]
-color = Color( 1, 0, 0, 1 )
+[node name="ColorShape" type="Polygon2D" parent="."]
 polygon = PoolVector2Array( -22, -22, 22, -22, 22, 22, -22, 22 )
 script = ExtResource( 1 )
 shape = SubResource( 2 )

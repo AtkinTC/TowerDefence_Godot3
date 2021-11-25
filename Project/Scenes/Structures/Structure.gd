@@ -34,6 +34,16 @@ func _ready() -> void:
 	self.add_to_group(faction+"_structure", true)
 	self.add_to_group(faction, true)
 	
+	## for prototyping purposes
+	var color_shape: ShapePolygon2D = get_node_or_null("ColorShape")
+	if(color_shape != null):
+		if(faction == "player"):
+			color_shape.color = Color.blue
+		elif(faction == "enemy"):
+			color_shape.color = Color.red
+		else:
+			color_shape.color = Color.gray
+	
 	update_debug_draw()
 
 func _process(_delta) -> void:

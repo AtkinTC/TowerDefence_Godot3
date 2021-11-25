@@ -45,10 +45,11 @@ func _physics_process(delta: float) -> void:
 					ran_spawning = true
 				else:
 					end_faction_turn()
-		else:
-			start_faction_turn()
+#		else:
+#			start_faction_turn()
 		
 
+#called by turn controller to start the faction turn
 func start_faction_turn() -> void:
 	turn_count += 1
 	taking_turn = true
@@ -64,7 +65,7 @@ func start_faction_turn() -> void:
 	
 func end_faction_turn() -> void:
 	taking_turn = false
-	emit_signal("finished_turn()")
+	emit_signal("finished_turn")
 
 func run_unit_spawning():
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
@@ -173,11 +174,18 @@ func run_unit_movement():
 	var faction_units_to_move := []
 	var faction_units_to_move_cell := {}
 	#units that definitly will not move
-	var faction_units_unmoving := []
-	var faction_units_unmoving_cell := {}
+	var units_unmoving := []
+	var units_unmoving_cell := {}
 	#units the definitly are moving
 	var faction_units_moved := []
 	var faction_units_moved_cell := {}
+	
+	#TODO: make this all units that aren't part in the current faction, not just one target faction
+	for _unit in get_tree().get_nodes_in_group(target_faction_id + "_unit"):
+		var unit := (_unit as Unit)
+		units_unmoving.append(unit)
+		units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+	
 	for _unit in faction_units:
 		var unit := (_unit as Unit)
 		#countdown all faction units delay time by one time unit
@@ -186,12 +194,12 @@ func run_unit_movement():
 			faction_units_to_move.append(unit)
 			faction_units_to_move_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
 		else:
-			debug_print(str("added to faction_units_unmoving : ", unit.get_name(), " : ", navigation_cont.convert_world_pos_to_map_pos(unit.global_position)))
-			faction_units_unmoving.append(unit)
-			faction_units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+			debug_print(str("added to units_unmoving : ", unit.get_name(), " : ", navigation_cont.convert_world_pos_to_map_pos(unit.global_position)))
+			units_unmoving.append(unit)
+			units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
 	
 	debug_print(str("faction_units_to_move.size() = ", faction_units_to_move.size()))
-	debug_print(str("faction_units_unmoving.size() = ", faction_units_unmoving.size()))
+	debug_print(str("units_unmoving.size() = ", units_unmoving.size()))
 	
 	#get positions of all blocking structures
 	var all_structures: Array = get_tree().get_nodes_in_group("structure")
@@ -228,7 +236,7 @@ func run_unit_movement():
 				if(move_choices != null && choice_index < move_choices.size()):
 					var choice_cell = move_choices[choice_index]
 					#if next nav cell conflicts with an unmoving unit or a unit that has already moved or a blocker structure:
-					while((all_blocker_structures_cell.values() + faction_units_unmoving_cell.values() + faction_units_moved_cell.values()).has(choice_cell)):
+					while((all_blocker_structures_cell.values() + units_unmoving_cell.values() + faction_units_moved_cell.values()).has(choice_cell)):
 						#go to next best nav cell and check again
 						choice_index += 1
 						unit_move_choice_index[unit.get_instance_id()] = choice_index
@@ -245,8 +253,8 @@ func run_unit_movement():
 					unit_potential_choices.erase(unit.get_instance_id())
 					unit_move_choice_index.erase(unit.get_instance_id())
 					#add unit to list of unmoving units
-					faction_units_unmoving.append(unit)
-					faction_units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+					units_unmoving.append(unit)
+					units_unmoving_cell[unit.get_instance_id()] = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
 					continue
 				
 				var choice_cell = move_choices[choice_index]
@@ -286,6 +294,7 @@ func run_unit_movement():
 func run_unit_attacks():
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var structures_cont := (ControllersRef.get_controller_reference("structures_node") as StructuresNode)
+	var units_cont := (ControllersRef.get_controller_reference("units_node") as UnitsNode)
 	
 	var faction_units_to_attack := []
 	var enemy_members_can_be_attacked := []
@@ -299,8 +308,9 @@ func run_unit_attacks():
 			faction_units_to_attack.append(unit)
 	
 	#get all enemy structures/units that can be attacked
-	for member in get_tree().get_nodes_in_group(target_faction_id):
-		if(member is DestructableStructure):
+	var enemy_members := get_tree().get_nodes_in_group(target_faction_id)
+	for member in enemy_members:
+		if(member.has_method("take_attack")):
 			enemy_members_can_be_attacked.append(member)
 	
 	#for each unit ready to attack
@@ -312,11 +322,17 @@ func run_unit_attacks():
 		for r in range(1, unit.get_attack_range()+1):
 			for range_cell in get_exact_range_cells(r):
 				var target_cell = range_cell + unit_cell
-				#TODO: add targeting units, this only works with structures currently
+				#TODO: get all the potential targets and then pick the "best" one by some priority
 				var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
-				if(target_structure is DestructableStructure && target_structure.is_in_group(target_faction_id)):
+				if(target_structure != null && target_structure.has_method("take_attack") && target_structure.is_in_group(target_faction_id)):
 					attack_target = target_structure
 					break
+				
+				var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
+				if(target_unit != null && target_unit.has_method("take_attack") && target_unit.is_in_group(target_faction_id)):
+					attack_target = target_unit
+					break
+				
 			if(attack_target != null):
 				break
 		#if an attackable enemy is in range

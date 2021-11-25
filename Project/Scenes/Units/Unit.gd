@@ -1,10 +1,15 @@
 extends Area2D
 class_name Unit
 
-signal base_damage(damage)
-signal enemy_destroyed(enemy_type, enemy_position)
+func get_class() -> String:
+	return "Unit"
 
+signal base_damage(damage)
+signal unit_destroyed(unit_type, unit_position)
+signal position_changed(unit)
 signal finished_turn()
+
+onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 
 var unit_type: String
 var default_attributes: Dictionary = {}
@@ -24,7 +29,7 @@ var move_animation_time: float = 0.5
 
 export(int) var attack_delay_time: int = 1
 var attack_delay_time_remaining: int
-var attack_animation_time: float = 0.5
+var attack_animation_time: float = 0.25
 var attack_range: int = 2
 
 var remaining_animation_time: float = 0
@@ -92,6 +97,16 @@ func _ready() -> void:
 	health_bar.value = current_health
 	health_bar.set_as_toplevel(true)
 	
+	## for prototyping purposes
+	var color_shape: ShapePolygon2D = get_node_or_null("ColorShape")
+	if(color_shape != null):
+		if(faction == "player"):
+			color_shape.color = Color.blue
+		elif(faction == "enemy"):
+			color_shape.color = Color.red
+		else:
+			color_shape.color = Color.gray
+	
 	debug = true
 #	if(debug):
 #		setup_debug_path_line()
@@ -136,6 +151,9 @@ func _process(delta: float) -> void:
 		health_bar.set_modulate(Color(1,1,1,1))
 	
 func _physics_process(delta) -> void:
+	if(active):
+		if(current_health <= 0):
+			destroy()
 	if(taking_turn):
 		if(move_target_set):
 			if(remaining_animation_time <= 0):
@@ -166,6 +184,7 @@ func finish_turn_movement():
 	#Vector2 cannot be set to null, so move_target is not unset
 	move_target_set = false
 	move_delay_time_remaining = move_delay_time
+	emit_signal("position_changed", self)
 	end_turn()
 	
 func start_turn_attack(_attack_target: Node2D):
@@ -203,12 +222,12 @@ func has_reached_target() -> void:
 	#print(self.get_name() + ":" + String(self.get_instance_id()) + " has reached target.")
 	reached_target = true
 
-func on_hit(damage: float) -> void:
-	#print(self.get_name() + " hit for " + (damage as String) + " damage")
-	impact()
-	set_current_hp(current_health-damage)
-	if(current_health <= 0):
-		on_destroy()
+#func on_hit(damage: float) -> void:
+#	#print(self.get_name() + " hit for " + (damage as String) + " damage")
+#	impact()
+#	set_current_hp(current_health-damage)
+#	if(current_health <= 0):
+#		on_destroy()
 
 func impact() -> void:
 	randomize()
@@ -220,17 +239,32 @@ func impact() -> void:
 	new_impact.position = impact_location
 	impact_area.add_child(new_impact)
 
-func on_destroy() -> void:
-	(get_node("CollisionShape2D") as CollisionShape2D).set_disabled(true)
+func destroy() -> void:
+	collision_shape.set_disabled(true)
 	health_bar.visible = false
 	active = false
-	emit_signal("enemy_destroyed", unit_type, get_global_position())
-	yield(get_tree().create_timer(0.5), "timeout")
+	emit_signal("unit_destroyed", unit_type, get_global_position())
+	#TODO: run destroyed animation
+	yield(get_tree().create_timer(0.25), "timeout")
 	self.queue_free()
-	
-func set_current_hp(hp: float) -> void:
-	current_health = max(hp, 0)
+
+func take_attack(attack_attributes: Dictionary):
+	if(attack_attributes == null || attack_attributes == {}):
+		return false
+	var damage: float = attack_attributes.get("damage", 0)
+	take_damage(damage)
+
+func take_damage(damage: float) -> void:
+	if(damage > 0):
+		set_current_hp(current_health - damage)
+		emit_signal("damaged")
+
+func set_current_hp(_health: float) -> void:
+	current_health = max(_health, 0)
 	health_bar.value = current_health
+
+func get_current_health() -> float:
+	return current_health
 
 func get_damage():
 	return attack_damage
@@ -258,13 +292,17 @@ func update_debug_move_line():
 		debug_move_line = Line2D.new()
 		debug_move_line.set_as_toplevel(true)
 		debug_move_line.set_default_color(Color.green)
-		debug_move_line.set_width(2)
+		debug_move_line.set_width(3)
 		debug_move_line.set_visible(false)
 		add_child(debug_move_line)
 	if(move_target_set && move_target != null):
 		debug_move_line.set_visible(true)
-		var pos := get_global_position()
-		debug_move_line.set_points([pos, move_target])
+		var points := [get_global_position(), move_target]
+		var unit_vector: Vector2 = (move_target - get_global_position()).normalized()
+		points.append(move_target - (unit_vector.rotated(deg2rad(45)) * 10))
+		points.append(move_target - (unit_vector.rotated(deg2rad(-45)) * 10))
+		points.append(move_target)
+		debug_move_line.set_points(points)
 	else:
 		debug_move_line.set_visible(false)
 		
@@ -272,13 +310,18 @@ func update_debug_attack_line():
 	if(debug_attack_line == null):
 		debug_attack_line = Line2D.new()
 		debug_attack_line.set_as_toplevel(true)
-		debug_attack_line.set_default_color(Color.red)
-		debug_attack_line.set_width(2)
+		debug_attack_line.set_default_color(Color.darkred)
+		debug_attack_line.set_width(3)
 		debug_attack_line.set_visible(false)
 		add_child(debug_attack_line)
 	if(attack_target_set && attack_target != null):
 		debug_attack_line.set_visible(true)
-		var pos := get_global_position()
-		debug_attack_line.set_points([pos, attack_target_pos])
+		var points := [get_global_position(), attack_target_pos]
+		var unit_vector: Vector2 = (attack_target_pos - get_global_position()).normalized()
+		points.append(attack_target_pos - (unit_vector.rotated(deg2rad(45)) * 10))
+		points.append(attack_target_pos - (unit_vector.rotated(deg2rad(-45)) * 10))
+		points.append(attack_target_pos)
+		
+		debug_attack_line.set_points(points)
 	else:
 		debug_attack_line.set_visible(false)

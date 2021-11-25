@@ -24,13 +24,10 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if(active):
-		if(current_health <= 0):
-			destroy()
+		if(current_health == base_health):
+			health_bar.set_modulate(Color(1,1,1,0))
 		else:
-			if(current_health == base_health):
-				health_bar.set_modulate(Color(1,1,1,0))
-			else:
-				health_bar.set_modulate(Color(1,1,1,1))
+			health_bar.set_modulate(Color(1,1,1,1))
 		
 
 func destroy() -> void:
@@ -43,6 +40,9 @@ func destroy() -> void:
 	self.queue_free()
 
 func _physics_process(delta) -> void:
+	if(active):
+		if(current_health <= 0):
+			destroy()
 	health_bar.set_position(position + health_bar_offset)
 
 func take_attack(attack_attributes: Dictionary):
@@ -59,7 +59,10 @@ func take_damage(damage: float) -> void:
 func set_current_hp(_health: float) -> void:
 	current_health = max(_health, 0)
 	health_bar.value = current_health
-	
+
+func get_current_health() -> float:
+	return current_health
+
 func set_ui_element_visibility(_visible: bool):
 	if(health_bar != null):
 		health_bar.visible = _visible
