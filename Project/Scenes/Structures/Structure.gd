@@ -8,6 +8,8 @@ func get_class() -> String:
 
 onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape2D")
 
+var age: int = 0
+
 export(bool) var active: bool = true
 export(String) var structure_type: String
 var default_attributes: Dictionary = {}
@@ -18,8 +20,8 @@ export(String) var faction: String
 var taking_turn: bool = false
 var finished_turn: bool = false
 
-var debug: bool = true
-var debug_draw_node: Control
+export(bool) var debug: bool = false
+var debug_label: Label
 
 func _init(_structure_type: String = "") -> void:
 	if(_structure_type.length() > 0):
@@ -42,12 +44,12 @@ func _ready() -> void:
 		elif(faction == "enemy"):
 			color_shape.color = Color.red
 		else:
-			color_shape.color = Color.gray
+			color_shape.color = Color.darkgray
 	
-	update_debug_draw()
+	debug_draw()
 
 func _process(_delta) -> void:
-	update_debug_draw()
+	debug_draw()
 
 func _physics_process(delta: float) -> void:
 	process_turn(delta)
@@ -68,6 +70,9 @@ func initialize_default_values() -> void:
 		default_attributes = {}
 	else:
 		default_attributes = (GameData.STRUCTURE_DATA as Dictionary).get(structure_type, {})
+
+func advance_time_units(units: int = 1):
+	age += units
 
 func start_turn() -> void:
 	taking_turn = true
@@ -90,6 +95,9 @@ func is_active() -> bool:
 func is_blocker() -> bool:
 	return blocker
 
+func get_age() -> int:
+	return age
+
 ##################
 ### DEBUG code ###
 ##################
@@ -97,5 +105,20 @@ func is_blocker() -> bool:
 func set_debug(_debug: bool) -> void:
 	debug = _debug
 
-func update_debug_draw() -> void:
-	pass
+func debug_draw():
+	update_debug_label()
+
+func update_debug_label():
+	if(!debug):
+		if(debug_label != null):
+			debug_label.set_visible(false)
+	else:
+		if(debug_label == null):
+			debug_label = Label.new()
+			debug_label.set_as_toplevel(true)
+			debug_label.set_visible(false)
+			debug_label.text = str(get_instance_id())
+			debug_label.set_scale(Vector2(0.85,0.85))
+			add_child(debug_label)
+		debug_label.set_global_position(get_global_position() + Vector2(-18, 10))
+		debug_label.set_visible(true)

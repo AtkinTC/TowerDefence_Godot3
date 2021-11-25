@@ -16,7 +16,7 @@ var turn_count: int = 0
 var running: bool = false
 var taking_turn: bool = false
 var ran_unit_movement: bool = false
-var ran_unit_attacks: bool = false
+var ran_faction_attacks: bool = false
 var ran_spawning: bool = false
 var waiting_for: Dictionary = {}
 
@@ -34,9 +34,9 @@ func _physics_process(delta: float) -> void:
 			# run one part of the turn and then wait
 			# continue until all parts are done and then end turn
 			if(waiting_for.size() == 0):
-				if(!ran_unit_attacks):
-					run_unit_attacks()
-					ran_unit_attacks = true
+				if(!ran_faction_attacks):
+					run_faction_attacks()
+					ran_faction_attacks = true
 				elif(!ran_unit_movement):
 					run_unit_movement()
 					ran_unit_movement = true
@@ -54,7 +54,7 @@ func start_faction_turn() -> void:
 	turn_count += 1
 	taking_turn = true
 	ran_unit_movement = false
-	ran_unit_attacks = false
+	ran_faction_attacks = false
 	ran_spawning = false
 	waiting_for = {}
 	
@@ -323,21 +323,21 @@ func run_unit_movement():
 		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()])
 		unit.start_turn_movement(navigation_cont.convert_map_pos_to_world_pos(unit_next_cell))
 
-func run_unit_attacks():
+# calculate targets and trigger attacks for all attacking faction member
+func run_faction_attacks():
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var structures_cont := (ControllersRef.get_controller_reference("structures_node") as StructuresNode)
 	var units_cont := (ControllersRef.get_controller_reference("units_node") as UnitsNode)
 	
-	var faction_units_to_attack := []
+	var faction_members_to_attack := []
 	var enemy_members_can_be_attacked := []
-	var faction_units_attacking := []
+	var faction_members_attacking := []
 	var attack_targets := {}
 	
-	#get all faction units that can attack
-	for _unit in get_tree().get_nodes_in_group(faction_id + "_unit"):
-		var unit := (_unit as Unit)
-		if(unit.get_attack_delay_time_remaining() <= 0 && unit.has_method("start_turn_attack")):
-			faction_units_to_attack.append(unit)
+	#get all faction members that can attack
+	for member in get_tree().get_nodes_in_group(faction_id):
+		if(member.has_method("start_turn_attack") && member.get_attack_delay_time_remaining() <= 0):
+			faction_members_to_attack.append(member)
 	
 	#get all enemy structures/units that can be attacked
 	var enemy_members := get_tree().get_nodes_in_group(target_faction_id)
@@ -346,14 +346,13 @@ func run_unit_attacks():
 			enemy_members_can_be_attacked.append(member)
 	
 	#for each unit ready to attack
-	for _unit in faction_units_to_attack:
-		var unit := (_unit as Unit)
-		var unit_cell = navigation_cont.convert_world_pos_to_map_pos(unit.global_position)
+	for member in faction_members_to_attack:
+		var member_cell = navigation_cont.convert_world_pos_to_map_pos(member.global_position)
 		# for each range distance of the unit (1,2,3...)
 		var attack_target = null
-		for r in range(1, unit.get_attack_range()+1):
+		for r in range(1, member.get_attack_range()+1):
 			for range_cell in get_exact_range_cells(r):
-				var target_cell = range_cell + unit_cell
+				var target_cell = range_cell + member_cell
 				#any destructable unit/structure not part of the current faction is a potential target
 				#TODO: get all the potential targets and then pick the "best" one by some priority
 				#TODO: prioritize "target_faction" targets over others
@@ -372,21 +371,20 @@ func run_unit_attacks():
 		#if an attackable enemy is in range
 		if(attack_target != null):
 			#record that target and move to the next attacking unit
-			faction_units_attacking.append(unit)
-			attack_targets[unit.get_instance_id()] = attack_target
+			faction_members_attacking.append(member)
+			attack_targets[member.get_instance_id()] = attack_target
 				
 	
 	#for each unit with a chosen attack target
 		#activate their attack
-	if(faction_units_attacking.size()):
-		debug_print("the following units are attacking:")
-	for _unit in faction_units_attacking:
-		var unit := (_unit as Unit)
-		var attack_target = attack_targets.get(unit.get_instance_id())
-		debug_print(str(unit.get_name()," : ",attack_target.get_name()))
-		waiting_for[unit.get_instance_id()] = unit
-		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()])
-		unit.start_turn_attack(attack_target)
+	if(faction_members_attacking.size()):
+		debug_print("the following members are attacking:")
+	for member in faction_members_attacking:
+		var attack_target = attack_targets.get(member.get_instance_id())
+		debug_print(str(member.get_name()," : ",attack_target.get_name()))
+		waiting_for[member.get_instance_id()] = member
+		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
+		member.start_turn_attack(attack_target)
 
 var exact_range_cells := {}
 func get_exact_range_cells(_range: int) -> Array:

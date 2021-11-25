@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "DestructableStructure",
+"class": "AttackingStructure",
+"language": "GDScript",
+"path": "res://Scenes/Structures/AttackingStructure.gd"
+}, {
 "base": "Structure",
 "class": "DestructableStructure",
 "language": "GDScript",
@@ -205,6 +210,7 @@ _global_script_classes=[ {
 "path": "res://Scenes/LevelScenes/UnitsNode.gd"
 } ]
 _global_script_class_icons={
+"AttackingStructure": "",
 "DestructableStructure": "",
 "Effect": "",
 "Enemy": "",

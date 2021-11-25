@@ -74,6 +74,7 @@ const tower_data = {
 ### UNITS ###
 ###############
 const ATTACK_DAMAGE: String = "attack_damage"
+const ATTACK_RANGE: String = "attack_range"
 const MOVE_DELAY: String = "move_delay"
 const ATTACK_DELAY: String = "attack_delay"
 const HEALTH: String = "health"

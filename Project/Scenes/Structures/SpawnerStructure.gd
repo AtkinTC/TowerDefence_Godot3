@@ -17,9 +17,6 @@ func _ready() -> void:
 		spawn_delay_time = (get_default_attribute(GameData.SPAWN_DELAY, 1) as float)
 	spawn_delay_remaining = spawn_delay_time
 
-func _physics_process(delta: float) -> void:
-	process_turn(delta)
-
 func process_turn(delta: float) -> void:
 	if(taking_turn):
 		#spawn unit
@@ -27,11 +24,12 @@ func process_turn(delta: float) -> void:
 		end_spawn_action()
 
 func advance_time_units(units: int = 1):
+	.advance_time_units(units)
 	spawn_delay_remaining = max(0, spawn_delay_remaining - units)
 	
 func get_time_until_spawn() -> int:
 	return spawn_delay_remaining
-	
+
 func start_spawn_action(_spawn_position: Vector2):
 	spawn_position = _spawn_position
 	spawn_position_set = true

@@ -11,8 +11,7 @@ var structures_dict: Dictionary = {}
 var cell_to_structure: Dictionary = {}
 var structure_to_cell: Dictionary = {}
 
-
-var debug: bool = false
+export(bool) var debug: bool = true
 
 func _ready() -> void:
 	ControllersRef.set_controller_reference("structures_node", self)
@@ -41,7 +40,8 @@ func add_structure(_structure: Node2D) -> bool:
 	cell_to_structure[structure_cell] = _structure.get_instance_id()
 	structure_to_cell[_structure.get_instance_id()] = structure_cell
 	
-	_structure.set_debug(debug)
+	if(debug):
+		_structure.set_debug(debug)
 	_structure.connect("structure_destroyed", self, "_on_structure_destroyed")
 	_structure.connect("tree_exiting", self, "_on_structure_exiting", [_structure.get_instance_id()])
 	add_child(_structure)
