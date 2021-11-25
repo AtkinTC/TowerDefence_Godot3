@@ -67,9 +67,10 @@ func _on_unit_position_changed(_unit: Unit):
 	var old_cell = unit_to_cell[_unit.get_instance_id()]
 	
 	unit_to_cell[_unit.get_instance_id()] = new_cell
+	# check before erasing to avoid timing issues where another unit has already overwritten this
 	if(cell_to_unit.get(old_cell) == _unit.get_instance_id()):
 		cell_to_unit.erase(old_cell)
-		cell_to_unit[new_cell] = _unit.get_instance_id()
+	cell_to_unit[new_cell] = _unit.get_instance_id()
 
 func _on_unit_destroyed(unit_type: String, unit_pos: Vector2):
 	emit_signal("unit_destroyed", unit_type, unit_pos)
