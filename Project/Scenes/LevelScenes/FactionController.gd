@@ -219,7 +219,9 @@ func run_unit_movement():
 		#keep looping until no new units finalize a move
 		while(temp_faction_units_moved == null || faction_units_moved.size() != temp_faction_units_moved.size()):
 			temp_faction_units_moved = faction_units_moved.duplicate()
+			#use dupes of these so changes to them don't take affect until next loop
 			var faction_units_to_move_dupe = faction_units_to_move.duplicate()
+			var faction_units_to_move_cell_dupe = faction_units_to_move_cell.duplicate()
 			
 			#for each unit that is ready to move and hasn't decided on a move:
 			for i in faction_units_to_move.size():
@@ -249,7 +251,7 @@ func run_unit_movement():
 				if(move_choices == null || choice_index >= move_choices.size()):
 					#remove unit from list of moving units
 					faction_units_to_move_dupe[i] = null
-					faction_units_to_move_cell.erase(unit.get_instance_id())
+					faction_units_to_move_cell_dupe.erase(unit.get_instance_id())
 					unit_potential_choices.erase(unit.get_instance_id())
 					unit_move_choice_index.erase(unit.get_instance_id())
 					#add unit to list of unmoving units
@@ -266,17 +268,20 @@ func run_unit_movement():
 				#if no conflicts:
 				#remove unit from the list of moving units
 				faction_units_to_move_dupe[i] = null
-				faction_units_to_move_cell.erase(unit.get_instance_id())
+				faction_units_to_move_cell_dupe.erase(unit.get_instance_id())
 				unit_potential_choices.erase(unit.get_instance_id())
 				unit_move_choice_index.erase(unit.get_instance_id())
 				#add unit to the list of moved units
 				#record the next nav cell for the unit
 				faction_units_moved.append(unit)
 				faction_units_moved_cell[unit.get_instance_id()] = choice_cell
+			#copy dupe changes back into the original collections
+			#faction_units_to_move_dupe has 'null' values to not break the index within the loop
 			faction_units_to_move = []
 			for unit in faction_units_to_move_dupe:
 				if(unit != null):
 					faction_units_to_move.append(unit)
+			faction_units_to_move_cell = faction_units_to_move_cell_dupe
 		#after looping through with no changes, iterate choice indexes and try again
 		for key in unit_move_choice_index.keys():
 			unit_move_choice_index[key] = unit_move_choice_index[key] + 1
