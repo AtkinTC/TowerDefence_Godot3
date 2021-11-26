@@ -229,17 +229,9 @@ func run_unit_movement():
 	debug_print(str("faction_units_to_move.size() = ", faction_units_to_move.size()))
 	debug_print(str("units_unmoving.size() = ", units_unmoving.size()))
 	
-	#get positions of all blocking structures
-#	var all_structures: Array = get_tree().get_nodes_in_group("structure")
-#	var all_blocker_structures_cell: Dictionary = {}
-#	for _structure in all_structures:
-#		var structure := (_structure as Structure)
-#		if(structure.is_blocker()):
-#			all_blocker_structures_cell[structure.get_instance_id()] = Utils.pos_to_cell(structure.global_position)
-	
 	var unit_potential_choices: Dictionary
 	var unit_move_choice_index: Dictionary
-	var remaining_loops = 100
+	var remaining_loops = 10
 	#do while there are still units that need to move
 	while(faction_units_to_move.size() > 0 && remaining_loops > 0):
 		remaining_loops -= 1
@@ -258,7 +250,7 @@ func run_unit_movement():
 				var move_choices = unit_potential_choices.get(unit.get_instance_id())
 				if(move_choices == null):
 					var unit_cell = Utils.pos_to_cell(unit.global_position)
-					move_choices = navigation_cont.get_potential_next_cells(unit_cell, target_cell, true)
+					move_choices = navigation_cont.get_potential_next_cells(unit_cell, target_cell, true, true)
 					unit_potential_choices[unit.get_instance_id()] = move_choices
 					unit_move_choice_index[unit.get_instance_id()] = 0
 				var choice_index = unit_move_choice_index.get(unit.get_instance_id(), 0)

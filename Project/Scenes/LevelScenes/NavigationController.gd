@@ -147,8 +147,11 @@ func get_next_world_position(world_current_position: Vector2, world_target_posit
 	var next_world_position = Utils.cell_to_pos(next_position)
 	return next_world_position
 
+
+# might make more sense to move this logic into the faction controller movement methods
+# all the info here can be retrieved from the get_distance_to_goal() method
 # gets all the next positions (max 4 in an orthoginal grid) that are closer to the target
-func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_structures: bool = false) -> Array:
+func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_structures: bool = false, with_rand: bool = false) -> Array:
 	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 	var next_positions := []
 	var next_positions_distance := []
@@ -157,18 +160,22 @@ func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_
 	if(distance_from_current == null || distance_from_current <= 0):
 		#no path of already at target, returning empty array
 		return next_positions
-		
+	
 	for neighbor in neighbors:
 		var neighbor_cell: Vector2 = current_cell + neighbor
 		var distance_from_neighbor = get_distance_to_goal(neighbor_cell, target_cell, with_structures)
-		
+		var modifier := 0.0
+		if(with_rand):
+			randomize()
+			modifier = randf()-0.5
+			
 		if(distance_from_neighbor >= 0 && distance_from_neighbor < distance_from_current):
 			for index in next_positions.size()+1:
 				if(index >= next_positions.size()):
 					next_positions.append(neighbor_cell)
 					next_positions_distance.append(distance_from_neighbor)
 					break
-				elif(distance_from_neighbor < next_positions_distance[index]):
+				elif(distance_from_neighbor < next_positions_distance[index] + modifier):
 					next_positions.insert(index, neighbor_cell)
 					next_positions_distance.insert(index, distance_from_neighbor)
 					break
