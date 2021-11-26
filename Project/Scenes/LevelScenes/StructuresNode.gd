@@ -7,14 +7,17 @@ func get_class() -> String:
 signal structure_destroyed(structure_type, enemy_position)
 signal structure_updated()
 
+# instance id : structure reference (1:1)
 var structures_dict: Dictionary = {}
+# map cell : structure reference (N:1)
 var cell_to_structure: Dictionary = {}
-var structure_to_cell: Dictionary = {}
+# instance_id : map cell (1:N)
+var structure_to_cells: Dictionary = {}
 
 export(bool) var debug: bool = true
 
 func _ready() -> void:
-	ControllersRef.set_controller_reference("structures_node", self)
+	ControllersRef.set_controller_reference(ControllersRef.STRUCTURES_CONTROLLER, self)
 	for child in get_children():
 		if(child is Structure):
 			add_structure(child)
@@ -28,7 +31,7 @@ func convert_world_pos_to_map_cell(world_position: Vector2) -> Vector2:
 	return map_position
 
 # adds structure instance to the node, and to the dictionary
-func add_structure(_structure: Node2D) -> bool:
+func add_structure(_structure: Structure) -> bool:
 	if(_structure == null):
 		return false
 	if(structures_dict.has(_structure.get_instance_id())):
@@ -36,9 +39,12 @@ func add_structure(_structure: Node2D) -> bool:
 		
 	structures_dict[_structure.get_instance_id()] = _structure
 	
-	var structure_cell = convert_world_pos_to_map_cell(_structure.get_global_position())
-	cell_to_structure[structure_cell] = _structure.get_instance_id()
-	structure_to_cell[_structure.get_instance_id()] = structure_cell
+	var structure_cell_main = convert_world_pos_to_map_cell(_structure.get_global_position())
+	var structure_cells = []
+	for cell in _structure.get_current_cells():
+		cell_to_structure[cell] = _structure.get_instance_id()
+		structure_cells.append(cell)
+	structure_to_cells[_structure.get_instance_id()] = structure_cells
 	
 	if(debug):
 		_structure.set_debug(debug)
@@ -65,10 +71,11 @@ func get_all_structures() -> Array:
 	
 func _on_structure_exiting(_instance_id: int) -> void:
 	if(structures_dict.has(_instance_id)):
+		#remove all references to this structure in the collections
 		structures_dict.erase(_instance_id)
-		var cell = structure_to_cell[_instance_id]
-		structure_to_cell.erase(_instance_id)
-		cell_to_structure.erase(cell)
+		for cell in structure_to_cells.get(_instance_id, []):
+			cell_to_structure.erase(cell)
+		structure_to_cells.erase(_instance_id)
 		emit_signal("structure_updated")
 
 func _on_structure_destroyed(structure_type: String, structure_pos: Vector2):

@@ -1,0 +1,64 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/Structures/DestructableStructure.gd" type="Script" id=2]
+[ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=3]
+[ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=4]
+[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=5]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 32, 32 )
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 22, 22 )
+
+[node name="ObstacleDestructable" type="Area2D"]
+script = ExtResource( 2 )
+shape_cells = [ Vector2( 0, 0 ), Vector2( 1, 0 ), Vector2( 0, 1 ), Vector2( -1, 0 ), Vector2( 0, -1 ) ]
+structure_type = "ObstacleDestructable"
+blocker = true
+base_health = 100
+
+[node name="CellShapeDraw" type="Node2D" parent="."]
+script = ExtResource( 5 )
+__meta__ = {
+"_editor_description_": ""
+}
+shape_cells = [ Vector2( 0, 0 ), Vector2( 1, 0 ), Vector2( 0, 1 ), Vector2( -1, 0 ), Vector2( 0, -1 ) ]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource( 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="Polygon2D3" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( -24, -88, -24, -24, -88, -24, -88, 24, -24, 24, -24, 88, 24, 88, 24, 24, 88, 24, 88, -24, 24, -24, 24, -88 )
+
+[node name="ColorShape" type="Polygon2D" parent="."]
+polygon = PoolVector2Array( -22, -22, 22, -22, 22, 22, -22, 22 )
+script = ExtResource( 1 )
+shape = SubResource( 3 )
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( 12, 16, 12, 4, 8, 4, 8, 16 )
+
+[node name="Polygon2D2" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( 20, 16, 20, 4, 16, 4, 16, 16 )
+
+[node name="HealthBar" type="TextureProgress" parent="."]
+margin_left = -30.0
+margin_top = -35.0
+margin_right = 30.0
+margin_bottom = -29.0
+value = 50.0
+texture_under = ExtResource( 3 )
+texture_progress = ExtResource( 4 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": false
+}

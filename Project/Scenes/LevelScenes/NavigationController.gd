@@ -28,7 +28,7 @@ func _ready() -> void:
 	ControllersRef.set_controller_reference(ControllersRef.NAVIGATION_CONTROLLER, self)
 
 func run_navigation_world_pos(taget_world_pos: Vector2, force_update: int = UPDATE_TYPE_ENUM.NONE):
-	var goal_cell = convert_world_pos_to_map_pos(taget_world_pos)
+	var goal_cell = Utils.pos_to_cell(taget_world_pos)
 	return run_navigation(goal_cell, force_update)
 
 func run_navigation(goal_cell: Vector2, force_update: int = UPDATE_TYPE_ENUM.NONE):
@@ -139,12 +139,12 @@ func get_next_position(current_cell: Vector2, target_cell: Vector2, with_structu
 		
 	
 func get_next_world_position(world_current_position: Vector2, world_target_position: Vector2, with_structures: bool = false):
-	var current_cell = convert_world_pos_to_map_pos(world_current_position)
-	var target_cell = convert_world_pos_to_map_pos(world_target_position)
+	var current_cell = Utils.pos_to_cell(world_current_position)
+	var target_cell = Utils.pos_to_cell(world_target_position)
 	var next_position = get_next_position(current_cell, target_cell, with_structures)
 	if(next_position == null):
 		return null
-	var next_world_position = convert_map_pos_to_world_pos(next_position)
+	var next_world_position = Utils.cell_to_pos(next_position)
 	return next_world_position
 
 # gets all the next positions (max 4 in an orthoginal grid) that are closer to the target
@@ -176,12 +176,12 @@ func get_potential_next_cells(current_cell: Vector2, target_cell: Vector2, with_
 	return next_positions
 
 func get_potential_next_positions(current_position: Vector2, target_position: Vector2, with_structures: bool = false) -> Array:
-	var current_cell = convert_world_pos_to_map_pos(current_position)
-	var target_cell = convert_world_pos_to_map_pos(target_position)
+	var current_cell = Utils.pos_to_cell(current_position)
+	var target_cell = Utils.pos_to_cell(target_position)
 	var next_cells := get_potential_next_cells(current_cell, target_cell, with_structures)
 	var next_positions = []
 	for cell in next_cells:
-		next_positions.append(convert_map_pos_to_world_pos(cell))
+		next_positions.append(Utils.cell_to_pos(cell))
 	return next_positions
 
 # get the distance to goal for current_cell to target_cell
@@ -194,8 +194,8 @@ func get_distance_to_goal(current_cell: Vector2, target_cell: Vector2, with_stru
 		return (navigation_data[target_cell] as TargetNavData).default_nav_maps.distance_map.get(current_cell, -1)
 
 func get_distance_to_goal_world(world_current_position: Vector2, world_target_position: Vector2, with_structures: bool = false) -> int:
-	var current_cell = convert_world_pos_to_map_pos(world_current_position)
-	var target_cell = convert_world_pos_to_map_pos(world_target_position)
+	var current_cell = Utils.pos_to_cell(world_current_position)
+	var target_cell = Utils.pos_to_cell(world_target_position)
 	var distance = get_distance_to_goal(current_cell, target_cell, with_structures)
 	if(distance == null):
 		return -1
@@ -205,27 +205,15 @@ func get_path_to_goal(world_current_position: Vector2, world_target_position: Ve
 	if(world_current_position == null):
 		return []
 	
-	var current_cell = convert_world_pos_to_map_pos(world_current_position)
-	var target_cell = convert_world_pos_to_map_pos(world_target_position)
+	var current_cell = Utils.pos_to_cell(world_current_position)
+	var target_cell = Utils.pos_to_cell(world_target_position)
 	var path: Array = []
 	while(current_cell != null):
 		var next_cell = get_next_position(current_cell, target_cell, with_structures)
 		if(next_cell != null):
-			path.append(convert_map_pos_to_world_pos(next_cell))
+			path.append(Utils.cell_to_pos(next_cell))
 		current_cell = next_cell
 	return path
-
-func convert_world_pos_to_map_pos(world_position: Vector2) -> Vector2:
-	var local_position = get_navigation_map().to_local(world_position)
-	var map_position = get_navigation_map().world_to_map(local_position)
-	return map_position
-
-func convert_map_pos_to_world_pos(map_position: Vector2, cell_center: bool = true) -> Vector2:
-	var local_position = get_navigation_map().map_to_world(map_position)
-	if(cell_center):
-		local_position += get_navigation_map().cell_size/2.0
-	var world_position = get_navigation_map().to_global(local_position)
-	return world_position
 
 #reset structures_up_to_date so that "with structures" navigation will be recalculated
 func update_structures() -> void:
@@ -235,7 +223,7 @@ func get_navigation_map() -> TileMap:
 	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
 
 func get_structures_node() -> StructuresNode:
-	return (ControllersRef.get_controller_reference("structures_node") as StructuresNode)
+	return (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
 
 func _on_structure_updated() -> void:
 	structures_up_to_date = {}
@@ -280,7 +268,7 @@ func refresh_debug() -> void:
 #
 #		for cell in used_cells:
 #			var cell_label: Label = Label.new()
-#			cell_label.set_global_position(convert_map_pos_to_world_pos(cell, false))
+#			cell_label.set_global_position(Utils.cell_to_pos(cell, false))
 #			cell_label.set_name("cell_label_"+String(cell.x)+"_"+String(cell.y))
 #			cell_label.text = String(cell as Vector2) + "\n" + String(_distance_map.get(cell, "---"))
 #			debug_cell_labels.add_child(cell_label)
@@ -309,6 +297,6 @@ func refresh_debug() -> void:
 #				var flow_line: Line2D = Line2D.new()
 #				flow_line.set_default_color(Color.blue)
 #				flow_line.set_width(3)
-#				flow_line.set_points([convert_map_pos_to_world_pos(cell), convert_map_pos_to_world_pos(_next_cell_map[cell])])
+#				flow_line.set_points([Utils.cell_to_pos(cell), Utils.cell_to_pos(_next_cell_map[cell])])
 #				flow_line.set_name("flow_lines_"+String(cell.x)+"_"+String(cell.y))
 #				debug_flow_lines.add_child(flow_line)

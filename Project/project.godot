@@ -264,6 +264,7 @@ GameData="*res://Singletons/GameData.gd"
 SceneLoader="*res://Singletons/SceneLoader.gd"
 ControllersRef="*res://Singletons/ControllersRef.gd"
 SaveGameController="*res://Singletons/SaveGameController.gd"
+Utils="*res://Singletons/Utils.gd"
 
 [debug]
 

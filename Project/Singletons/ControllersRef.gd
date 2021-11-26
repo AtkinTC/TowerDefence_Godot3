@@ -10,6 +10,8 @@ const ENEMIES_CONTROLLER = "enemies_controller"
 const ENEMY_SPAWN_CONTROLLER = "enemy_spawn_controller"
 const TOWERS_CONTROLLER = "towers_controller"
 const EFFECTS_CONTROLLER = "effects_controller"
+const STRUCTURES_CONTROLLER = "structures_node"
+const UNITS_CONTROLLER = "units_node"
 
 func reset():
 	controllers_dict = {}

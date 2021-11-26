@@ -10,6 +10,9 @@ onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape
 
 var age: int = 0
 
+export(Array) var shape_cells := [Vector2(0,0)]
+var current_cells := []
+
 export(bool) var active: bool = true
 export(String) var structure_type: String
 var default_attributes: Dictionary = {}
@@ -97,6 +100,20 @@ func is_blocker() -> bool:
 
 func get_age() -> int:
 	return age
+	
+func get_shape_cells() -> Array:
+	if(shape_cells == null || shape_cells.size() == 0):
+		return [Vector2(0,0)]
+	return shape_cells
+
+# assuming structure will not move and shape will not change
+func get_current_cells() -> Array:
+	if(current_cells != null && current_cells.size() > 0):
+		return current_cells
+	current_cells = []
+	for cell in shape_cells:
+		current_cells.append((cell as Vector2) + Utils.pos_to_cell(get_global_position()))
+	return current_cells
 
 ##################
 ### DEBUG code ###

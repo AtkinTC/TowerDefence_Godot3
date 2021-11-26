@@ -13,7 +13,7 @@ var unit_to_cell: Dictionary = {}
 var debug: bool = false
 
 func _ready() -> void:
-	ControllersRef.set_controller_reference("units_node", self)
+	ControllersRef.set_controller_reference(ControllersRef.UNITS_CONTROLLER, self)
 	for child in get_children():
 		if(child is Unit):
 			add_unit(child)
@@ -28,7 +28,7 @@ func add_unit(_unit: Node2D) -> bool:
 	units_dict[_unit.get_instance_id()] = _unit
 	
 	var nav_cont: NavigationController = ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER)
-	var unit_cell = nav_cont.convert_world_pos_to_map_pos(_unit.get_global_position())
+	var unit_cell = Utils.pos_to_cell(_unit.get_global_position())
 	cell_to_unit[unit_cell] = _unit.get_instance_id()
 	unit_to_cell[_unit.get_instance_id()] = unit_cell
 	
@@ -64,7 +64,7 @@ func _on_unit_exiting(_instance_id: int) -> void:
 
 func _on_unit_position_changed(_unit: Unit):
 	var nav_cont: NavigationController = ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER)
-	var new_cell = nav_cont.convert_world_pos_to_map_pos(_unit.get_global_position())
+	var new_cell = Utils.pos_to_cell(_unit.get_global_position())
 	var old_cell = unit_to_cell[_unit.get_instance_id()]
 	
 	unit_to_cell[_unit.get_instance_id()] = new_cell

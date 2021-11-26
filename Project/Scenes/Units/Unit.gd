@@ -45,6 +45,7 @@ var move_target_set: bool = false
 
 var attack_target: Node2D
 var attack_target_pos: Vector2 = Vector2.ZERO
+var attack_target_cell: Vector2 = Vector2.ZERO
 var attack_target_set: bool = false
 
 onready var health_bar: TextureProgress = get_node("HealthBar")
@@ -198,9 +199,14 @@ func finish_turn_movement():
 	emit_signal("position_changed", self)
 	end_turn()
 	
-func start_turn_attack(_attack_target: Node2D):
+func start_turn_attack(_attack_target: Node2D, _attack_target_cell = null):
 	attack_target = _attack_target
-	attack_target_pos = _attack_target.get_global_position()
+	if(_attack_target_cell == null):
+		attack_target_cell = Utils.pos_to_cell(_attack_target.get_global_position())
+		attack_target_pos = _attack_target.get_global_position()
+	else:
+		attack_target_cell = _attack_target_cell
+		attack_target_pos = Utils.cell_to_pos(attack_target_cell)
 	attack_target_set = true
 	remaining_animation_time = attack_animation_time
 	send_attack(attack_target)
