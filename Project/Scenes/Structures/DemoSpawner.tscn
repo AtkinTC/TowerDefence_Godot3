@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Structures/SpawnerStructure.gd" type="Script" id=2]
 [ext_resource path="res://Scenes/Units/BasicUnit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=5]
+[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=6]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 32 )
@@ -22,6 +23,9 @@ blocker = true
 faction = "enemy"
 spawn_unit_scene = ExtResource( 3 )
 spawn_delay_time = 2
+
+[node name="CellShapeDraw" type="Node2D" parent="."]
+script = ExtResource( 6 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false

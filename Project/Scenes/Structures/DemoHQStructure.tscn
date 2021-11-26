@@ -1,7 +1,8 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Structures/HQStructure.gd" type="Script" id=2]
+[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=3]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=5]
 
@@ -20,6 +21,9 @@ structure_type = "DemoHQStructure"
 blocker = true
 faction = "player"
 base_health = 100
+
+[node name="CellShapeDraw" type="Node2D" parent="."]
+script = ExtResource( 3 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
