@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Structures/DestructableStructure.gd" type="Script" id=2]
 [ext_resource path="res://Scenes/Structures/Components/AttackComponent.gd" type="Script" id=3]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=5]
+[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=6]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 32 )
@@ -20,6 +21,9 @@ script = ExtResource( 2 )
 structure_type = "DemoAttackingStructure"
 blocker = true
 base_health = 10
+
+[node name="CellShapeDraw" type="Node2D" parent="."]
+script = ExtResource( 6 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
@@ -59,5 +63,6 @@ polygon = PoolVector2Array( 16, -16, 16, -8, 4, -8, 4, 16, -4, 16, -4, -8, -16, 
 [node name="AttackComponent" type="Node2D" parent="."]
 script = ExtResource( 3 )
 debug = true
+attack_delay_time = 2
 attack_range = 3
 attack_damage = 1

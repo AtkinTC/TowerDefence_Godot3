@@ -87,8 +87,9 @@ func initialize_default_values() -> void:
 
 func advance_time_units(units: int = 1):
 	age += units
-	for component in components:
-		(component as Component).advance_time_units(units)
+	if(active):
+		for component in components:
+			(component as Component).advance_time_units(units)
 
 # get child components of a certain type, or all components if type is empty
 func get_components(type: int = -1) -> Array:

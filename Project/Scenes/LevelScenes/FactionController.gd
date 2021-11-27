@@ -77,6 +77,15 @@ func end_faction_turn() -> void:
 	taking_turn = false
 	emit_signal("finished_turn")
 
+func _on_member_finished_turn(_instance_id: int):
+	if(waiting_for.has(_instance_id)):
+		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has finished its action"))
+		waiting_for.erase(_instance_id)
+
+################
+### Spawning ###
+################
+
 func run_unit_spawning() -> bool:
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
@@ -164,22 +173,10 @@ func run_unit_spawning() -> bool:
 		spawner.start_turn_spawn(spawner_target_cells[spawner.get_instance_id()])
 	return true
 
-#compares the move priority of two units
-# (unit1 >  unit2) >  0
-# (unit1 == unit2) == 0
-# (unit1 <  unit2) <  0
-func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
-	var wait_time1 = unit1.get_turns_since_last_move()
-	var age1 = unit1.get_age()
-	var wait_time2: int = unit2.get_turns_since_last_move()
-	var age2: int = unit2.get_age()
-	
-	if(wait_time1 != wait_time2):
-		return wait_time1 - wait_time2
-	if(age1 != age2):
-		return age1 - age2
-	return 0
-	
+################
+### Movement ###
+################
+
 func run_unit_movement() -> bool:
 	# TODO: sort units by some Priority before calculating movement
 	#	priority could consider how long since the unit successfully moves and the age of the unit
@@ -335,7 +332,28 @@ func run_unit_movement() -> bool:
 		unit.start_turn_movement(Utils.cell_to_pos(unit_next_cell))
 	return true
 
+#compares the move priority of two units
+# (unit1 >  unit2) >  0
+# (unit1 == unit2) == 0
+# (unit1 <  unit2) <  0
+func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
+	var wait_time1 = unit1.get_turns_since_last_move()
+	var age1 = unit1.get_age()
+	var wait_time2: int = unit2.get_turns_since_last_move()
+	var age2: int = unit2.get_age()
+	
+	if(wait_time1 != wait_time2):
+		return wait_time1 - wait_time2
+	if(age1 != age2):
+		return age1 - age2
+	return 0
+
+#################
+### Attacking ###
+#################
+
 # calculate targets and trigger attacks for all attacking faction member
+# TODO: handle *individual* attackers; attackers that have their own targetting logic that supersedes faction targetting 
 func run_faction_attacks() -> bool:
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
@@ -358,44 +376,77 @@ func run_faction_attacks() -> bool:
 				if(comp.is_ready_to_attack()):
 					faction_members_to_attack.append(comp)
 	
-	#get all enemy structures/units that can be attacked
-	var enemy_members := get_tree().get_nodes_in_group(target_faction_id)
-	for member in enemy_members:
-		if(member.has_method("take_attack")):
-			enemy_members_can_be_attacked.append(member)
+	if(faction_members_to_attack.size() == 0):
+		return false
 	
+	var targets_overlap := {}
+	var member_valid_attacks := {}
+	
+	#first pass of attack targeting calculation
 	#for each unit ready to attack
-	for member in faction_members_to_attack:
-		var member_cell = Utils.pos_to_cell(member.global_position)
-		# for each range distance of the unit (1,2,3...)
-		var attack_target = null
-		var attack_cell = null
-		for r in range(1, member.get_attack_range()+1):
-			for range_cell in get_exact_range_cells(r):
-				var target_cell = range_cell + member_cell
-				#any destructable unit/structure not part of the current faction is a potential target
-				#TODO: get all the potential targets and then pick the "best" one by some priority
-				#TODO: prioritize "target_faction" targets over others
-				var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
-				if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
-					attack_target = target_structure
-					attack_cell = target_cell
-					break
-				
-				var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
-				if(target_unit != null && target_unit.has_method("take_attack") && !target_unit.is_in_group(faction_id)):
-					attack_target = target_unit
-					attack_cell = target_cell
-					break
-				
-			if(attack_target != null):
-				break
-		#if an attackable enemy is in range
-		if(attack_target != null):
-			#record that target and move to the next attacking unit
+	var faction_members_to_attack_temp = faction_members_to_attack.duplicate()
+	for i in faction_members_to_attack.size():
+		var member = faction_members_to_attack[i]
+		var valid_attacks := get_all_valid_attacks_by_range(member)
+		if(valid_attacks == null || valid_attacks.size() == 0):
+			#no valid attacks, remove attacker
+			faction_members_to_attack_temp[i] = null
+			continue
+		if(valid_attacks.size() == 1):
+			#only one possible attack, no need for further calculation
+			var attack_target = valid_attacks[0][0]
+			var attack_cell = valid_attacks[0][1]
+			faction_members_to_attack_temp[i] = null
 			faction_members_attacking.append(member)
 			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
-				
+			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+		else:
+			#multiple possible targets, carry over to next phase of calculation
+			member_valid_attacks[member.get_instance_id()] = valid_attacks
+	faction_members_to_attack = []
+	for member in faction_members_to_attack_temp:
+		if(member != null):
+			faction_members_to_attack.append(member)
+	
+	if(faction_members_to_attack.size() == 0 && faction_members_attacking.size() == 0):
+		return false
+	
+	#second pass of attack targeting calculation
+	#prioritize targets that are not already targeted for attack
+	#for each unit ready to attack, remaining from last stage
+	for member in faction_members_to_attack:
+		var valid_attacks = member_valid_attacks[member.get_instance_id()]
+		if(valid_attacks == null || valid_attacks.size() == 0):
+			#this shouldn't ever happen at this stage
+			continue
+		elif(targets_overlap.size() == 0):
+			#no overlaps to sort by, just take first option
+			#record that target and move to the next attacking unit
+			var attack_target = valid_attacks[0][0]
+			var attack_cell = valid_attacks[0][1]
+			faction_members_attacking.append(member)
+			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
+			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+			continue
+		else:
+			#sort by overlaps, then take first option
+			var overlap_sorted = []
+			var list_parts = {}
+			var largest_overlap = 0
+			for attack in valid_attacks:
+				var target = attack[0]
+				var cell = attack[1]
+				var overlap = targets_overlap.get(target.get_instance_id(), 0)
+				largest_overlap = max(overlap, largest_overlap)
+				list_parts[overlap] = list_parts.get(overlap, []) + [attack]
+			for overlap in largest_overlap+1:
+				overlap_sorted += list_parts.get(overlap, [])
+			var attack_target = overlap_sorted[0][0]
+			var attack_cell = overlap_sorted[0][1]
+			faction_members_attacking.append(member)
+			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
+			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+			continue
 	
 	if(faction_members_attacking.size() == 0):
 		return false
@@ -412,7 +463,61 @@ func run_faction_attacks() -> bool:
 		member.start_turn_attack(attack_target, attack_cell)
 	return true
 
+# get the first found valid attack and then stop search
+func get_first_valid_attack(member: Node2D) -> Array:
+	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
+	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	
+	var member_cell = Utils.pos_to_cell(member.global_position)
+	# for each range distance of the unit (1,2,3...)
+	var attack_target = null
+	var attack_cell = null
+	for r in range(1, member.get_attack_range()+1):
+		for range_cell in get_exact_range_cells(r):
+			var target_cell = range_cell + member_cell
+			#any destructable unit/structure not part of the current faction is a potential target
+			var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
+			if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
+				attack_target = target_structure
+				attack_cell = target_cell
+				break
+			
+			var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
+			if(target_unit != null && target_unit.has_method("take_attack") && !target_unit.is_in_group(faction_id)):
+				attack_target = target_unit
+				attack_cell = target_cell
+				break
+		if(attack_target != null):
+			break
+	return [attack_target, attack_cell]
+
+#get all possible attacks, sorted by range
+func get_all_valid_attacks_by_range(member: Node2D) -> Array:
+	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
+	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	
+	var attack_cells := []
+	
+	var member_cell = Utils.pos_to_cell(member.global_position)
+	# for each range distance of the unit (1,2,3...)
+	for r in range(1, member.get_attack_range()+1):
+		for range_cell in get_exact_range_cells(r):
+			var target_cell = range_cell + member_cell
+			#any destructable unit/structure not part of the current faction is a potential target
+			var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
+			if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
+				attack_cells.append([target_structure, target_cell])
+				continue
+			
+			var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
+			if(target_unit != null && target_unit.has_method("take_attack") && !target_unit.is_in_group(faction_id)):
+				attack_cells.append([target_unit, target_cell])
+				continue
+			
+	return attack_cells
+
 var exact_range_cells := {}
+#get the ring of cells corresponding *exactly* to the specified range
 func get_exact_range_cells(_range: int) -> Array:
 	if(exact_range_cells.has(_range)):
 		return exact_range_cells[_range]
@@ -428,10 +533,9 @@ func get_exact_range_cells(_range: int) -> Array:
 	exact_range_cells[_range] = range_cells
 	return range_cells
 
-func _on_member_finished_turn(_instance_id: int):
-	if(waiting_for.has(_instance_id)):
-		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has finished its action"))
-		waiting_for.erase(_instance_id)
+#############
+### Debug ###
+#############
 
 func debug_print(_message: String):
 	if(debug):
