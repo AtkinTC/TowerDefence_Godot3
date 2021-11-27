@@ -132,6 +132,9 @@ func get_move_delay_time_remaining() -> int:
 	
 func get_attack_delay_time_remaining() -> int:
 	return attack_delay_time_remaining
+	
+func is_ready_to_attack() -> bool:
+	return attack_delay_time_remaining <= 0
 
 func get_attack_range() -> int:
 	return attack_range

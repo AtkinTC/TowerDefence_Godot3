@@ -20,6 +20,8 @@ export(bool) var blocker: bool = false
 
 export(String) var faction: String
 
+var components: Array = []
+
 var taking_turn: bool = false
 var finished_turn: bool = false
 
@@ -38,6 +40,15 @@ func _ready() -> void:
 		faction = "neutral"
 	self.add_to_group(faction+"_structure", true)
 	self.add_to_group(faction, true)
+	
+	# register child components
+	for child in get_children():
+		if(child is Component):
+			components.append(child)
+			child.set_faction(faction)
+			child.set_parent_structure_type(structure_type)
+	if(debug && components.size() > 0):
+		print(str("components: ", components))
 	
 	## for prototyping purposes
 	var color_shape: ShapePolygon2D = get_node_or_null("ColorShape")
@@ -76,7 +87,19 @@ func initialize_default_values() -> void:
 
 func advance_time_units(units: int = 1):
 	age += units
+	for component in components:
+		(component as Component).advance_time_units(units)
 
+# get child components of a certain type, or all components if type is empty
+func get_components(type: int = -1) -> Array:
+	if(type == null || type == -1):
+		return components
+	var type_components := []
+	for component in components:
+		if((component as Component).get_component_type() == type):
+			type_components.append(component)
+	return type_components
+	
 func start_turn() -> void:
 	taking_turn = true
 	finished_turn = false

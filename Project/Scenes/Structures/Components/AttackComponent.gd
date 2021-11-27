@@ -1,8 +1,11 @@
-extends DestructableStructure
-class_name AttackingStructure
+extends Component
+class_name AttackComponent
 
 func get_class() -> String:
-	return "AttackingStructure"
+	return "Component"
+
+func _init() -> void:
+	component_type = COMPONENT_TYPE.ATTACK
 
 export(int) var attack_delay_time: int = 1
 var attack_delay_time_remaining: int
@@ -20,11 +23,7 @@ var remaining_animation_time: float = 0
 var debug_attack_line: Line2D
 
 func _ready() -> void:
-	if(attack_damage < 0):
-		attack_damage = (get_default_attribute(GameData.ATTACK_DAMAGE, 1) as float)
-		
-	if(attack_range < 0):
-		attack_range = (get_default_attribute(GameData.ATTACK_RANGE, 1) as float)
+	attack_delay_time_remaining = attack_delay_time
 
 func advance_time_units(units: int = 1):
 	.advance_time_units(units)
@@ -36,6 +35,7 @@ func process_turn(delta: float) -> void:
 			if(remaining_animation_time <= 0):
 				finish_turn_attack()
 			else:
+				#TODO: check if the parent attack animation is finished, if applicable
 				remaining_animation_time = max(0, remaining_animation_time-delta)
 
 func start_turn_attack(_attack_target: Node2D, _attack_target_cell = null):
@@ -47,6 +47,7 @@ func start_turn_attack(_attack_target: Node2D, _attack_target_cell = null):
 		attack_target_cell = _attack_target_cell
 		attack_target_pos = Utils.cell_to_pos(attack_target_cell)
 	attack_target_set = true
+	#TODO: trigger parent attack animation. if applicable
 	remaining_animation_time = attack_animation_time
 	send_attack(attack_target)
 	start_turn()
@@ -70,6 +71,9 @@ func get_attack_range() -> int:
 	
 func get_attack_delay_time_remaining() -> int:
 	return attack_delay_time_remaining
+	
+func is_ready_to_attack() -> bool:
+	return attack_delay_time_remaining <= 0
 
 ##################
 ### DEBUG code ###

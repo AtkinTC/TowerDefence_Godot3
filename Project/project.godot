@@ -9,10 +9,15 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "DestructableStructure",
-"class": "AttackingStructure",
+"base": "Component",
+"class": "AttackComponent",
 "language": "GDScript",
-"path": "res://Scenes/Structures/AttackingStructure.gd"
+"path": "res://Scenes/Structures/Components/AttackComponent.gd"
+}, {
+"base": "Node2D",
+"class": "Component",
+"language": "GDScript",
+"path": "res://Scenes/Structures/Components/Component.gd"
 }, {
 "base": "Structure",
 "class": "DestructableStructure",
@@ -159,10 +164,10 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://Scenes/SupportScenes/ShapePolygon2D.gd"
 }, {
-"base": "DestructableStructure",
-"class": "SpawnerStructure",
+"base": "Component",
+"class": "SpawnerComponent",
 "language": "GDScript",
-"path": "res://Scenes/Structures/SpawnerStructure.gd"
+"path": "res://Scenes/Structures/Components/SpawnerComponent.gd"
 }, {
 "base": "Area2D",
 "class": "Structure",
@@ -210,7 +215,8 @@ _global_script_classes=[ {
 "path": "res://Scenes/LevelScenes/UnitsNode.gd"
 } ]
 _global_script_class_icons={
-"AttackingStructure": "",
+"AttackComponent": "",
+"Component": "",
 "DestructableStructure": "",
 "Effect": "",
 "Enemy": "",
@@ -240,7 +246,7 @@ _global_script_class_icons={
 "ResourcesDisplayContainer": "",
 "SceneHandler": "",
 "ShapePolygon2D": "",
-"SpawnerStructure": "",
+"SpawnerComponent": "",
 "Structure": "",
 "StructuresNode": "",
 "TimerProgressDisplay": "",

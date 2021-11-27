@@ -11,10 +11,14 @@ func get_class() -> String:
 export(String) var faction_id: String
 export(String) var target_faction_id: String
 
+var minimum_turn_length = 0.25
+var remaining_minimum_turn_length
+
 var turn_count: int = 0
 
 var running: bool = false
 var taking_turn: bool = false
+var empty_turn: bool = true
 var ran_unit_movement: bool = false
 var ran_faction_attacks: bool = false
 var ran_spawning: bool = false
@@ -31,19 +35,23 @@ func stop_running():
 func _physics_process(delta: float) -> void:
 	if(running):
 		if(taking_turn):
+			remaining_minimum_turn_length = max(0, remaining_minimum_turn_length - delta)
 			# run one part of the turn and then wait
 			# continue until all parts are done and then end turn
 			if(waiting_for.size() == 0):
 				if(!ran_faction_attacks):
-					run_faction_attacks()
+					if(run_faction_attacks()):
+						empty_turn = false
 					ran_faction_attacks = true
 				elif(!ran_unit_movement):
-					run_unit_movement()
+					if(run_unit_movement()):
+						empty_turn = false
 					ran_unit_movement = true
 				elif(!ran_spawning):
-					run_unit_spawning()
+					if(run_unit_spawning()):
+						empty_turn = false
 					ran_spawning = true
-				else:
+				elif(remaining_minimum_turn_length <= 0 || empty_turn):
 					end_faction_turn()
 #		else:
 #			start_faction_turn()
@@ -52,13 +60,15 @@ func _physics_process(delta: float) -> void:
 #called by turn controller to start the faction turn
 func start_faction_turn() -> void:
 	turn_count += 1
+	remaining_minimum_turn_length = minimum_turn_length
 	taking_turn = true
+	empty_turn = true
 	ran_unit_movement = false
 	ran_faction_attacks = false
 	ran_spawning = false
 	waiting_for = {}
 	
-	#get all faction structures
+	#get all faction members
 	for member in get_tree().get_nodes_in_group(faction_id):
 		if(member.has_method("advance_time_units")):
 			member.advance_time_units()
@@ -67,7 +77,7 @@ func end_faction_turn() -> void:
 	taking_turn = false
 	emit_signal("finished_turn")
 
-func run_unit_spawning():
+func run_unit_spawning() -> bool:
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
 	
@@ -87,13 +97,17 @@ func run_unit_spawning():
 	var faction_structures: Array = get_tree().get_nodes_in_group(faction_id + "_structure")
 	
 	#get all structures that can spawn and are ready to spawn
-	var faction_structures_to_spawn: Array = []
+	var faction_members_to_spawn: Array = []
 	
 	for _structure in faction_structures:
 		var structure := (_structure as Structure)
-		if(structure.is_active() && structure.has_method("get_time_until_spawn") && structure.get_time_until_spawn() <= 0):
-			faction_structures_to_spawn.append(structure)
-			
+		if(structure.is_active() && structure.has_method("is_ready_to_spawn") && structure.is_ready_to_spawn()):
+			faction_members_to_spawn.append(structure)
+		#get structure components that are ready to spawn
+		var spawn_comps = structure.get_components(Component.COMPONENT_TYPE.SPAWNER)
+		for comp in spawn_comps:
+			if(comp.is_ready_to_spawn()):
+				faction_members_to_spawn.append(comp)
 	
 	#get positions of all blocking structures and all unit
 	var all_structures: Array = get_tree().get_nodes_in_group("structure")
@@ -110,20 +124,20 @@ func run_unit_spawning():
 		all_blocker_units_cell[unit.get_instance_id()] = Utils.pos_to_cell(unit.global_position)
 	
 	#create empty collection of new spawn positions
-	var confirmed_spawner_structures = []
+	var confirmed_spawners = []
 	var spawner_target_cells: Dictionary = {}
 	
 	#for all spawning strucures:
-	for _structure in faction_structures_to_spawn:
-		var structure := (_structure as Structure)
+	for spawner in faction_members_to_spawn:
 		#get potential spawning positions (4 neighbor cells in orthogonal map)
 		var neighbors := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 		var closest_spawn_cell: Vector2
 		var closest_distance: int = -1
 		#for each potential spawn position
 		for neighbor in neighbors:
-			var neighbor_cell = Utils.pos_to_cell(structure.global_position) + neighbor
+			var neighbor_cell = Utils.pos_to_cell(spawner.global_position) + neighbor
 			#discard the spawning positions that conflict with blocking structures, units, or already chosen spawn positions
+			#TODO: consider multi-cell structures, including the spawner structure itself
 			if(!(spawner_target_cells.values() + all_blocker_structures_cell.values() + all_blocker_units_cell.values()).has(neighbor_cell)):
 				#select the spawn position with the shortest distance to the target
 				var neighbor_distance = navigation_cont.get_distance_to_goal(neighbor_cell, target_cell, true)
@@ -134,20 +148,21 @@ func run_unit_spawning():
 		if(closest_distance == -1):
 			continue
 		#add chosen spawn position to the collection of new spawn positions
-		confirmed_spawner_structures.append(structure)
-		spawner_target_cells[structure.get_instance_id()] = closest_spawn_cell
+		confirmed_spawners.append(spawner)
+		spawner_target_cells[spawner.get_instance_id()] = closest_spawn_cell
 	
+	if(confirmed_spawners.size() == 0):
+		return false
 	#for all the towers with selected spawn positions
-	if(confirmed_spawner_structures.size()):
-		debug_print("spawning from the following structures:")
-	for _structure in confirmed_spawner_structures:
-		var structure := (_structure as Structure)
-		var spawn_cell = spawner_target_cells[structure.get_instance_id()]
-		debug_print(str(structure.get_name()," : ",spawn_cell))
+	debug_print("spawning from the following structures:")
+	for spawner in confirmed_spawners:
+		var spawn_cell = spawner_target_cells[spawner.get_instance_id()]
+		debug_print(str(spawner.get_name()," : ",spawn_cell))
 		#trigger the spawns
-		waiting_for[structure.get_instance_id()] = structure
-		structure.connect("finished_turn", self, "_on_member_finished_turn", [structure.get_instance_id()])
-		structure.start_spawn_action(Utils.cell_to_pos(spawner_target_cells[structure.get_instance_id()]))
+		waiting_for[spawner.get_instance_id()] = spawner
+		spawner.connect("finished_turn", self, "_on_member_finished_turn", [spawner.get_instance_id()])
+		spawner.start_turn_spawn(spawner_target_cells[spawner.get_instance_id()])
+	return true
 
 #compares the move priority of two units
 # (unit1 >  unit2) >  0
@@ -165,7 +180,7 @@ func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
 		return age1 - age2
 	return 0
 	
-func run_unit_movement():
+func run_unit_movement() -> bool:
 	# TODO: sort units by some Priority before calculating movement
 	#	priority could consider how long since the unit successfully moves and the age of the unit
 	#	this way units wont't get stuck as other units move in and out of their desired position
@@ -307,8 +322,10 @@ func run_unit_movement():
 		for key in unit_move_choice_index.keys():
 			unit_move_choice_index[key] = unit_move_choice_index[key] + 1
 	
-	if(faction_units_moved.size()):
-		debug_print("moving the following units:")
+	if(faction_units_moved.size() == 0):
+		return false
+	
+	debug_print("moving the following units:")
 	for _unit in faction_units_moved:
 		var unit := (_unit as Unit)
 		var unit_next_cell = faction_units_moved_cell.get(unit.get_instance_id())
@@ -316,9 +333,10 @@ func run_unit_movement():
 		waiting_for[unit.get_instance_id()] = unit
 		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()])
 		unit.start_turn_movement(Utils.cell_to_pos(unit_next_cell))
+	return true
 
 # calculate targets and trigger attacks for all attacking faction member
-func run_faction_attacks():
+func run_faction_attacks() -> bool:
 	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
 	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
@@ -328,10 +346,17 @@ func run_faction_attacks():
 	var faction_members_attacking := []
 	var attack_targets := {}
 	
-	#get all faction members that can attack
+	
 	for member in get_tree().get_nodes_in_group(faction_id):
-		if(member.has_method("start_turn_attack") && member.get_attack_delay_time_remaining() <= 0):
+		#get all faction members that are ready to attack
+		if(member.has_method("is_ready_to_attack") && member.is_ready_to_attack()):
 			faction_members_to_attack.append(member)
+		#get structure components that are ready to attack
+		if(member is Structure):
+			var attack_comps = (member as Structure).get_components(Component.COMPONENT_TYPE.ATTACK)
+			for comp in attack_comps:
+				if(comp.is_ready_to_attack()):
+					faction_members_to_attack.append(comp)
 	
 	#get all enemy structures/units that can be attacked
 	var enemy_members := get_tree().get_nodes_in_group(target_faction_id)
@@ -372,10 +397,12 @@ func run_faction_attacks():
 			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
 				
 	
+	if(faction_members_attacking.size() == 0):
+		return false
+	
 	#for each unit with a chosen attack target
 		#activate their attack
-	if(faction_members_attacking.size()):
-		debug_print("the following members are attacking:")
+	debug_print("the following members are attacking:")
 	for member in faction_members_attacking:
 		var attack_target = attack_targets.get(member.get_instance_id())[0]
 		var attack_cell = attack_targets.get(member.get_instance_id())[1]
@@ -383,6 +410,7 @@ func run_faction_attacks():
 		waiting_for[member.get_instance_id()] = member
 		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
 		member.start_turn_attack(attack_target, attack_cell)
+	return true
 
 var exact_range_cells := {}
 func get_exact_range_cells(_range: int) -> Array:
