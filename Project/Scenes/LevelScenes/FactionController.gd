@@ -379,8 +379,10 @@ func run_faction_attacks() -> bool:
 	if(faction_members_to_attack.size() == 0):
 		return false
 	
-	var targets_overlap := {}
+	var target_member_overlap := {}
+	var target_cell_overlap := {}
 	var member_valid_attacks := {}
+	#valid attack is an array containing the target member, the target cell, and the distance to that cell
 	
 	#first pass of attack targeting calculation
 	#for each unit ready to attack
@@ -394,12 +396,13 @@ func run_faction_attacks() -> bool:
 			continue
 		if(valid_attacks.size() == 1):
 			#only one possible attack, no need for further calculation
-			var attack_target = valid_attacks[0][0]
-			var attack_cell = valid_attacks[0][1]
+			var attack_target = valid_attacks[0]["target"]
+			var attack_cell = valid_attacks[0]["cell"]
 			faction_members_to_attack_temp[i] = null
 			faction_members_attacking.append(member)
 			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
-			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_cell_overlap[attack_cell] = target_cell_overlap.get(target_cell_overlap, 0) + 1
 		else:
 			#multiple possible targets, carry over to next phase of calculation
 			member_valid_attacks[member.get_instance_id()] = valid_attacks
@@ -419,33 +422,36 @@ func run_faction_attacks() -> bool:
 		if(valid_attacks == null || valid_attacks.size() == 0):
 			#this shouldn't ever happen at this stage
 			continue
-		elif(targets_overlap.size() == 0):
+		elif(target_member_overlap.size() == 0 && target_cell_overlap.size() == 0):
 			#no overlaps to sort by, just take first option
 			#record that target and move to the next attacking unit
-			var attack_target = valid_attacks[0][0]
-			var attack_cell = valid_attacks[0][1]
+			var attack_target = valid_attacks[0]["target"]
+			var attack_cell = valid_attacks[0]["cell"]
 			faction_members_attacking.append(member)
 			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
-			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_cell_overlap[attack_cell] = target_cell_overlap.get(attack_cell, 0) + 1
 			continue
 		else:
-			#sort by overlaps, then take first option
-			var overlap_sorted = []
+			#sort by distance and overlaps, then take first option
+			var modifier_sorted = []
 			var list_parts = {}
-			var largest_overlap = 0
+			var largest_modifier = 0
 			for attack in valid_attacks:
-				var target = attack[0]
-				var cell = attack[1]
-				var overlap = targets_overlap.get(target.get_instance_id(), 0)
-				largest_overlap = max(overlap, largest_overlap)
-				list_parts[overlap] = list_parts.get(overlap, []) + [attack]
-			for overlap in largest_overlap+1:
-				overlap_sorted += list_parts.get(overlap, [])
-			var attack_target = overlap_sorted[0][0]
-			var attack_cell = overlap_sorted[0][1]
+				var target = attack["target"]
+				var cell = attack["cell"]
+				var distance = attack["range"]
+				var modifier = (distance-1)*2 + target_member_overlap.get(target.get_instance_id(), 0) + target_cell_overlap.get(cell, 0)
+				largest_modifier = max(modifier, largest_modifier)
+				list_parts[modifier] = list_parts.get(modifier, []) + [attack]
+			for modifier in largest_modifier+1:
+				modifier_sorted += list_parts.get(modifier, [])
+			var attack_target = modifier_sorted[0]["target"]
+			var attack_cell = modifier_sorted[0]["cell"]
 			faction_members_attacking.append(member)
 			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
-			targets_overlap[attack_target.get_instance_id()] = targets_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			target_cell_overlap[attack_cell] = target_cell_overlap.get(attack_cell, 0) + 1
 			continue
 	
 	if(faction_members_attacking.size() == 0):
@@ -492,11 +498,13 @@ func get_first_valid_attack(member: Node2D) -> Array:
 	return [attack_target, attack_cell]
 
 #get all possible attacks, sorted by range
+#an "attack" is a collection containing the target member, the target cell, and the distance to the target
+#[target_member, target_cell, range]
 func get_all_valid_attacks_by_range(member: Node2D) -> Array:
 	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
 	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
 	
-	var attack_cells := []
+	var attacks := []
 	
 	var member_cell = Utils.pos_to_cell(member.global_position)
 	# for each range distance of the unit (1,2,3...)
@@ -506,15 +514,15 @@ func get_all_valid_attacks_by_range(member: Node2D) -> Array:
 			#any destructable unit/structure not part of the current faction is a potential target
 			var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
 			if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
-				attack_cells.append([target_structure, target_cell])
+				attacks.append({"target":target_structure, "cell":target_cell, "range":r})
 				continue
 			
 			var target_unit: Unit = units_cont.get_unit_at_cell(target_cell)
 			if(target_unit != null && target_unit.has_method("take_attack") && !target_unit.is_in_group(faction_id)):
-				attack_cells.append([target_unit, target_cell])
+				attacks.append({"target":target_unit, "cell":target_cell, "range":r})
 				continue
 			
-	return attack_cells
+	return attacks
 
 var exact_range_cells := {}
 #get the ring of cells corresponding *exactly* to the specified range
