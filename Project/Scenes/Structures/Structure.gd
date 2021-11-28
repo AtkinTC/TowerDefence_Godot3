@@ -26,7 +26,9 @@ var taking_turn: bool = false
 var finished_turn: bool = false
 
 export(bool) var debug: bool = false
-var debug_label: Label
+onready var debug_label: Label = get_node_or_null("DebugLabel")
+var debug_label_offset: Vector2 = Vector2(-18, 10)
+var debug_label_initialized: bool = false
 
 func _init(_structure_type: String = "") -> void:
 	if(_structure_type.length() > 0):
@@ -51,7 +53,7 @@ func _ready() -> void:
 		print(str("components: ", components))
 	
 	## for prototyping purposes
-	var color_shape: ShapePolygon2D = get_node_or_null("ColorShape")
+	var color_shape: Polygon2D = get_node_or_null("ColorShape")
 	if(color_shape != null):
 		if(faction == "player"):
 			color_shape.color = Color.blue
@@ -60,6 +62,7 @@ func _ready() -> void:
 		else:
 			color_shape.color = Color.darkgray
 	
+	debug_init()
 	debug_draw()
 
 func _process(_delta) -> void:
@@ -146,6 +149,10 @@ func get_current_cells() -> Array:
 func set_debug(_debug: bool) -> void:
 	debug = _debug
 
+func debug_init():
+	if(debug_label != null):
+		debug_label_offset = debug_label.get_position()
+
 func debug_draw():
 	update_debug_label()
 
@@ -154,12 +161,14 @@ func update_debug_label():
 		if(debug_label != null):
 			debug_label.set_visible(false)
 	else:
-		if(debug_label == null):
-			debug_label = Label.new()
+		if(!debug_label_initialized):
+			if(debug_label == null):
+				debug_label = Label.new()
+				add_child(debug_label)
 			debug_label.set_as_toplevel(true)
 			debug_label.set_visible(false)
 			debug_label.text = str(get_instance_id())
 			debug_label.set_scale(Vector2(0.85,0.85))
-			add_child(debug_label)
-		debug_label.set_global_position(get_global_position() + Vector2(-18, 10))
+			debug_label_initialized = true
+		debug_label.set_global_position(get_global_position() + debug_label_offset)
 		debug_label.set_visible(true)
