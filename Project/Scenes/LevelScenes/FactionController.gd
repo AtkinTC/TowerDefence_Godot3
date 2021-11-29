@@ -19,14 +19,12 @@ var turn_count: int = 0
 var running: bool = false
 var taking_turn: bool = false
 var empty_turn: bool = true
-var ran_unit_movement: bool = false
-var ran_faction_attacks: bool = false
-var ran_spawning: bool = false
-var ran_influence: bool = false
+
+var segment_ran_flags = {}
 
 var waiting_for: Dictionary = {}
 
-var debug: bool = false
+export(bool) var debug: bool = false
 
 func _ready() -> void:
 	self.add_to_group(faction_id+"_faction_controller", true)
@@ -47,22 +45,22 @@ func _physics_process(delta: float) -> void:
 			# run one part of the turn and then wait
 			# continue until all parts are done and then end turn
 			if(waiting_for.size() == 0):
-				if(!ran_influence):
+				if(!segment_ran_flags.get("influence", false)):
 					if(run_faction_influence()):
 						empty_turn = false
-					ran_influence = true
-				elif(!ran_faction_attacks):
+					segment_ran_flags["influence"] = true
+				elif(!segment_ran_flags.get("attacks", false)):
 					if(run_faction_attacks()):
 						empty_turn = false
-					ran_faction_attacks = true
-				elif(!ran_unit_movement):
+					segment_ran_flags["attacks"] = true
+				elif(!segment_ran_flags.get("movement", false)):
 					if(run_unit_movement()):
 						empty_turn = false
-					ran_unit_movement = true
-				elif(!ran_spawning):
+					segment_ran_flags["movement"] = true
+				elif(!segment_ran_flags.get("spawning", false)):
 					if(run_unit_spawning()):
 						empty_turn = false
-					ran_spawning = true
+					segment_ran_flags["spawning"] = true
 				elif(remaining_minimum_turn_length <= 0 || empty_turn):
 					end_faction_turn()
 
@@ -72,10 +70,7 @@ func start_faction_turn() -> void:
 	remaining_minimum_turn_length = minimum_turn_length
 	taking_turn = true
 	empty_turn = true
-	ran_unit_movement = false
-	ran_faction_attacks = false
-	ran_spawning = false
-	ran_influence = false
+	segment_ran_flags = {}
 	waiting_for = {}
 	
 	#get all faction members
