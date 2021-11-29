@@ -17,8 +17,10 @@ var taking_turn: bool = false
 var waiting_on: Node
 
 func _ready() -> void:
+	ControllersRef.set_controller_reference(ControllersRef.TURN_CONTROLLER, self)
+	
 	for faction_id in FACTIONS:
-		var faction_controller = get_tree().get_nodes_in_group(str(faction_id,"_controller"))[0]
+		var faction_controller = get_tree().get_nodes_in_group(str(faction_id,"_faction_controller"))[0]
 		faction_controllers[faction_id] = faction_controller
 	
 func start_running():

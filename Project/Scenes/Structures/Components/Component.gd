@@ -7,7 +7,7 @@ class_name Component
 func get_class() -> String:
 	return "Component"
 
-enum COMPONENT_TYPE{BASE,ATTACK,SPAWNER}
+enum COMPONENT_TYPE{BASE,ATTACK,SPAWNER,INFLUENCER}
 
 signal finished_turn()
 

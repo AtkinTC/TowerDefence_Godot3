@@ -22,9 +22,17 @@ var empty_turn: bool = true
 var ran_unit_movement: bool = false
 var ran_faction_attacks: bool = false
 var ran_spawning: bool = false
+var ran_influence: bool = false
+
 var waiting_for: Dictionary = {}
 
 var debug: bool = false
+
+func _ready() -> void:
+	self.add_to_group(faction_id+"_faction_controller", true)
+
+func get_faction() -> String:
+	return faction_id
 
 func start_running():
 	running = true
@@ -39,7 +47,11 @@ func _physics_process(delta: float) -> void:
 			# run one part of the turn and then wait
 			# continue until all parts are done and then end turn
 			if(waiting_for.size() == 0):
-				if(!ran_faction_attacks):
+				if(!ran_influence):
+					if(run_faction_influence()):
+						empty_turn = false
+					ran_influence = true
+				elif(!ran_faction_attacks):
 					if(run_faction_attacks()):
 						empty_turn = false
 					ran_faction_attacks = true
@@ -53,9 +65,6 @@ func _physics_process(delta: float) -> void:
 					ran_spawning = true
 				elif(remaining_minimum_turn_length <= 0 || empty_turn):
 					end_faction_turn()
-#		else:
-#			start_faction_turn()
-		
 
 #called by turn controller to start the faction turn
 func start_faction_turn() -> void:
@@ -66,6 +75,7 @@ func start_faction_turn() -> void:
 	ran_unit_movement = false
 	ran_faction_attacks = false
 	ran_spawning = false
+	ran_influence = false
 	waiting_for = {}
 	
 	#get all faction members
@@ -540,6 +550,101 @@ func get_exact_range_cells(_range: int) -> Array:
 				range_cells.append(Vector2(-i, -(_range-i)))
 	exact_range_cells[_range] = range_cells
 	return range_cells
+
+#################
+### Influence ###
+#################
+
+# calculate spread of faction influence
+func run_faction_influence() -> bool:
+	#TODO: cleanup influence that is not in influence range
+	#TODO: cleanup indluence that is cut off from influence source
+	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
+	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
+	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	var influence_cont := (ControllersRef.get_controller_reference(ControllersRef.INFLUENCE_CONTROLLER) as InfluenceControllere)
+	
+	var faction_members_to_influence := []
+	var faction_members_influencing := []
+	var valid_navigation_cells := []
+	var existing_influence_cells := []
+	var new_influence_cells := {}
+	
+	for member in get_tree().get_nodes_in_group(faction_id + "_structure"):
+		#get structure components that are ready to spread influence
+		if(member is Structure):
+			var influencer_comps = (member as Structure).get_components(Component.COMPONENT_TYPE.INFLUENCER)
+			for comp in influencer_comps:
+				if(comp.is_ready_for_action()):
+					faction_members_to_influence.append(comp)
+	
+	if(faction_members_to_influence.size() == 0):
+		return false
+	
+	valid_navigation_cells = navigation_cont.get_navigation_map().get_used_cells()
+	existing_influence_cells = influence_cont.get_faction_influence_cells(faction_id)
+	
+	#TODO: selected influence cell needs to be connected to existing influence or the influence source
+	var faction_members_to_influence_temp = faction_members_to_influence.duplicate()
+	for i in faction_members_to_influence.size():
+		var member = faction_members_to_influence[i]
+		var influencer = (member as InfluenceSpreaderComponent)
+		var member_cell = Utils.pos_to_cell(member.global_position)
+		var cell_selected: bool = false
+		# loop through potential cells by range until a valid cell is selected
+		for r in range(0, influencer.get_max_influence_range()+1):
+			var range_cells := get_exact_range_cells(r)
+			for range_cell in range_cells:
+				var target_cell = range_cell + member_cell
+				
+				# cell is already influenced
+				if(existing_influence_cells.has(target_cell) || new_influence_cells.has(target_cell)):
+					continue
+				# cell is not on the navigation map
+				if(!valid_navigation_cells.has(target_cell)):
+					continue
+				# don't spread influence onto enemy structure
+				var structure = structures_cont.get_structure_at_cell(target_cell)
+				if(structure is Structure && (structure as Structure).get_faction() != faction_id):
+					continue
+				# don't spread influence onto enemy units
+				var unit = units_cont.get_unit_at_cell(target_cell)
+				if(unit is Unit && (unit as Unit).get_faction() != faction_id):
+					continue
+				
+				# valid cell found
+				new_influence_cells[member.get_instance_id()] = (target_cell)
+				faction_members_influencing.append(member)
+				faction_members_to_influence_temp[i] = null
+				cell_selected = true
+			if(cell_selected):
+				break
+				
+	faction_members_to_influence = []
+	for member in faction_members_to_influence_temp:
+		if(member != null):
+			faction_members_to_influence.append(member)
+	
+	if(new_influence_cells.size() == 0):
+		return false
+	
+	# set all the influence cells in the influence maps
+	# maybe in the future this will be handled in the influencer member
+	for cell in new_influence_cells.values():
+		influence_cont.set_cell_faction_influence(faction_id, cell, true)
+		
+	# reset the timers for influencers who who didn't actually do anything
+	for member in faction_members_to_influence:
+		(member as InfluenceSpreaderComponent).reset_delay()
+	
+	debug_print("the following members are spreading influence:")
+	for member in faction_members_influencing:
+		var target_cell = new_influence_cells.get(member.get_instance_id())
+		debug_print(str(member.get_name()," : ",target_cell))
+		waiting_for[member.get_instance_id()] = member
+		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
+		(member as InfluenceSpreaderComponent).start_turn_action(target_cell)
+	return true
 
 #############
 ### Debug ###

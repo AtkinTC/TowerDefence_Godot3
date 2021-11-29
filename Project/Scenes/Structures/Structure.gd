@@ -49,8 +49,8 @@ func _ready() -> void:
 			components.append(child)
 			child.set_faction(faction)
 			child.set_parent_structure_type(structure_type)
-	if(debug && components.size() > 0):
-		print(str("components: ", components))
+#	if(debug && components.size() > 0):
+#		print(str("components: ", components))
 	
 	## for prototyping purposes
 	var color_shape: Polygon2D = get_node_or_null("ColorShape")
@@ -141,6 +141,9 @@ func get_current_cells() -> Array:
 	for cell in shape_cells:
 		current_cells.append((cell as Vector2) + Utils.pos_to_cell(get_global_position()))
 	return current_cells
+
+func get_faction() -> String:
+	return faction
 
 ##################
 ### DEBUG code ###

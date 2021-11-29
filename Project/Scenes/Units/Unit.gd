@@ -293,7 +293,8 @@ func set_ui_element_visibility(_visible: bool):
 	if(health_bar != null):
 		health_bar.visible = _visible
 
-
+func get_faction() -> String:
+	return faction
 
 ##################
 ### DEBUG code ###

@@ -12,6 +12,8 @@ const TOWERS_CONTROLLER = "towers_controller"
 const EFFECTS_CONTROLLER = "effects_controller"
 const STRUCTURES_CONTROLLER = "structures_node"
 const UNITS_CONTROLLER = "units_node"
+const INFLUENCE_CONTROLLER = "influence_controller"
+const TURN_CONTROLLER = "turn_controller"
 
 func reset():
 	controllers_dict = {}
