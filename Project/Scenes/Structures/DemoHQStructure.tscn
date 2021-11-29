@@ -65,4 +65,4 @@ polygon = PoolVector2Array( -8, -4, 8, -4, 8, -16, 16, -16, 16, 16, 8, 16, 8, 4,
 script = ExtResource( 6 )
 debug = true
 influence_spread_delay_time = 1
-max_influence_range = 5
+max_influence_range = 10

@@ -586,15 +586,26 @@ func run_faction_influence() -> bool:
 		var influencer = (member as InfluenceSpreaderComponent)
 		var member_cell = Utils.pos_to_cell(member.global_position)
 		var cell_selected: bool = false
+		var influence_in_previous_range = false
 		# loop through potential cells by range until a valid cell is selected
 		for r in range(0, influencer.get_max_influence_range()+1):
+			if(r > 0 && !influence_in_previous_range):
+				# shortcut to help avoid disconnected influence cells
+				break
+			influence_in_previous_range = false
 			var range_cells := get_exact_range_cells(r)
 			for range_cell in range_cells:
 				var target_cell = range_cell + member_cell
 				
 				# cell is already influenced
-				if(existing_influence_cells.has(target_cell) || new_influence_cells.has(target_cell)):
+				if(existing_influence_cells.has(target_cell)):
+					influence_in_previous_range = true
 					continue
+				
+				# cell is already set to be influenced by another faction member
+				if(new_influence_cells.has(target_cell)):
+					continue	
+				
 				# cell is not on the navigation map
 				if(!valid_navigation_cells.has(target_cell)):
 					continue
@@ -606,6 +617,19 @@ func run_faction_influence() -> bool:
 				var unit = units_cont.get_unit_at_cell(target_cell)
 				if(unit is Unit && (unit as Unit).get_faction() != faction_id):
 					continue
+				
+				if(r > 0):
+					var has_influenced_neighbor := false
+					# check if the cell is connected to any existing influence
+					var neighbors := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
+					for neighbor in neighbors:
+						var neighbor_cell: Vector2 = target_cell + neighbor
+						if(existing_influence_cells.has(neighbor_cell)):
+							has_influenced_neighbor = true
+							break
+					# cell would be disconnected influence
+					if(!has_influenced_neighbor):
+						continue
 				
 				# valid cell found
 				new_influence_cells[member.get_instance_id()] = (target_cell)

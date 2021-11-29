@@ -5,12 +5,15 @@ func get_class() -> String:
 	return "InfluenceMap"
 
 export(String) var faction_id = ""
+export(Color) var tile_color: Color = Color.white
 
 func get_faction() -> String:
 	return faction_id
 
 func _ready() -> void:
 	self.add_to_group(faction_id+"_influence_map", true)
+	
+	self.modulate = tile_color
 	
 	fix_invalid_tiles()
 	if(get_used_cells().size() > 0):
