@@ -114,11 +114,8 @@ script = ExtResource( 44 )
 tile_set = ExtResource( 42 )
 format = 1
 script = ExtResource( 43 )
-__meta__ = {
-"_edit_lock_": true
-}
 faction_id = "player"
-tile_color = Color( 0.709804, 0, 1, 0.560784 )
+tile_color = Color( 0.5, 0, 0.5, 0.5 )
 
 [node name="TurnController" type="Node2D" parent="."]
 script = ExtResource( 29 )
