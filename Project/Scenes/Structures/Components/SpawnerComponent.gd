@@ -50,10 +50,10 @@ func _ready() -> void:
 
 func _draw() -> void:
 	if(debug):
-		var width := 64 #TODO: get cell width dynamically from game grid/Tilemap
+		var dim := Utils.get_map_cell_dimensions()
 		for cell in spawn_cells:
 			if(cell != null && cell is Vector2):
-				draw_rect(Rect2(cell.x*width-width/2, cell.y*width-width/2, width, width), Color(0,0,1,0.25), true)
+				draw_rect(Rect2(cell.x*dim.x-dim.x/2, cell.y*dim.y-dim.y/2, dim.x, dim.y), Color(0,0,1,0.25), true)
 
 func advance_time_units(units: int = 1):
 	.advance_time_units(units)

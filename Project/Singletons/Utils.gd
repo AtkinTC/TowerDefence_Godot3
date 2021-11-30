@@ -3,6 +3,9 @@ extends Node
 func get_navigation_map() -> TileMap:
 	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
 
+func get_map_cell_dimensions() -> Vector2:
+	return get_navigation_map().get_cell_size()
+
 func pos_to_cell(world_position: Vector2) -> Vector2:
 	var local_position = get_navigation_map().to_local(world_position)
 	var map_cell = get_navigation_map().world_to_map(local_position)
@@ -19,7 +22,7 @@ func cell_to_pos(map_cell: Vector2, cell_center: bool = true) -> Vector2:
 # if the center of a cell is in the polygon, then that cell would be returned
 func polygon_to_cells(polygon2d: Polygon2D) -> Array:
 	var cells := []
-	var cell_width := 64 #should be retrieved dynamically from the game grid/tilemap, not hardcoded here
+	var cell_dim := get_map_cell_dimensions()
 	
 	var polygon := polygon2d.get_polygon()
 	
@@ -39,16 +42,16 @@ func polygon_to_cells(polygon2d: Polygon2D) -> Array:
 		min_y = min(min_y, polygon[i].y)
 	
 	# get bounding cell coordinates
-	var max_x_coord = floor(abs(max_x)/cell_width) * sign(max_x)
-	var min_x_coord = floor(abs(min_x)/cell_width) * sign(min_x)
-	var max_y_coord = floor(abs(max_y)/cell_width) * sign(max_y)
-	var min_y_coord = floor(abs(min_y)/cell_width) * sign(min_y)
+	var max_x_coord = floor(abs(max_x)/cell_dim.x) * sign(max_x)
+	var min_x_coord = floor(abs(min_x)/cell_dim.x) * sign(min_x)
+	var max_y_coord = floor(abs(max_y)/cell_dim.y) * sign(max_y)
+	var min_y_coord = floor(abs(min_y)/cell_dim.y) * sign(min_y)
 	
 	# the cells ([min_x_coord:max_x_coord], [min_y_coord:max_y_coord]) is all the possible cells in the shape
 	for x_coord in range(min_x_coord, max_x_coord+1):
 		for y_coord in range(min_y_coord, max_y_coord+1):
 			var cell_coord := Vector2(x_coord, y_coord)
-			var point : = cell_coord * cell_width
+			var point : = cell_coord * cell_dim
 			# Geometry.is_point_in_polygon in Godot 3 is unreliable
 			# replaced with custom solution
 			if(is_point_in_polygon(point, polygon)):
