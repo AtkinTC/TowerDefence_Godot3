@@ -70,7 +70,7 @@ _global_script_classes=[ {
 "path": "res://Scenes/Structures/HQStructure.gd"
 }, {
 "base": "Node2D",
-"class": "InfluenceControllere",
+"class": "InfluenceController",
 "language": "GDScript",
 "path": "res://Scenes/LevelScenes/InfluenceController.gd"
 }, {
@@ -242,7 +242,7 @@ _global_script_class_icons={
 "GameScene": "",
 "GunTower": "",
 "HQStructure": "",
-"InfluenceControllere": "",
+"InfluenceController": "",
 "InfluenceMap": "",
 "InfluenceSpreaderComponent": "",
 "InputButton": "",
