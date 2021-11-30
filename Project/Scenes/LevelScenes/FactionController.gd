@@ -370,6 +370,7 @@ func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
 # calculate targets and trigger attacks for all attacking faction member
 # TODO: handle *individual* attackers; attackers that have their own targetting logic that supersedes faction targetting 
 func run_attacks() -> bool:
+	var method_name = "run_attacks"
 	var nav_cont := get_nav_cont()
 	var structs_cont := get_structs_cont()
 	var units_cont := get_units_cont()
@@ -398,6 +399,8 @@ func run_attacks() -> bool:
 	var member_valid_attacks := {}
 	#valid attack is an array containing the target member, the target cell, and the distance to that cell
 	
+	# run two passes: first pass for attackers with only one valid target, second pass for the rest
+	
 	#first pass of attack targeting calculation
 	#for each unit ready to attack
 	var faction_members_to_attack_temp = faction_members_to_attack.duplicate()
@@ -408,18 +411,21 @@ func run_attacks() -> bool:
 			#no valid attacks, remove attacker
 			faction_members_to_attack_temp[i] = null
 			continue
+			
 		if(valid_attacks.size() == 1):
 			#only one possible attack, no need for further calculation
-			var attack_target = valid_attacks[0]["target"]
-			var attack_cell = valid_attacks[0]["cell"]
 			faction_members_to_attack_temp[i] = null
 			faction_members_attacking.append(member)
-			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
+			attack_targets[member.get_instance_id()] = valid_attacks[0]
+			var attack_target = valid_attacks[0]["target"]
 			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			var attack_cell = valid_attacks[0]["cell"]
 			target_cell_overlap[attack_cell] = target_cell_overlap.get(target_cell_overlap, 0) + 1
+			
 		else:
 			#multiple possible targets, carry over to next phase of calculation
 			member_valid_attacks[member.get_instance_id()] = valid_attacks
+			
 	faction_members_to_attack = []
 	for member in faction_members_to_attack_temp:
 		if(member != null):
@@ -435,38 +441,53 @@ func run_attacks() -> bool:
 		var valid_attacks = member_valid_attacks[member.get_instance_id()]
 		if(valid_attacks == null || valid_attacks.size() == 0):
 			#this shouldn't ever happen at this stage
+			print(str(get_class(),":",method_name,": Unexpected code branch."))
 			continue
+			
 		elif(target_member_overlap.size() == 0 && target_cell_overlap.size() == 0):
 			#no overlaps to sort by, just take first option
 			#record that target and move to the next attacking unit
-			var attack_target = valid_attacks[0]["target"]
-			var attack_cell = valid_attacks[0]["cell"]
 			faction_members_attacking.append(member)
-			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
+			attack_targets[member.get_instance_id()] = valid_attacks[0]
+			var attack_target = valid_attacks[0]["target"]
 			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			var attack_cell = valid_attacks[0]["cell"]
 			target_cell_overlap[attack_cell] = target_cell_overlap.get(attack_cell, 0) + 1
 			continue
+			
 		else:
 			#sort by distance and overlaps, then take first option
-			var modifier_sorted = []
+			var sorted_by_modifier = []
 			var list_parts = {}
+			var smallest_modifier = 10000000
 			var largest_modifier = 0
 			for attack in valid_attacks:
 				var target = attack["target"]
 				var cell = attack["cell"]
 				var distance = attack["range"]
+				
+				# calculate a 'modifier' value based on distance to target, and number of overlapping attacks with the same target
+				# lowest modifier will be the highest priority target
 				var modifier = (distance-1)*2 + target_member_overlap.get(target.get_instance_id(), 0) + target_cell_overlap.get(cell, 0)
+				
+				# sort the targets into a arrays of shared modifier value
 				largest_modifier = max(modifier, largest_modifier)
+				smallest_modifier = min(modifier, smallest_modifier)
 				list_parts[modifier] = list_parts.get(modifier, []) + [attack]
-			for modifier in largest_modifier+1:
-				modifier_sorted += list_parts.get(modifier, [])
-			var attack_target = modifier_sorted[0]["target"]
-			var attack_cell = modifier_sorted[0]["cell"]
+				
+			# reassemble the list from the list parts
+			#for modifier in range(smallest_modifier, largest_modifier+1):
+			#	sorted_by_modifier += list_parts.get(modifier, [])
+			
+			# first value of the first list segment is the 'best' attack
+			var best_attack = list_parts[smallest_modifier][0]
+			
 			faction_members_attacking.append(member)
-			attack_targets[member.get_instance_id()] = [attack_target, attack_cell]
+			attack_targets[member.get_instance_id()] = best_attack
+			var attack_target = best_attack["target"]
 			target_member_overlap[attack_target.get_instance_id()] = target_member_overlap.get(attack_target.get_instance_id(), 0) + 1
+			var attack_cell = best_attack["cell"]
 			target_cell_overlap[attack_cell] = target_cell_overlap.get(attack_cell, 0) + 1
-			continue
 	
 	if(faction_members_attacking.size() == 0):
 		return false
@@ -475,8 +496,8 @@ func run_attacks() -> bool:
 		#activate their attack
 	debug_print("the following members are attacking:")
 	for member in faction_members_attacking:
-		var attack_target = attack_targets.get(member.get_instance_id())[0]
-		var attack_cell = attack_targets.get(member.get_instance_id())[1]
+		var attack_target = attack_targets.get(member.get_instance_id())["target"]
+		var attack_cell = attack_targets.get(member.get_instance_id())["cell"]
 		debug_print(str(member.get_name()," : ",attack_target.get_name()))
 		waiting_for[member.get_instance_id()] = member
 		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
