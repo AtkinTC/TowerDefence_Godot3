@@ -153,7 +153,7 @@ faction = "enemy"
 debug = true
 
 [node name="E-DemoHQStructure" parent="StructuresNode" instance=ExtResource( 7 )]
-position = Vector2( 160, 448 )
+position = Vector2( 160, 480 )
 faction = "enemy"
 debug = true
 

@@ -10,7 +10,7 @@ onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape
 
 var age: int = 0
 
-onready var cel_shape_polygon: Polygon2D = get_node_or_null("CellShapePolygon")
+onready var cell_shape_polygon: Polygon2D = get_node_or_null("CellShapePolygon")
 var shape_cells := [Vector2(0,0)]
 var current_cells := []
 
@@ -44,9 +44,9 @@ func _ready() -> void:
 	self.add_to_group(faction+"_structure", true)
 	self.add_to_group(faction, true)
 	
-	if(cel_shape_polygon != null):
-		shape_cells = Utils.polygon_to_cells(cel_shape_polygon)
-		cel_shape_polygon.queue_free()
+	if(cell_shape_polygon != null):
+		shape_cells = Utils.polygon_to_cells(cell_shape_polygon)
+		cell_shape_polygon.queue_free()
 	if(shape_cells == null || shape_cells.size() == 0):
 		shape_cells = [Vector2(0,0)]
 	

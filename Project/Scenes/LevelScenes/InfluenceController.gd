@@ -1,5 +1,8 @@
 extends Node2D
-class_name InfluenceControllere
+class_name InfluenceController
+
+func get_class() -> String:
+	return "InfluenceController"
 
 const FACTIONS = ["player", "enemy"]
 

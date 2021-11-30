@@ -6,7 +6,7 @@ signal finished_turn()
 var CLASS_NAME = "FactionController"
 
 func get_class() -> String:
-	return CLASS_NAME
+	return "FactionController"
 
 export(String) var faction_id: String
 export(String) var target_faction_id: String
@@ -46,19 +46,19 @@ func _physics_process(delta: float) -> void:
 			# continue until all parts are done and then end turn
 			if(waiting_for.size() == 0):
 				if(!segment_ran_flags.get("influence", false)):
-					if(run_faction_influence()):
+					if(run_influence()):
 						empty_turn = false
 					segment_ran_flags["influence"] = true
 				elif(!segment_ran_flags.get("attacks", false)):
-					if(run_faction_attacks()):
+					if(run_attacks()):
 						empty_turn = false
 					segment_ran_flags["attacks"] = true
 				elif(!segment_ran_flags.get("movement", false)):
-					if(run_unit_movement()):
+					if(run_movement()):
 						empty_turn = false
 					segment_ran_flags["movement"] = true
 				elif(!segment_ran_flags.get("spawning", false)):
-					if(run_unit_spawning()):
+					if(run_spawning()):
 						empty_turn = false
 					segment_ran_flags["spawning"] = true
 				elif(remaining_minimum_turn_length <= 0 || empty_turn):
@@ -87,13 +87,30 @@ func _on_member_finished_turn(_instance_id: int):
 		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has finished its action"))
 		waiting_for.erase(_instance_id)
 
+func get_nav_cont() -> NavigationController:
+	return (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
+
+func get_map_cont() -> GameMap:
+	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
+	
+func get_structs_cont() -> StructuresNode:
+	return (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
+
+func get_units_cont() -> UnitsNode:
+	return (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	
+func get_influence_cont() -> InfluenceController:
+	return (ControllersRef.get_controller_reference(ControllersRef.INFLUENCE_CONTROLLER) as InfluenceController)
+
 ################
 ### Spawning ###
 ################
 
-func run_unit_spawning() -> bool:
-	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
-	var map_cont := (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap)
+func run_spawning() -> bool:
+	var nav_cont := get_nav_cont()
+	var map_cont := get_map_cont()
+	var structs_cont := get_structs_cont()
+	var units_cont := get_units_cont()
 	
 	var target_node: Node2D
 	for member in get_tree().get_nodes_in_group(target_faction_id + "_hq"):
@@ -115,27 +132,13 @@ func run_unit_spawning() -> bool:
 	
 	for _structure in faction_structures:
 		var structure := (_structure as Structure)
-		if(structure.is_active() && structure.has_method("is_ready_to_spawn") && structure.is_ready_to_spawn()):
-			faction_members_to_spawn.append(structure)
+#		if(structure.is_active() && structure.has_method("is_ready_to_spawn") && structure.is_ready_to_spawn()):
+#			faction_members_to_spawn.append(structure)
 		#get structure components that are ready to spawn
 		var spawn_comps = structure.get_components(Component.COMPONENT_TYPE.SPAWNER)
 		for comp in spawn_comps:
 			if(comp.is_ready_to_spawn()):
 				faction_members_to_spawn.append(comp)
-	
-	#get positions of all blocking structures and all unit
-	var all_structures: Array = get_tree().get_nodes_in_group("structure")
-	var all_blocker_structures_cell: Dictionary = {}
-	for _structure in all_structures:
-		var structure := (_structure as Structure)
-		if(structure.is_blocker()):
-			all_blocker_structures_cell[structure.get_instance_id()] = Utils.pos_to_cell(structure.global_position)
-	
-	var all_units: Array = get_tree().get_nodes_in_group("unit")
-	var all_blocker_units_cell: Dictionary = {}
-	for _unit in all_units:
-		var unit := (_unit as Unit)
-		all_blocker_units_cell[unit.get_instance_id()] = Utils.pos_to_cell(unit.global_position)
 	
 	#create empty collection of new spawn positions
 	var confirmed_spawners = []
@@ -143,6 +146,7 @@ func run_unit_spawning() -> bool:
 	
 	#for all spawning strucures:
 	for spawner in faction_members_to_spawn:
+		#TODO: spawner should contain defined spawn positions for more control over behavior
 		#get potential spawning positions (4 neighbor cells in orthogonal map)
 		var neighbors := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 		var closest_spawn_cell: Vector2
@@ -150,17 +154,25 @@ func run_unit_spawning() -> bool:
 		#for each potential spawn position
 		for neighbor in neighbors:
 			var neighbor_cell = Utils.pos_to_cell(spawner.global_position) + neighbor
-			#discard the spawning positions that conflict with blocking structures, units, or already chosen spawn positions
-			#TODO: consider multi-cell structures, including the spawner structure itself
-			if(!(spawner_target_cells.values() + all_blocker_structures_cell.values() + all_blocker_units_cell.values()).has(neighbor_cell)):
-				#select the spawn position with the shortest distance to the target
-				var neighbor_distance = navigation_cont.get_distance_to_goal(neighbor_cell, target_cell, true)
-				if(neighbor_distance >= 0 && (closest_distance < 0 || neighbor_distance < closest_distance)):
-					closest_distance = neighbor_distance
-					closest_spawn_cell = neighbor_cell
+			
+			if(spawner_target_cells.values().has(neighbor_cell)):
+				# conflicts with already chosen spawn position of another spawner
+				continue
+			
+			if((structs_cont.get_structure_at_cell(neighbor_cell) != null && structs_cont.get_structure_at_cell(neighbor_cell).is_blocker())
+			|| units_cont.get_unit_at_cell(neighbor_cell) != null):
+				# conflicts with an existing unit or blocker structure
+				continue
+				
+			var neighbor_distance = nav_cont.get_distance_to_goal(neighbor_cell, target_cell, true)
+			if(neighbor_distance >= 0 && (closest_distance < 0 || neighbor_distance < closest_distance)):
+				closest_distance = neighbor_distance
+				closest_spawn_cell = neighbor_cell
+			
 		#if there are no valid spawn positions, then skip this structure for the turn
 		if(closest_distance == -1):
 			continue
+		
 		#add chosen spawn position to the collection of new spawn positions
 		confirmed_spawners.append(spawner)
 		spawner_target_cells[spawner.get_instance_id()] = closest_spawn_cell
@@ -182,12 +194,9 @@ func run_unit_spawning() -> bool:
 ### Movement ###
 ################
 
-func run_unit_movement() -> bool:
-	# TODO: sort units by some Priority before calculating movement
-	#	priority could consider how long since the unit successfully moves and the age of the unit
-	#	this way units wont't get stuck as other units move in and out of their desired position
-	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
-	var structures_node := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
+func run_movement() -> bool:
+	var nav_cont := get_nav_cont()
+	var structs_cont := get_structs_cont()
 	
 	var target_node: Node2D
 	for member in get_tree().get_nodes_in_group(target_faction_id + "_hq"):
@@ -267,7 +276,7 @@ func run_unit_movement() -> bool:
 				var move_choices = unit_potential_choices.get(unit.get_instance_id())
 				if(move_choices == null):
 					var unit_cell = Utils.pos_to_cell(unit.global_position)
-					move_choices = navigation_cont.get_potential_next_cells(unit_cell, target_cell, true, true)
+					move_choices = nav_cont.get_potential_next_cells(unit_cell, target_cell, true, true)
 					unit_potential_choices[unit.get_instance_id()] = move_choices
 					unit_move_choice_index[unit.get_instance_id()] = 0
 				var choice_index = unit_move_choice_index.get(unit.get_instance_id(), 0)
@@ -275,7 +284,7 @@ func run_unit_movement() -> bool:
 				if(move_choices != null && choice_index < move_choices.size()):
 					var choice_cell = move_choices[choice_index]
 					#if next nav cell conflicts with an unmoving unit or a unit that has already moved or a blocker structure:
-					while((structures_node.get_structure_at_cell(choice_cell) != null && structures_node.get_structure_at_cell(choice_cell).is_blocker())
+					while((structs_cont.get_structure_at_cell(choice_cell) != null && structs_cont.get_structure_at_cell(choice_cell).is_blocker())
 						|| (units_unmoving_cell.values() + faction_units_moved_cell.values()).has(choice_cell)):
 						#go to next best nav cell and check again
 						choice_index += 1
@@ -359,16 +368,15 @@ func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
 
 # calculate targets and trigger attacks for all attacking faction member
 # TODO: handle *individual* attackers; attackers that have their own targetting logic that supersedes faction targetting 
-func run_faction_attacks() -> bool:
-	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
-	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
-	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+func run_attacks() -> bool:
+	var nav_cont := get_nav_cont()
+	var structs_cont := get_structs_cont()
+	var units_cont := get_units_cont()
 	
 	var faction_members_to_attack := []
 	var enemy_members_can_be_attacked := []
 	var faction_members_attacking := []
 	var attack_targets := {}
-	
 	
 	for member in get_tree().get_nodes_in_group(faction_id):
 		#get all faction members that are ready to attack
@@ -476,8 +484,8 @@ func run_faction_attacks() -> bool:
 
 # get the first found valid attack and then stop search
 func get_first_valid_attack(member: Node2D) -> Array:
-	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
-	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	var structs_cont := get_structs_cont()
+	var units_cont := get_units_cont()
 	
 	var member_cell = Utils.pos_to_cell(member.global_position)
 	# for each range distance of the unit (1,2,3...)
@@ -487,7 +495,7 @@ func get_first_valid_attack(member: Node2D) -> Array:
 		for range_cell in get_exact_range_cells(r):
 			var target_cell = range_cell + member_cell
 			#any destructable unit/structure not part of the current faction is a potential target
-			var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
+			var target_structure: Structure = structs_cont.get_structure_at_cell(target_cell)
 			if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
 				attack_target = target_structure
 				attack_cell = target_cell
@@ -504,10 +512,9 @@ func get_first_valid_attack(member: Node2D) -> Array:
 
 #get all possible attacks, sorted by range
 #an "attack" is a collection containing the target member, the target cell, and the distance to the target
-#[target_member, target_cell, range]
 func get_all_valid_attacks_by_range(member: Node2D) -> Array:
-	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
-	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
+	var structs_cont := get_structs_cont()
+	var units_cont := get_units_cont()
 	
 	var attacks := []
 	
@@ -517,7 +524,7 @@ func get_all_valid_attacks_by_range(member: Node2D) -> Array:
 		for range_cell in get_exact_range_cells(r):
 			var target_cell = range_cell + member_cell
 			#any destructable unit/structure not part of the current faction is a potential target
-			var target_structure: Structure = structures_cont.get_structure_at_cell(target_cell)
+			var target_structure: Structure = structs_cont.get_structure_at_cell(target_cell)
 			if(target_structure != null && target_structure.has_method("take_attack") && !target_structure.is_in_group(faction_id)):
 				attacks.append({"target":target_structure, "cell":target_cell, "range":r})
 				continue
@@ -551,13 +558,13 @@ func get_exact_range_cells(_range: int) -> Array:
 #################
 
 # calculate spread of faction influence
-func run_faction_influence() -> bool:
+func run_influence() -> bool:
 	#TODO: cleanup influence that is not in influence range
 	#TODO: cleanup indluence that is cut off from influence source
-	var navigation_cont := (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
-	var structures_cont := (ControllersRef.get_controller_reference(ControllersRef.STRUCTURES_CONTROLLER) as StructuresNode)
-	var units_cont := (ControllersRef.get_controller_reference(ControllersRef.UNITS_CONTROLLER) as UnitsNode)
-	var influence_cont := (ControllersRef.get_controller_reference(ControllersRef.INFLUENCE_CONTROLLER) as InfluenceControllere)
+	var nav_cont := get_nav_cont()
+	var structs_cont := get_structs_cont()
+	var units_cont := get_units_cont()
+	var influence_cont := get_influence_cont()
 	
 	var faction_members_to_influence := []
 	var faction_members_influencing := []
@@ -576,7 +583,7 @@ func run_faction_influence() -> bool:
 	if(faction_members_to_influence.size() == 0):
 		return false
 	
-	valid_navigation_cells = navigation_cont.get_navigation_map().get_used_cells()
+	valid_navigation_cells = nav_cont.get_navigation_map().get_used_cells()
 	existing_influence_cells = influence_cont.get_faction_influence_cells(faction_id)
 	
 	#TODO: selected influence cell needs to be connected to existing influence or the influence source
@@ -610,7 +617,7 @@ func run_faction_influence() -> bool:
 				if(!valid_navigation_cells.has(target_cell)):
 					continue
 				# don't spread influence onto enemy structure
-				var structure = structures_cont.get_structure_at_cell(target_cell)
+				var structure = structs_cont.get_structure_at_cell(target_cell)
 				if(structure is Structure && (structure as Structure).get_faction() != faction_id):
 					continue
 				# don't spread influence onto enemy units
@@ -652,7 +659,7 @@ func run_faction_influence() -> bool:
 	for cell in new_influence_cells.values():
 		influence_cont.set_cell_faction_influence(faction_id, cell, true)
 		
-	# reset the timers for influencers who who didn't actually do anything
+	# reset the timers for influencers that didn't actually do anything
 	for member in faction_members_to_influence:
 		(member as InfluenceSpreaderComponent).reset_delay()
 	

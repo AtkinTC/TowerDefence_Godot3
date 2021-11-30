@@ -1,6 +1,9 @@
 extends Node2D
 class_name NavigationController
 
+func get_class() -> String:
+	return "NavigationController"
+
 class NavTypeMaps:
 	var next_cell_map: Dictionary = {}
 	var distance_map: Dictionary = {}
