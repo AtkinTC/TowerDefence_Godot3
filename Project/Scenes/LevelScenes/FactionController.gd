@@ -146,36 +146,37 @@ func run_spawning() -> bool:
 	
 	#for all spawning strucures:
 	for spawner in faction_members_to_spawn:
-		#TODO: spawner should contain defined spawn positions for more control over behavior
-		#get potential spawning positions (4 neighbor cells in orthogonal map)
-		var neighbors := [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
-		var closest_spawn_cell: Vector2
-		var closest_distance: int = -1
+		var base_spawn_cells = spawner.get_spawn_cells()
+		if(base_spawn_cells == null || base_spawn_cells.size() == 0):
+			base_spawn_cells = [Vector2.ZERO]
+		
+		var cell_closest_to_target: Vector2
+		var shortest_distance_to_target: int = -1
 		#for each potential spawn position
-		for neighbor in neighbors:
-			var neighbor_cell = Utils.pos_to_cell(spawner.global_position) + neighbor
+		for base_spawn_cell in base_spawn_cells:
+			var spawn_cell = Utils.pos_to_cell(spawner.global_position) + base_spawn_cell
 			
-			if(spawner_target_cells.values().has(neighbor_cell)):
+			if(spawner_target_cells.values().has(spawn_cell)):
 				# conflicts with already chosen spawn position of another spawner
 				continue
 			
-			if((structs_cont.get_structure_at_cell(neighbor_cell) != null && structs_cont.get_structure_at_cell(neighbor_cell).is_blocker())
-			|| units_cont.get_unit_at_cell(neighbor_cell) != null):
+			if((structs_cont.get_structure_at_cell(spawn_cell) != null && structs_cont.get_structure_at_cell(spawn_cell).is_blocker())
+			|| units_cont.get_unit_at_cell(spawn_cell) != null):
 				# conflicts with an existing unit or blocker structure
 				continue
-				
-			var neighbor_distance = nav_cont.get_distance_to_goal(neighbor_cell, target_cell, true)
-			if(neighbor_distance >= 0 && (closest_distance < 0 || neighbor_distance < closest_distance)):
-				closest_distance = neighbor_distance
-				closest_spawn_cell = neighbor_cell
 			
+			var nav_distance_to_target = nav_cont.get_distance_to_goal(spawn_cell, target_cell, true)
+			if(nav_distance_to_target >= 0 && (shortest_distance_to_target < 0 || nav_distance_to_target < shortest_distance_to_target)):
+				shortest_distance_to_target = nav_distance_to_target
+				cell_closest_to_target = spawn_cell
+		
 		#if there are no valid spawn positions, then skip this structure for the turn
-		if(closest_distance == -1):
+		if(shortest_distance_to_target == -1 || cell_closest_to_target == null):
 			continue
 		
 		#add chosen spawn position to the collection of new spawn positions
 		confirmed_spawners.append(spawner)
-		spawner_target_cells[spawner.get_instance_id()] = closest_spawn_cell
+		spawner_target_cells[spawner.get_instance_id()] = cell_closest_to_target
 	
 	if(confirmed_spawners.size() == 0):
 		return false

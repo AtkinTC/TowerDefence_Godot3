@@ -65,3 +65,7 @@ script = ExtResource( 7 )
 debug = true
 spawn_unit_scene = ExtResource( 3 )
 spawn_delay_time = 2
+
+[node name="CellShapePolygon" type="Polygon2D" parent="SpawnerComponent"]
+color = Color( 0, 0, 1, 0.25098 )
+polygon = PoolVector2Array( -64, -32, -64, 32, -32, 64, 32, 64, 64, 32, 64, -32, 32, -64, -32, -64 )

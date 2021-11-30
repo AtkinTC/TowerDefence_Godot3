@@ -71,10 +71,10 @@ func _ready() -> void:
 	
 	debug_init()
 	debug_draw()
+	update()
 
 func _process(_delta) -> void:
 	debug_draw()
-	update()
 
 func _physics_process(delta: float) -> void:
 	process_turn(delta)

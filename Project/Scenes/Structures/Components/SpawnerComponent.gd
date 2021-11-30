@@ -9,6 +9,9 @@ func _init() -> void:
 
 export(PackedScene) var spawn_unit_scene: PackedScene
 
+onready var cell_shape_polygon: Polygon2D = get_node_or_null("CellShapePolygon")
+var spawn_cells := [Vector2(0,0)]
+
 export(int) var spawn_delay_time: int = -1
 var spawn_delay_time_remaining: int
 var spawn_animation_time: float = 0.25
@@ -23,6 +26,34 @@ var debug_spawn_line: Line2D
 
 func _ready() -> void:
 	spawn_delay_time_remaining = spawn_delay_time
+	
+	if(cell_shape_polygon != null):
+		spawn_cells = Utils.polygon_to_cells(cell_shape_polygon)
+		cell_shape_polygon.queue_free()
+	if(spawn_cells == null || spawn_cells.size() == 0):
+		spawn_cells = [Vector2(0,0)]
+	if(spawn_cells.size() > 1):
+		#sort by distance from origin (rectangular distance)
+		var segments = {}
+		var min_distance = 1000000
+		var max_distance = -1
+		for cell in spawn_cells:
+			var rect_distance := abs(cell.x) + abs(cell.y)
+			max_distance = max(max_distance, rect_distance)
+			min_distance = min(min_distance, rect_distance)
+			segments[rect_distance] = segments.get(rect_distance, []) + [cell]
+		spawn_cells = []
+		for i in range(min_distance, max_distance+1):
+			spawn_cells += segments.get(i as float, [])
+		
+	print(str("spawn cells : ", spawn_cells))
+
+func _draw() -> void:
+	if(debug):
+		var width := 64 #TODO: get cell width dynamically from game grid/Tilemap
+		for cell in spawn_cells:
+			if(cell != null && cell is Vector2):
+				draw_rect(Rect2(cell.x*width-width/2, cell.y*width-width/2, width, width), Color(0,0,1,0.25), true)
 
 func advance_time_units(units: int = 1):
 	.advance_time_units(units)
@@ -67,6 +98,9 @@ func get_spawn_delay_time_remaining() -> int:
 	
 func is_ready_to_spawn() -> bool:
 	return spawn_delay_time_remaining <= 0
+
+func get_spawn_cells() -> Array:
+	return spawn_cells
 
 ##################
 ### DEBUG code ###
