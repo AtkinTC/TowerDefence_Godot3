@@ -10,7 +10,8 @@ onready var collision_shape: CollisionShape2D = get_node_or_null("CollisionShape
 
 var age: int = 0
 
-export(Array) var shape_cells := [Vector2(0,0)]
+onready var cel_shape_polygon: Polygon2D = get_node_or_null("CellShapePolygon")
+var shape_cells := [Vector2(0,0)]
 var current_cells := []
 
 export(bool) var active: bool = true
@@ -43,6 +44,12 @@ func _ready() -> void:
 	self.add_to_group(faction+"_structure", true)
 	self.add_to_group(faction, true)
 	
+	if(cel_shape_polygon != null):
+		shape_cells = Utils.polygon_to_cells(cel_shape_polygon)
+		cel_shape_polygon.queue_free()
+	if(shape_cells == null || shape_cells.size() == 0):
+		shape_cells = [Vector2(0,0)]
+	
 	# register child components
 	for child in get_children():
 		if(child is Component):
@@ -67,9 +74,17 @@ func _ready() -> void:
 
 func _process(_delta) -> void:
 	debug_draw()
+	update()
 
 func _physics_process(delta: float) -> void:
 	process_turn(delta)
+
+func _draw() -> void:
+	if(debug):
+		var width := 64 #TODO: get cell width dynamically from game grid/Tilemap
+		for cell in shape_cells:
+			if(cell != null && cell is Vector2):
+				draw_rect(Rect2(cell.x*width-width/2, cell.y*width-width/2, width, width), Color(1,0,0,0.25), true)
 
 # filler meant to be overriden by structures with actual turn logic
 func process_turn(delta: float) -> void:

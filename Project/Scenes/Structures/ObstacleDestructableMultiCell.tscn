@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Structures/DestructableStructure.gd" type="Script" id=2]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=3]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=4]
-[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=5]
 
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 32, 32 )
@@ -14,17 +13,13 @@ extents = Vector2( 22, 22 )
 
 [node name="ObstacleDestructable" type="Area2D"]
 script = ExtResource( 2 )
-shape_cells = [ Vector2( 0, 0 ), Vector2( 1, 0 ), Vector2( 0, 1 ), Vector2( -1, 0 ), Vector2( 0, -1 ) ]
 structure_type = "ObstacleDestructable"
 blocker = true
 base_health = 100
 
-[node name="CellShapeDraw" type="Node2D" parent="."]
-script = ExtResource( 5 )
-__meta__ = {
-"_editor_description_": ""
-}
-shape_cells = [ Vector2( 0, 0 ), Vector2( 1, 0 ), Vector2( 0, 1 ), Vector2( -1, 0 ), Vector2( 0, -1 ) ]
+[node name="CellShapePolygon" type="Polygon2D" parent="."]
+color = Color( 1, 0, 0, 0.25 )
+polygon = PoolVector2Array( -96, -32, -96, 32, -32, 32, -32, 96, 32, 96, 32, 32, 96, 32, 96, -32, 32, -32, 32, -96, -32, -96, -32, -32 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false

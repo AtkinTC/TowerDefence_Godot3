@@ -1,11 +1,10 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scenes/SupportScenes/ShapePolygon2D.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Structures/DestructableStructure.gd" type="Script" id=2]
 [ext_resource path="res://Scenes/Units/BasicUnit.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Assets/UI/Art/red_bar_001.png" type="Texture" id=4]
 [ext_resource path="res://Assets/UI/Art/green_bar_001.png" type="Texture" id=5]
-[ext_resource path="res://Scenes/Structures/CellShapeDraw.gd" type="Script" id=6]
 [ext_resource path="res://Scenes/Structures/Components/SpawnerComponent.gd" type="Script" id=7]
 
 [sub_resource type="RectangleShape2D" id=1]
@@ -22,8 +21,9 @@ script = ExtResource( 2 )
 structure_type = "DemoSpawner"
 blocker = true
 
-[node name="CellShapeDraw" type="Node2D" parent="."]
-script = ExtResource( 6 )
+[node name="CellShapePolygon" type="Polygon2D" parent="."]
+color = Color( 1, 0, 0, 0.25 )
+polygon = PoolVector2Array( -32, -32, -32, 32, 32, 32, 32, -32 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
