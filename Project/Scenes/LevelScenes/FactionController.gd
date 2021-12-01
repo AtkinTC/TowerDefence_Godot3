@@ -11,7 +11,7 @@ func get_class() -> String:
 export(String) var faction_id: String
 export(String) var target_faction_id: String
 
-var minimum_turn_length = 0.25
+var minimum_turn_length = 0.0
 var remaining_minimum_turn_length
 
 var turn_count: int = 0
@@ -39,6 +39,9 @@ func stop_running():
 	running = false
 
 func _physics_process(delta: float) -> void:
+	if(clean_waiting_list()):
+		print(str(get_class()," : Null in waiting_for list"))
+		
 	if(running):
 		if(taking_turn):
 			remaining_minimum_turn_length = max(0, remaining_minimum_turn_length - delta)
@@ -85,8 +88,17 @@ func end_faction_turn() -> void:
 func _on_member_finished_turn(_instance_id: int):
 	if(waiting_for.has(_instance_id)):
 		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has finished its action"))
+		if(is_connected("tree_exiting", self, "_on_member_exiting")):
+			disconnect("tree_exiting", self, "_on_member_exiting")
 		waiting_for.erase(_instance_id)
 
+func _on_member_exiting(_instance_id: int):
+	if(waiting_for.has(_instance_id)):
+		debug_print(str(CLASS_NAME, " : member (", _instance_id, ") has left the tree during turn"))
+		if(is_connected("finished_turn", self, "_on_member_finished_turn")):
+			disconnect("finished_turn", self, "_on_member_finished_turn")
+		waiting_for.erase(_instance_id)
+		
 func get_nav_cont() -> NavigationController:
 	return (ControllersRef.get_controller_reference(ControllersRef.NAVIGATION_CONTROLLER) as NavigationController)
 
@@ -102,6 +114,13 @@ func get_units_cont() -> UnitsNode:
 func get_influence_cont() -> InfluenceController:
 	return (ControllersRef.get_controller_reference(ControllersRef.INFLUENCE_CONTROLLER) as InfluenceController)
 
+func clean_waiting_list() -> bool:
+	var had_null = false
+	for key in waiting_for.keys():
+		if !(waiting_for[key] is Node):
+			waiting_for.erase(key)
+			had_null = true
+	return had_null
 ################
 ### Spawning ###
 ################
@@ -187,8 +206,10 @@ func run_spawning() -> bool:
 		debug_print(str(spawner.get_name()," : ",spawn_cell))
 		#trigger the spawns
 		waiting_for[spawner.get_instance_id()] = spawner
-		spawner.connect("finished_turn", self, "_on_member_finished_turn", [spawner.get_instance_id()])
+		spawner.connect("finished_turn", self, "_on_member_finished_turn", [spawner.get_instance_id()], CONNECT_ONESHOT)
+		spawner.connect("tree_exiting", self, "_on_member_exiting", [spawner.get_instance_id()], CONNECT_ONESHOT)
 		spawner.start_turn_spawn(spawner_target_cells[spawner.get_instance_id()])
+		
 	return true
 
 ################
@@ -343,8 +364,10 @@ func run_movement() -> bool:
 		var unit_next_cell = faction_units_moved_cell.get(unit.get_instance_id())
 		debug_print(str(unit.get_name()," : ",unit_next_cell))
 		waiting_for[unit.get_instance_id()] = unit
-		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()])
+		unit.connect("finished_turn", self, "_on_member_finished_turn", [unit.get_instance_id()], CONNECT_ONESHOT)
+		unit.connect("tree_exiting", self, "_on_member_exiting", [unit.get_instance_id()], CONNECT_ONESHOT)
 		unit.start_turn_movement(Utils.cell_to_pos(unit_next_cell))
+	
 	return true
 
 #compares the move priority of two units
@@ -500,8 +523,10 @@ func run_attacks() -> bool:
 		var attack_cell = attack_targets.get(member.get_instance_id())["cell"]
 		debug_print(str(member.get_name()," : ",attack_target.get_name()))
 		waiting_for[member.get_instance_id()] = member
-		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
+		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()], CONNECT_ONESHOT)
+		member.connect("tree_exiting", self, "_on_member_exiting", [member.get_instance_id()], CONNECT_ONESHOT)
 		member.start_turn_attack(attack_target, attack_cell)
+	
 	return true
 
 # get the first found valid attack and then stop search
@@ -690,8 +715,10 @@ func run_influence() -> bool:
 		var target_cell = new_influence_cells.get(member.get_instance_id())
 		debug_print(str(member.get_name()," : ",target_cell))
 		waiting_for[member.get_instance_id()] = member
-		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()])
+		member.connect("finished_turn", self, "_on_member_finished_turn", [member.get_instance_id()], CONNECT_ONESHOT)
+		member.connect("tree_exiting", self, "_on_member_exiting", [member.get_instance_id()], CONNECT_ONESHOT)
 		(member as InfluenceSpreaderComponent).start_turn_action(target_cell)
+	
 	return true
 
 #############
