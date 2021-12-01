@@ -1,6 +1,10 @@
 extends TileMap
 class_name InfluenceMap
 
+var tile_set_16x16_path = "res://Resources/Tilesets/blank_space_16x16.tres"
+var tile_set_32x32_path = "res://Resources/Tilesets/blank_space_32x32.tres"
+var tile_set_64x64_path = "res://Resources/Tilesets/blank_space_64x64.tres"
+
 func get_class() -> String:
 	return "InfluenceMap"
 
@@ -14,6 +18,15 @@ func _ready() -> void:
 	self.add_to_group(faction_id+"_influence_map", true)
 	
 	self.modulate = tile_color
+	
+	var cell_dim = Utils.get_map_cell_dimensions()
+	set_cell_size(cell_dim)
+	if(cell_dim == Vector2(64,64)):
+		set_tileset(load(tile_set_64x64_path) as TileSet)
+	elif(cell_dim == Vector2(32,32)):
+		set_tileset(load(tile_set_32x32_path) as TileSet)
+	elif(cell_dim == Vector2(16,16)):
+		set_tileset(load(tile_set_16x16_path) as TileSet)
 	
 	fix_invalid_tiles()
 	if(get_used_cells().size() > 0):
