@@ -82,9 +82,10 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if(debug):
 		var dim := Utils.get_map_cell_dimensions()
+		var off := Utils.get_grid_offset(get_global_position())
 		for cell in shape_cells:
 			if(cell != null && cell is Vector2):
-				draw_rect(Rect2(cell.x*dim.x-dim.x/2, cell.y*dim.y-dim.y/2, dim.x, dim.y), Color(1,0,0,0.25), true)
+				draw_rect(Rect2(cell.x*dim.x-dim.x/2-off.x, cell.y*dim.y-dim.y/2-off.y, dim.x, dim.y), Color(1,0,0,0.25), true)
 
 # filler meant to be overriden by structures with actual turn logic
 func process_turn(delta: float) -> void:

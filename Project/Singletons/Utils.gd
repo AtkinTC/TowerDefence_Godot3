@@ -18,28 +18,38 @@ func cell_to_pos(map_cell: Vector2, cell_center: bool = true) -> Vector2:
 	var world_position = get_navigation_map().to_global(local_position)
 	return world_position
 
+func get_grid_offset(global_pos: Vector2) -> Vector2:
+	return global_pos - cell_to_pos(pos_to_cell(global_pos))
+
 # from a Polygon2D, return a list of grid cells that would closest correspond to that shape
 # if the center of a cell is in the polygon, then that cell would be returned
 func polygon_to_cells(polygon2d: Polygon2D) -> Array:
-	var cells := []
-	var cell_dim := get_map_cell_dimensions()
-	
 	var polygon := polygon2d.get_polygon()
 	
 	# needs at least 3 points for a valid polygon
 	if(polygon.size() <= 2):
 		return []
 	
+	var cells := []
+	var cell_dim := get_map_cell_dimensions()
+	var center_world_pos := polygon2d.get_global_position()
+	var grid_offset := get_grid_offset(center_world_pos)
+	
+	# shift the whole polygon by the offset amount to properly align grid cells
+	var offset_polygon = []
+	for v in polygon:
+		offset_polygon.append(v + grid_offset)
+	
 	# get bounding values
-	var max_x: int = polygon[0].x
-	var min_x: int = polygon[0].x
-	var max_y: int = polygon[0].y
-	var min_y: int = polygon[0].y
-	for i in range(1, polygon.size()):
-		max_x = max(max_x, polygon[i].x)
-		min_x = min(min_x, polygon[i].x)
-		max_y = max(max_y, polygon[i].y)
-		min_y = min(min_y, polygon[i].y)
+	var max_x: int = offset_polygon[0].x
+	var min_x: int = offset_polygon[0].x
+	var max_y: int = offset_polygon[0].y
+	var min_y: int = offset_polygon[0].y
+	for i in range(1, offset_polygon.size()):
+		max_x = max(max_x, offset_polygon[i].x)
+		min_x = min(min_x, offset_polygon[i].x)
+		max_y = max(max_y, offset_polygon[i].y)
+		min_y = min(min_y, offset_polygon[i].y)
 	
 	# get bounding cell coordinates
 	var max_x_coord = floor(abs(max_x)/cell_dim.x) * sign(max_x)
@@ -54,7 +64,7 @@ func polygon_to_cells(polygon2d: Polygon2D) -> Array:
 			var point : = cell_coord * cell_dim
 			# Geometry.is_point_in_polygon in Godot 3 is unreliable
 			# replaced with custom solution
-			if(is_point_in_polygon(point, polygon)):
+			if(is_point_in_polygon(point, offset_polygon)):
 				cells.append(cell_coord)
 	return cells
 

@@ -24,10 +24,11 @@ func _ready() -> void:
 		faction_controllers[faction_id] = faction_controller
 	
 func start_running():
-	running = true
-	for child in get_children():
-		if(child is FactionController):
-			child.start_running()
+	if(!running):
+		running = true
+		for child in get_children():
+			if(child is FactionController):
+				child.start_running()
 	
 func stop_running():
 	running = false
