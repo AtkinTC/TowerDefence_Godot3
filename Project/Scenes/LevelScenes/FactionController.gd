@@ -220,28 +220,31 @@ func run_movement() -> bool:
 	var nav_cont := get_nav_cont()
 	var structs_cont := get_structs_cont()
 	
-	var target_node: Node2D
+	var target_members := []
 	for member in get_tree().get_nodes_in_group(target_faction_id + "_hq"):
-		if(member is Node2D):
-			target_node = member
-			break
-	
-	if(target_node == null):
-		return false
+		if(member is Structure):
+			target_members.append(member)
 		
-	var target_position = target_node.get_global_position()
-	var target_cell = Utils.pos_to_cell(target_position)
+	if(target_members.size() == 0):
+		return false
+	
+	var target_cells := []
+	for member in target_members:
+		target_cells += (member as Structure).get_current_cells()
+	
+	if(target_cells.size() == 0):
+		return false
 	
 	#get all faction units
 	var faction_units: Array = get_tree().get_nodes_in_group(faction_id + "_unit")
 	
-	#units that potentially can move
+	#units that potentially can move this turn
 	var faction_units_to_move := []
 	var faction_units_to_move_cell := {}
 	#units that definitly will not move
 	var units_unmoving := []
 	var units_unmoving_cell := {}
-	#units the definitly are moving
+	#units that definitly are moving this turn
 	var faction_units_moved := []
 	var faction_units_moved_cell := {}
 	
@@ -273,9 +276,11 @@ func run_movement() -> bool:
 			units_unmoving.append(unit)
 			units_unmoving_cell[unit.get_instance_id()] = Utils.pos_to_cell(unit.global_position)
 	
-	
 	debug_print(str("faction_units_to_move.size() = ", faction_units_to_move.size()))
 	debug_print(str("units_unmoving.size() = ", units_unmoving.size()))
+	
+	if(faction_units_to_move.size() == 0):
+		return false
 	
 	var unit_potential_choices: Dictionary
 	var unit_move_choice_index: Dictionary
@@ -295,12 +300,40 @@ func run_movement() -> bool:
 			for i in faction_units_to_move.size():
 				var unit := (faction_units_to_move[i] as Unit)
 				#get best next nav cell for unit
+				#try to retrieve move choices already stored in collection from previous loop
 				var move_choices = unit_potential_choices.get(unit.get_instance_id())
 				if(move_choices == null):
 					var unit_cell = Utils.pos_to_cell(unit.global_position)
-					move_choices = nav_cont.get_potential_next_cells(unit_cell, target_cell, true, true)
+					
+					# get the units shortest distance to any target from current cell
+					var current_cell_best_distance := 1000000000
+					for target_cell in target_cells:
+						current_cell_best_distance = min(current_cell_best_distance, nav_cont.get_distance_to_goal(unit_cell, target_cell, true))
+					
+					# get dictionary of potential cells, and their best distance to any target
+					var possible_move_choices = get_possible_move_choices(unit_cell, target_cells)
+					
+					# bucket sort the potential move cells by their distance
+					var move_choices_segments = {}
+					var min_distance := 1000000000
+					var max_distance := -1
+					for cell in possible_move_choices:
+						var choice_distance = possible_move_choices[cell]
+						max_distance = max(max_distance, choice_distance)
+						min_distance = min(min_distance, choice_distance)
+						move_choices_segments[choice_distance] = move_choices_segments.get(choice_distance, []) + [cell]
+					
+					# reassemble sorted list of choices, not including worse options
+					move_choices = []
+					for d in range(min_distance, max_distance+1):
+						if(d < current_cell_best_distance):
+							# shuffle each segment so equal distance choices are randomized
+							move_choices += Utils.shuffle(move_choices_segments.get(d, []))
+					
+					#save choices array, and reset index to be maintained across loops
 					unit_potential_choices[unit.get_instance_id()] = move_choices
 					unit_move_choice_index[unit.get_instance_id()] = 0
+					
 				var choice_index = unit_move_choice_index.get(unit.get_instance_id(), 0)
 				
 				if(move_choices != null && choice_index < move_choices.size()):
@@ -385,6 +418,20 @@ func compare_units_move_priority(unit1: Unit, unit2: Unit) -> int:
 	if(age1 != age2):
 		return age1 - age2
 	return 0
+
+func get_possible_move_choices(current_cell: Vector2, target_cells: Array) -> Dictionary:
+	var next_positions := {}
+	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
+	for neighbor in neighbors:
+		var neighbor_cell: Vector2 = current_cell + neighbor
+		var best_distance = 1000000000
+		for target_cell in target_cells:
+			var distance_from_neighbor = get_nav_cont().get_distance_to_goal(neighbor_cell, target_cell, true)	
+			if(distance_from_neighbor >= 0 && distance_from_neighbor < best_distance):
+				best_distance = distance_from_neighbor
+				next_positions[neighbor_cell] = best_distance
+	
+	return next_positions
 
 #################
 ### Attacking ###

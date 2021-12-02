@@ -148,3 +148,19 @@ func is_point_in_polygon(point: Vector2, polygon: PoolVector2Array, extreme: Vec
 	
 	# Return true if count is odd, false otherwise 
 	return (count % 2 == 1)
+
+# Shuffle an array using Fisher–Yates algorithm
+func shuffle(array: Array) -> Array:
+	if(array == null || array.size() <= 1):
+		return array
+	var m := array.size()
+	var i : int
+	var t
+	while(m > 0):
+		randomize()
+		i = int(randf() * m)
+		m -= 1
+		t = array[m]
+		array[m] = array[i]
+		array[i] = t
+	return array
