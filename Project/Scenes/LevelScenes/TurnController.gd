@@ -4,68 +4,76 @@ class_name TurnController
 func get_class() -> String:
 	return "TurnController"
 
-const FACTIONS = ["player", "enemy"]
+const FACTIONS := ["player", "enemy"]
 
-var faction_controllers = {}
+var actionControllerTypes := [AttackActionController,
+					MovementActionController,
+					SpawnActionController]
 
-var current_faction_index: int = -1
+var actions_order := []
+var action_index := -1
+var actions := {}
+
+var acting_factions = []
+var factions_data = {"player":{"target_faction_id":["enemy"]}, "enemy":{"target_faction_id":["player"]}}
+
+var action_controllers = {}
+
 var turn_count: int = 0
 
 var running: bool = false
 var taking_turn: bool = false
 
-var waiting_on: Node
+var waiting_on: BaseActionController
 
 func _ready() -> void:
 	ControllersRef.set_controller_reference(ControllersRef.TURN_CONTROLLER, self)
 	
-	for faction_id in FACTIONS:
-		var faction_controller = get_tree().get_nodes_in_group(str(faction_id,"_faction_controller"))[0]
-		faction_controllers[faction_id] = faction_controller
+	acting_factions = FACTIONS
+	
+	for actionControllerType in actionControllerTypes:
+		var action_controller := (actionControllerType.new() as BaseActionController)
+		actions_order.append(action_controller.action_type)
+		actions[action_controller.action_type] = action_controller
+		add_child(action_controller)
 	
 func start_running():
 	if(!running):
 		running = true
-		for child in get_children():
-			if(child is FactionController):
-				child.start_running()
 	
 func stop_running():
 	running = false
-	for child in get_children():
-		if(child is FactionController):
-			child.stop_running()
 	
 func _physics_process(delta: float) -> void:
 	if(running):
 		if(taking_turn):
 			if(waiting_on == null):
-				start_next_faction_turn()
+				action_index += 1
+				if(action_index >= actions_order.size()):
+					end_turn()
+				else:
+					var action_controller = (actions[actions_order[action_index]] as BaseActionController)
+					action_controller.calculate_action(acting_factions, factions_data)
+					action_controller.connect("finished_action", self, "_on_finished_action", [action_index], CONNECT_ONESHOT)
+					waiting_on = action_controller
+					action_controller.run_action()
 		else:
 			start_turn()
 
 func start_turn():
-	turn_count += 1
 	taking_turn = true
-	current_faction_index = -1
+	action_index = -1
 	waiting_on = null
+	for faction in acting_factions:
+		for member in get_tree().get_nodes_in_group(faction):
+			if(member.has_method("advance_time_units")):
+				member.advance_time_units()
 	
 func end_turn():
+	turn_count += 1
 	taking_turn = false
+	acting_factions.push_back(acting_factions.pop_front())
 
-func start_next_faction_turn():
-	current_faction_index += 1
-	if(current_faction_index >= FACTIONS.size()):
-		#no more factions; end of turn
-		end_turn()
-		return false
-	
-	var faction_controller: FactionController = faction_controllers.get(FACTIONS[current_faction_index])
-	faction_controller.connect("finished_turn", self, "_on_faction_finished_turn", [current_faction_index], CONNECT_ONESHOT)
-	waiting_on = faction_controller
-	faction_controller.start_faction_turn()
-	return true
-
-func _on_faction_finished_turn(faction_index):
-	if(faction_index == current_faction_index):
+func _on_finished_action(_action_index):
+	if(action_index == _action_index):
 		waiting_on = null
