@@ -131,17 +131,20 @@ func run_spawning() -> bool:
 	var structs_cont := get_structs_cont()
 	var units_cont := get_units_cont()
 	
-	var target_node: Node2D
+	var target_members := []
 	for member in get_tree().get_nodes_in_group(target_faction_id + "_hq"):
-		if(member is Node2D):
-			target_node = member
-			break
-	
-	if(target_node == null):
-		return false
+		if(member is Structure):
+			target_members.append(member)
 		
-	var target_position = target_node.get_global_position()
-	var target_cell = Utils.pos_to_cell(target_position)
+	if(target_members.size() == 0):
+		return false
+	
+	var target_cells := []
+	for member in target_members:
+		target_cells += (member as Structure).get_current_cells()
+	
+	if(target_cells.size() == 0):
+		return false
 	
 	#get all faction structures
 	var faction_structures: Array = get_tree().get_nodes_in_group(faction_id + "_structure")
@@ -169,8 +172,11 @@ func run_spawning() -> bool:
 		if(base_spawn_cells == null || base_spawn_cells.size() == 0):
 			base_spawn_cells = [Vector2.ZERO]
 		
-		var cell_closest_to_target: Vector2
-		var shortest_distance_to_target: int = -1
+		#var cell_closest_to_target: Vector2
+		#var shortest_distance_to_target: int = -1
+		var spawn_cell_segments ={}
+		var min_distance := 1000000000
+		var max_distance := -1
 		#for each potential spawn position
 		for base_spawn_cell in base_spawn_cells:
 			var spawn_cell = Utils.pos_to_cell(spawner.global_position) + base_spawn_cell
@@ -179,23 +185,30 @@ func run_spawning() -> bool:
 				# conflicts with already chosen spawn position of another spawner
 				continue
 			
-			if((structs_cont.get_structure_at_cell(spawn_cell) != null && structs_cont.get_structure_at_cell(spawn_cell).is_blocker())
-			|| units_cont.get_unit_at_cell(spawn_cell) != null):
-				# conflicts with an existing unit or blocker structure
+			if(structs_cont.get_structure_at_cell(spawn_cell) != null && structs_cont.get_structure_at_cell(spawn_cell).is_blocker()):
+				# conflicts with an existing blocker structure
+				continue
+				
+			if(units_cont.get_unit_at_cell(spawn_cell) != null):
+				# conflicts with an existing unit
 				continue
 			
-			var nav_distance_to_target = nav_cont.get_distance_to_goal(spawn_cell, target_cell, true)
-			if(nav_distance_to_target >= 0 && (shortest_distance_to_target < 0 || nav_distance_to_target < shortest_distance_to_target)):
-				shortest_distance_to_target = nav_distance_to_target
-				cell_closest_to_target = spawn_cell
+			var nav_distance = get_shortest_distance_to_multiple_targets(spawn_cell, target_cells)
+			if(nav_distance >= 0):
+				spawn_cell_segments[nav_distance] = spawn_cell_segments.get(nav_distance, []) + [spawn_cell]
+				max_distance = max(max_distance, nav_distance)
+				min_distance = min(min_distance, nav_distance)
 		
 		#if there are no valid spawn positions, then skip this structure for the turn
-		if(shortest_distance_to_target == -1 || cell_closest_to_target == null):
+		if(spawn_cell_segments.size() == 0):
 			continue
+		
+		# pick random cell from valid min distance cells
+		var chosen_spawn_cell = Utils.shuffle(spawn_cell_segments[min_distance])[0]
 		
 		#add chosen spawn position to the collection of new spawn positions
 		confirmed_spawners.append(spawner)
-		spawner_target_cells[spawner.get_instance_id()] = cell_closest_to_target
+		spawner_target_cells[spawner.get_instance_id()] = chosen_spawn_cell
 	
 	if(confirmed_spawners.size() == 0):
 		return false
@@ -424,14 +437,19 @@ func get_possible_move_choices(current_cell: Vector2, target_cells: Array) -> Di
 	var neighbors = [Vector2.UP, Vector2.RIGHT, Vector2.DOWN, Vector2.LEFT]
 	for neighbor in neighbors:
 		var neighbor_cell: Vector2 = current_cell + neighbor
-		var best_distance = 1000000000
-		for target_cell in target_cells:
-			var distance_from_neighbor = get_nav_cont().get_distance_to_goal(neighbor_cell, target_cell, true)	
-			if(distance_from_neighbor >= 0 && distance_from_neighbor < best_distance):
-				best_distance = distance_from_neighbor
-				next_positions[neighbor_cell] = best_distance
+		var distance = get_shortest_distance_to_multiple_targets(neighbor_cell, target_cells)
+		if(distance >= 0):
+			next_positions[neighbor_cell] = distance
 	
 	return next_positions
+
+func get_shortest_distance_to_multiple_targets(current_cell: Vector2, target_cells: Array) -> int:
+	var best_distance = -1
+	for target_cell in target_cells:
+		var distance = get_nav_cont().get_distance_to_goal(current_cell, target_cell, true)	
+		if(distance >= 0 && (best_distance == -1 || distance < best_distance)):
+			best_distance = distance
+	return best_distance
 
 #################
 ### Attacking ###
