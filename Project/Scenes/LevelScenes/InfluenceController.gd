@@ -18,7 +18,7 @@ func _ready() -> void:
 func get_faction_influence_map(faction: String):
 	return influence_maps.get(faction)
 
-func get_faction_influence_cells(faction: String):
+func get_faction_influence_cells(faction: String) -> Array:
 	var influence_cells = []
 	var map = influence_maps.get(faction)
 	#if there is an influence map for this faction

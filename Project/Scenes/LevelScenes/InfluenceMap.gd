@@ -5,6 +5,8 @@ var tile_set_16x16_path = "res://Resources/Tilesets/blank_space_16x16.tres"
 var tile_set_32x32_path = "res://Resources/Tilesets/blank_space_32x32.tres"
 var tile_set_64x64_path = "res://Resources/Tilesets/blank_space_64x64.tres"
 
+var tile_id : int
+
 func get_class() -> String:
 	return "InfluenceMap"
 
@@ -19,6 +21,12 @@ func _ready() -> void:
 	
 	self.modulate = tile_color
 	
+	fix_invalid_tiles()
+	var used_cells = get_used_cells()
+	
+	for cell in used_cells:
+		set_cell(cell.x, cell.y, -1)
+	
 	var cell_dim = Utils.get_map_cell_dimensions()
 	set_cell_size(cell_dim)
 	if(cell_dim == Vector2(64,64)):
@@ -28,7 +36,11 @@ func _ready() -> void:
 	elif(cell_dim == Vector2(16,16)):
 		set_tileset(load(tile_set_16x16_path) as TileSet)
 	
-	fix_invalid_tiles()
+	tile_id = get_tileset().get_tiles_ids()[0]
+	
+	for cell in used_cells:
+		set_cell(cell.x, cell.y, tile_id)
+	
 	if(get_used_cells().size() > 0):
 		print(str("starting influenced cells: ", get_used_cells()))
 		for cell in get_used_cells():
@@ -37,7 +49,7 @@ func _ready() -> void:
 func set_cell_influence(cell: Vector2, influenced: bool = true):
 	var tile = -1
 	if(influenced):
-		tile = 0
+		tile = tile_id
 	set_cell(cell.x, cell.y, tile)
 
 func get_influenced_cells() -> Array:
