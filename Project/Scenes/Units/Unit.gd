@@ -129,7 +129,10 @@ func get_turns_since_last_move() -> int:
 
 func get_move_delay_time_remaining() -> int:
 	return move_delay_time_remaining
-	
+
+func is_ready_to_move() -> bool:
+	return move_delay_time_remaining <= 0
+
 func get_attack_delay_time_remaining() -> int:
 	return attack_delay_time_remaining
 	
@@ -292,6 +295,10 @@ func get_damage():
 func set_ui_element_visibility(_visible: bool):
 	if(health_bar != null):
 		health_bar.visible = _visible
+
+# returned as an array as future-proofing for potential multi-cell units
+func get_current_cells() -> Array:
+	return [Utils.pos_to_cell(get_global_position())]
 
 func get_faction() -> String:
 	return faction
