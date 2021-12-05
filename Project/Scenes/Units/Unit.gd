@@ -24,12 +24,12 @@ var finished_turn: bool = false
 var active = true
 var age: int = 0
 
-export(int) var move_delay_time: int = 1
+export(int) var move_delay_time: int = -1
 var move_delay_time_remaining: int
-var move_animation_time: float = 0.5
+var move_animation_time: float = 0.20
 var turns_since_last_move: int = 0
 
-export(int) var attack_delay_time: int = 1
+export(int) var attack_delay_time: int = -1
 var attack_delay_time_remaining: int
 var attack_animation_time: float = 0.25
 

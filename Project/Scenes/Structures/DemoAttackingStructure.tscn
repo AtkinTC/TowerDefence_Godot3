@@ -64,5 +64,5 @@ polygon = PoolVector2Array( 16, -16, 16, -8, 4, -8, 4, 16, -4, 16, -4, -8, -16, 
 script = ExtResource( 3 )
 debug = true
 attack_delay_time = 2
-attack_range = 3
+attack_range = 6
 attack_damage = 1

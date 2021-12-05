@@ -14,7 +14,7 @@ var spawn_cells := [Vector2(0,0)]
 
 export(int) var spawn_delay_time: int = -1
 var spawn_delay_time_remaining: int
-var spawn_animation_time: float = 0.25
+var spawn_animation_time: float = 0.10
 
 var spawn_target_pos: Vector2 = Vector2.ZERO
 var spawn_target_cell: Vector2 = Vector2.ZERO
