@@ -26,8 +26,11 @@ var build_valid: bool = false
 var build_tile: Vector2
 var build_location: Vector2
 var build_type: String
+var build_ghost: GhostStructure
 var ui: UI
 var camera: GameCamera2D
+
+onready var structure_factory := StructureFactory.new()
 
 var game_started: bool = false
 
@@ -61,10 +64,6 @@ func _ready() -> void:
 	print("Camera center : " + String(camera.get_camera_screen_center()))
 	camera.set_position(camera.get_camera_screen_center())
 	
-	#enemy_spawn_cont.set_map_name(levelMap.get_map_name())
-	#enemy_spawn_cont.set_map_name(level_id)
-	#enemy_spawn_cont.set_spawn_points_node(levelMap.get_spawn_points_node())
-	
 	# TODO: make this dynamic, not hardcoded
 	resources_cont.set_resource_quantity(GameData.GOLD, 10)
 	resources_cont.set_resource_quantity(GameData.MANA, 0)
@@ -90,12 +89,20 @@ func _ready() -> void:
 	ui.connect("quit_from_ui", self, "_on_quit")
 	structure_cont.connect("structure_updated", navigation_cont, "_on_structure_updated")
 	
+	# convert level map spawn data into actual structures
+	var spawn_ghosts := levelMap.get_spawn_ghosts()
+	for ghost in spawn_ghosts:
+		if(ghost is GhostStructure):
+			var new_structure : Structure = structure_factory.generate_structure_from_ghost(ghost)
+			structure_cont.add_structure(new_structure)
+	levelMap.clear_spawn_ghosts()
+	
 	navigation_cont.set_debug(debug)
 	turn_controller.start_running()
 
 func _process(_delta: float) -> void:	
 	if build_mode:
-		update_tower_preview()
+		update_structure_preview()
 		
 	var move_vector := Vector2.ZERO
 	if Input.is_action_pressed("ui_right"):
@@ -123,11 +130,35 @@ func _physics_process(delta: float) -> void:
 #			level_complete()
 
 func _unhandled_input(event: InputEvent) -> void:
+	#TEST input, needs to be removed
+	if(event.is_action_released("ui_1")):
+		var ghost = structure_factory.generate_ghost_structure("DemoObst-Small")
+		if (ghost != null):
+			initiate_build_mode(ghost)
+	if(event.is_action_released("ui_2")):
+		var ghost = structure_factory.generate_ghost_structure("DemoObst-Med")
+		if (ghost != null):
+			initiate_build_mode(ghost)
+	if(event.is_action_released("ui_3")):
+		var ghost = structure_factory.generate_ghost_structure("DemoObst-Large")
+		if (ghost != null):
+			initiate_build_mode(ghost)
+	if(event.is_action_released("ui_4")):
+		var ghost = structure_factory.generate_ghost_structure("DemoObst-XLarge")
+		if (ghost != null):
+			initiate_build_mode(ghost)
+	
 	if(event.is_action_released("ui_cancel") and build_mode):
 		cancel_build_mode()
 	if(event.is_action_released("ui_accept") and build_mode):
 		verify_and_build()
 		cancel_build_mode()
+	
+#	if(event.is_action_released("ui_cancel") and build_mode):
+#		cancel_build_mode()
+#	if(event.is_action_released("ui_accept") and build_mode):
+#		verify_and_build()
+#		cancel_build_mode()
 	
 	if(event.is_action_pressed("zoom_in")):
 		camera.change_zoom_level(-1)
@@ -138,79 +169,88 @@ func set_level_id(_level_id: String):
 	level_id = _level_id
 
 ##
-## Tower Building Functions
+## Structure Building Functions
 ##
 
-func initiate_build_mode(tower_type: String) -> void:
+func initiate_build_mode(ghost: GhostStructure) -> void:
 	if build_mode:
 		cancel_build_mode()
-	build_type = tower_type
+	build_ghost = ghost
 	build_mode = true
-	ui.set_tower_preview(tower_type, get_camera_mouse_position())
+	ui.set_structure_preview(ghost, get_camera_mouse_position())
+	update_structure_preview()
 
-func update_tower_preview() -> void:
+func update_structure_preview() -> void:
 	var mouse_position: Vector2 = get_global_mouse_position()
-	var placement_type = GameData.tower_data.get(build_type, {}).get(GameData.PLACEMENT, GameData.PLACEMENT_TYPE.RANGED)
 	
-	var exclusion_maps: Array = [levelMap.get_tower_exclusion_map()]
-	var inclusion_maps: Array = []
+	var ghost_bounds := build_ghost.get_rect()
+	var cell_dim := Utils.get_map_cell_dimensions()
 	
-	if(placement_type == GameData.PLACEMENT_TYPE.RANGED):
-		exclusion_maps.append(levelMap.get_navigation_map())
-	if(placement_type == GameData.PLACEMENT_TYPE.MELEE):
-		inclusion_maps.append(levelMap.get_navigation_map())
+	var ghost_top_left := build_ghost.get_rect().position
 	
-	# Assuming all maps share cell coordinates with navigation map
+	var exclusion_maps: Array = []
+	var inclusion_maps: Array = [levelMap.get_navigation_map()]
+	
 	build_tile = levelMap.get_navigation_map().world_to_map(mouse_position)
 	var tile_position: Vector2 = levelMap.get_navigation_map().map_to_world(build_tile)
-	build_location = tile_position + levelMap.get_navigation_map().get_cell_size()/2
+	var diff := ghost_top_left
+	while(abs(diff.x) >= cell_dim.x):
+		diff.x = (abs(diff.x) - cell_dim.x) * sign(diff.x)
+	while(abs(diff.y) >= cell_dim.y):
+		diff.y = (abs(diff.y) - cell_dim.y) * sign(diff.y)
+	
+	build_location = tile_position
 	
 	build_valid = true
-	
-	#if(towers_node.get_tower_at_tile(build_tile)):
-#		build_valid = false
-		
+	for cell in build_ghost.get_cells():
+		var build_cell = build_tile + cell
+		if(structure_cont.get_structure_at_cell(build_cell)):
+			build_valid = false
+			break
 	if(build_valid):
-		#tower cannot be placed on any tiles in the exclusion maps
-		for map in exclusion_maps:
-			if (map.get_cellv(build_tile) != -1):
-				build_valid = false
-				break
-				
-	if(build_valid):
-		#tower can only be placed on tiles in the inclusion map
+		# structure can only be placed on tiles in the inclusion map
 		for map in inclusion_maps:
-			if (map.get_cellv(build_tile) == -1):
-				build_valid = false
+			for cell in build_ghost.get_cells():
+				var build_cell = build_tile + cell
+				if (map.get_cellv(build_cell) == -1):
+					build_valid = false
+					break
+			if(!build_valid):
+				break
+	if(build_valid):
+		# structure cannot be placed on any tiles in the exclusion maps
+		for map in exclusion_maps:
+			for cell in build_ghost.get_cells():
+				var build_cell = build_tile + cell
+				if (map.get_cellv(build_cell) != -1):
+					build_valid = false
+					break
+			if(!build_valid):
 				break
 			
 	if(build_valid):
-		ui.update_tower_preview(camera.convert_to_camera_position(build_location), UI.VALID_COLOR)
+		ui.update_structure_preview(camera.convert_to_camera_position(build_location), UI.VALID_COLOR)
 	else:
-		ui.update_tower_preview(camera.convert_to_camera_position(build_location), UI.INVALID_COLOR)
+		ui.update_structure_preview(camera.convert_to_camera_position(build_location), UI.INVALID_COLOR)
 
 func cancel_build_mode() -> void:
 	build_mode = false
 	build_valid = false
-	ui.remove_tower_preview()
+	ui.remove_structure_preview()
 		
 func verify_and_build():
 	if (!build_mode || !build_valid):
 		return false
 	
-	if(!can_afford_tower(build_type)):
-		return false
+	#TODO: final check that structure can be built (eg. costs and other requirements)
 	
-	var new_tower: Tower = load(TOWERS_PATH + build_type + SCENE_EXT).instance()
-	new_tower.position = build_location
-	new_tower.connect("create_effect", self, "_on_create_effect")
-	new_tower.set_debug(debug)
-	var build_tile: Vector2 = levelMap.get_navigation_map().world_to_map(build_location)
-	#get_towers_node().add_tower(new_tower, build_tile)
+	var new_structure : Structure = structure_factory.generate_structure_from_ghost(build_ghost)
+	new_structure.set_faction("player")
+	structure_cont.add_structure(new_structure)
 	
-	navigation_cont.update_blockers()
+	#TODO: remove any resources spent to build the tower
 	
-	spend_resources_to_purchase_tower(build_type)
+	navigation_cont.update_structures()
 
 func can_afford_tower(_tower_type: String) -> bool:
 	var purchase_costs: Dictionary = GameData.tower_data.get(_tower_type, {}).get(GameData.COST, {})

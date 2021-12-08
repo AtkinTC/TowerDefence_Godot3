@@ -22,9 +22,8 @@ const HEALTH_HIGH_TINT: Color = Color("ffffff")
 const HEALTH_MID_TINT: Color = Color("ffeeee")
 const HEALTH_LOW_TINT: Color = Color("ff8888")
 
-const DRAG_TOWER_NAME: String = "DragTower"
-const TOWER_PREVIEW_NAME: String = "TowerPreview"
-const RANGE_OVERLAY_NAME: String = "RangeOverlay"
+const STRUCTURE_PREVIEW: String = "StructurePreview"
+const STRUCTURE_GHOST: String = "StructureGhost"
 
 var active_camera: Camera2D
 
@@ -47,61 +46,35 @@ func set_speed_button_state(_fast_forward: bool) -> void:
 		if(member is TextureButton):
 			(member as TextureButton).pressed = _fast_forward
 
-func set_tower_preview(tower_type: String, mouse_position: Vector2) -> void:
-	var drag_tower: Node2D = load(TOWERS_DIR + tower_type + SCENE_EXT).instance()
-	drag_tower.set_name(DRAG_TOWER_NAME)
-	drag_tower.modulate = VALID_COLOR
-	drag_tower.active = false
+func set_structure_preview(ghost: GhostStructure, mouse_position: Vector2) -> void:
+	ghost.set_name(STRUCTURE_GHOST)
+	ghost.modulate = VALID_COLOR
 	
 	var control: Node2D = Node2D.new()
 	control.set_as_toplevel(true)
-	control.add_child(drag_tower, true)
+	control.add_child(ghost, true)
 	control.set_position(mouse_position)
-	control.set_name(TOWER_PREVIEW_NAME)
+	control.set_name(STRUCTURE_PREVIEW)
 	control.set_scale(Vector2.ONE/active_camera.get_zoom())
-	
-	var tower := (drag_tower as Tower)
-	var tower_range : float = tower.get_default_attribute(GameData.RANGE, -1)
-	if(tower_range != null && tower_range > 0):
-		var range_overlay := Sprite.new()
-		range_overlay.position = Vector2.ZERO
-		var scaling : float = tower_range / 310.0
-		range_overlay.scale = Vector2(scaling, scaling)
-		var texture : Texture = load(RANGE_TEXTURE_FILEPATH)
-		range_overlay.texture = texture
-		range_overlay.modulate = VALID_COLOR
-		range_overlay.set_name(RANGE_OVERLAY_NAME)
-		control.add_child(range_overlay, true)
-	
-#	for child in control.get_children():
-#		if(child is Node2D):
-#			child.set_scale(Vector2.ONE/active_camera.get_zoom())
 	
 	add_child(control, true)
 	move_child(control, 0)
 
-func update_tower_preview(new_position: Vector2, color: Color) -> void:
-	var tower_preview: Node2D = get_node(TOWER_PREVIEW_NAME)
-	tower_preview.set_position(new_position)
-	tower_preview.set_scale(Vector2.ONE/active_camera.get_zoom())
+func update_structure_preview(new_position: Vector2, color: Color) -> void:
+	var structure_preview: Node2D = get_node(STRUCTURE_PREVIEW)
+	structure_preview.set_position(new_position)
+	structure_preview.set_scale(Vector2.ONE/active_camera.get_zoom())
 	
-	var drag_tower: Node2D = tower_preview.get_node(DRAG_TOWER_NAME)
-	if(drag_tower.modulate != color):
-		drag_tower.modulate = color
-		var range_overlay: Node2D = tower_preview.get_node(RANGE_OVERLAY_NAME)
-		if range_overlay:
-			range_overlay.modulate = color
-			
-#	for child in tower_preview.get_children():
-#		if(child is Node2D):
-#			child.set_scale(Vector2.ONE/active_camera.get_zoom())
-		
-func remove_tower_preview() -> void:
-	var tower_preview: Node2D = get_node(TOWER_PREVIEW_NAME)
-	if(tower_preview != null):
-		tower_preview.name += "_delete"
-		tower_preview.visible = false
-		tower_preview.queue_free()
+	var ghost: Node2D = structure_preview.get_node(STRUCTURE_GHOST)
+	if(ghost.modulate != color):
+		ghost.modulate = color
+
+func remove_structure_preview() -> void:
+	var structure_preview: Node2D = get_node(STRUCTURE_PREVIEW)
+	if(structure_preview != null):
+		structure_preview.name += "_delete"
+		structure_preview.visible = false
+		structure_preview.queue_free()
 
 func initialize_health_bar(max_health: int, current_health: int) -> void:
 	hp_bar.max_value = max_health

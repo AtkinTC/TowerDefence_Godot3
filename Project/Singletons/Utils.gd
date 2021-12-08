@@ -2,6 +2,12 @@ extends Node
 
 const EXTREME_INT = 10000000
 
+func is_navigation_map_available() -> bool:
+	var gameMap = ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER)
+	if !(gameMap is GameMap):
+		return false
+	return (gameMap.get_navigation_map() is TileMap)
+
 func get_navigation_map() -> TileMap:
 	return (ControllersRef.get_controller_reference(ControllersRef.MAP_CONTROLLER) as GameMap).get_navigation_map()
 
@@ -22,20 +28,6 @@ func cell_to_pos(map_cell: Vector2, cell_center: bool = true) -> Vector2:
 
 func get_cell_corner_offset(global_pos: Vector2) -> Vector2:
 	return global_pos - cell_to_pos(pos_to_cell(global_pos))
-
-#get the adjustment vector to evenly fit a rectangle (just width and height, no position) into the grid
-func get_rect_grid_adjustment(width: float, height: float) -> Vector2:
-	var grid_offset = Vector2.ZERO
-	var cell_dim := get_map_cell_dimensions()
-	var cells_x = ceil(width / cell_dim.x)
-	var cells_width = cells_x * cell_dim.x
-	var cells_y = ceil(height / cell_dim.y)
-	var cells_height = cells_y * cell_dim.y
-
-	grid_offset.x = (cells_width - (width))/2
-	grid_offset.y = (cells_height - (height))/2
-	
-	return grid_offset
 
 # align the rect with the grid with minimal adjustment
 func get_grid_align_rect_adjustment(rect: Rect2, cell_dim: Vector2) -> Vector2:
@@ -64,11 +56,13 @@ func get_grid_align_rect_adjustment(rect: Rect2, cell_dim: Vector2) -> Vector2:
 	var new_outer_cells_y_neg: int = ceil((neg_height - adjustment_vector.y)/cell_dim.y)
 	var new_outer_cells_y_pos: int = ceil((pos_height + adjustment_vector.y)/cell_dim.y)
 	
+	# if the excess space is equal to or more than a whole cell, then shift over by half a cell to improve alignment
 	if((new_outer_cells_x_neg + new_outer_cells_x_pos) * cell_dim.x - rect.size.x >= cell_dim.x):
 		adjustment_vector.x += cell_dim.x/2
 	if((new_outer_cells_y_neg + new_outer_cells_y_pos) * cell_dim.y - rect.size.y >= cell_dim.y):
 		adjustment_vector.y += cell_dim.y/2
 	
+	# bound the adjustment to be no more than half the tile size in any direction
 	if(adjustment_vector.x > cell_dim.x/2):
 		adjustment_vector.x -= cell_dim.x
 	if(adjustment_vector.y > cell_dim.y/2):
@@ -228,7 +222,7 @@ func is_point_in_rect(point: Vector2, rect: Rect2) -> bool:
 	
 	return false
 
-func get_bounding_rect(polygon: PoolVector2Array) -> Rect2:
+func get_poly_bounding_rect(polygon: PoolVector2Array) -> Rect2:
 	var max_x: int = polygon[0].x
 	var min_x: int = polygon[0].x
 	var max_y: int = polygon[0].y
@@ -267,8 +261,8 @@ func do_polygons_intersect(polygon1: PoolVector2Array, polygon2: PoolVector2Arra
 	if(polygon1.size() <= 2 || polygon2.size() <= 2):
 		return false
 	
-	var rect1 := get_bounding_rect(polygon1)
-	var rect2 := get_bounding_rect(polygon2)
+	var rect1 := get_poly_bounding_rect(polygon1)
+	var rect2 := get_poly_bounding_rect(polygon2)
 	
 	if(!do_rects_intersect(rect1, rect2)):
 		return false
@@ -281,20 +275,26 @@ func do_polygons_intersect(polygon1: PoolVector2Array, polygon2: PoolVector2Arra
 		if(is_point_in_rect(p2, rect1)):
 			if(is_point_in_polygon(p2, polygon1, false)):
 				return true
-		
+	
+	#TODO: replace with a more direct algorithm
+	# Geometry.intersect_polygons_2d gets the job done but is wasteful
 	var intersection := Geometry.intersect_polygons_2d(polygon1, polygon2)
 	if(intersection == null || intersection.size() == 0):
 		return false
 
 	return true
+
+func rect_to_poly(rect2: Rect2) -> PoolVector2Array:
+	var rect_polygon := PoolVector2Array()
+	rect_polygon.append(rect2.position)
+	rect_polygon.append(Vector2(rect2.position.x + rect2.size.x, rect2.position.y))
+	rect_polygon.append(Vector2(rect2.position.x + rect2.size.x, rect2.position.y + rect2.size.y))
+	rect_polygon.append(Vector2(rect2.position.x, rect2.position.y + rect2.size.y))
 	
+	return rect_polygon
 
 func does_rect_intersect_polygon(rect: Rect2, polygon: PoolVector2Array) -> bool:
-	var rect_polygon := PoolVector2Array()
-	rect_polygon.append(rect.position)
-	rect_polygon.append(Vector2(rect.position.x + rect.size.x, rect.position.y))
-	rect_polygon.append(Vector2(rect.position.x + rect.size.x, rect.position.y + rect.size.y))
-	rect_polygon.append(Vector2(rect.position.x, rect.position.y + rect.size.y))
+	var rect_polygon := rect_to_poly(rect)
 	
 	return do_polygons_intersect(rect_polygon, polygon)
 

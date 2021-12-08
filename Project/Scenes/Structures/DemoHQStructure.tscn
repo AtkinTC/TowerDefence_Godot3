@@ -20,11 +20,12 @@ script = ExtResource( 2 )
 structure_type = "DemoHQStructure"
 blocker = true
 faction = "player"
+debug_label_offset = Vector2( 0, 0 )
 base_health = 100
 
 [node name="CellShapePolygon" type="Polygon2D" parent="."]
 color = Color( 1, 0, 0, 0.25 )
-polygon = PoolVector2Array( -32, -32, -32, 32, 32, 32, 32, -32 )
+polygon = PoolVector2Array( -28, -28, -28, 28, 28, 28, 28, -28 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 visible = false
@@ -66,3 +67,14 @@ script = ExtResource( 6 )
 debug = true
 influence_spread_delay_time = 1
 max_influence_range = 10
+
+[node name="DebugLabel" type="Label" parent="."]
+margin_left = -24.0
+margin_top = 12.0
+margin_right = 16.0
+margin_bottom = 26.0
+rect_scale = Vector2( 0.85, 0.85 )
+text = "test"
+__meta__ = {
+"_edit_use_anchors_": false
+}

@@ -4,7 +4,6 @@ class_name GameMap
 export(String) var map_name: String
 
 onready var navigation_map: TileMap = get_node("NavigationMap")
-onready var tower_exclusion_map: TileMap = get_node("TowerExclusion")
 
 var debug: bool = false;
 
@@ -16,9 +15,21 @@ func get_map_name() -> String:
 
 func get_navigation_map() -> TileMap:
 	return navigation_map
-
-func get_tower_exclusion_map() -> TileMap:
-	return tower_exclusion_map
+	
+func get_spawn_ghosts() -> Array:
+	var spawn_ghosts = []
+	var spawn_node = get_node_or_null("SpawnNode")
+	if(spawn_node != null):
+		for child in spawn_node.get_children():
+			if(child is GhostStructure):
+				spawn_ghosts.append(child)
+	
+	return spawn_ghosts
+	
+func clear_spawn_ghosts():
+	var spawn_node = get_node_or_null("SpawnNode")
+	if(spawn_node != null):
+		spawn_node.queue_free()
 	
 func set_debug(_debug: bool) -> void:
 	debug = _debug

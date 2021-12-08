@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="GDScript" id=1]
+script/source = "tool
+extends Node2D
+
+
+export var size := Vector2(10.0, 10.0) setget set_size
+export var color := Color(1,1,1) setget set_color
+export var offset := Vector2(0,0) setget set_offset
+
+var _rect: Rect2
+
+func set_size(_size : Vector2) -> void:
+	size = _size
+	_recalculate_rect()
+	update()
+
+func set_offset(_offset : Vector2) -> void:
+	offset = _offset
+	_recalculate_rect()
+	update()
+
+func _recalculate_rect() -> void:
+	_rect = Rect2(offset, size)
+
+func get_rect() -> Rect2:
+	return _rect
+
+func set_color(_color : Color) -> void:
+	color = _color
+	update()
+
+func _draw() -> void:
+	#if not Engine.is_editor_hint():
+	#	return
+	var small_rect = _rect
+	small_rect.position += Vector2(2, 2)
+	small_rect.size -= Vector2(4, 4)
+	draw_rect(small_rect, color, false, 2)
+	draw_rect(Rect2(-2,-2,4,4), color, true)
+
+"
+
+[node name="SpawnGhost" type="Node2D"]
+script = SubResource( 1 )
+size = Vector2( 32, 32 )
+color = Color( 1, 0, 0, 1 )
+offset = Vector2( -16, -16 )
