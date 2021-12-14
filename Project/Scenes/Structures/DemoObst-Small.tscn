@@ -7,7 +7,7 @@ extents = Vector2( 12, 12 )
 
 [node name="Obstacle" type="Area2D"]
 script = ExtResource( 1 )
-structure_type = "DemoObst64x64"
+structure_type = "DemoObst-Small"
 blocker = true
 
 [node name="CellShapePolygon" type="Polygon2D" parent="."]

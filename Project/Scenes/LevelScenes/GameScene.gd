@@ -50,7 +50,7 @@ func get_effects_node() -> Node2D:
 	return effects_node
 
 func _ready() -> void:
-	levelMap = get_node("Map001") #TODO: change to dynamically get current map
+	levelMap = get_node("Map") #TODO: change to dynamically get current map
 	#levelMap.set_debug(OS.is_debug_build())
 	
 	ControllersRef.set_controller_reference(ControllersRef.GAME_CONTROLLER, self)

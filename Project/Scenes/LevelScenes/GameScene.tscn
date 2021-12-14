@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Resources/build_buttongroup.tres" type="ButtonGroup" id=1]
 [ext_resource path="res://Assets/Icons/X1.png" type="Texture" id=2]
-[ext_resource path="res://Scenes/Maps/Map001.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scenes/Maps/map_001.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Scenes/LevelScenes/StructuresNode.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/LevelScenes/BasicResourceDisplay.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=6]
@@ -84,7 +84,7 @@ __meta__ = {
 "_edit_lock_": true
 }
 
-[node name="Map001" parent="." instance=ExtResource( 3 )]
+[node name="Map" parent="." instance=ExtResource( 3 )]
 
 [node name="InputHandler" type="Node2D" parent="."]
 script = ExtResource( 32 )
