@@ -12,7 +12,7 @@ extents = Vector2( 32, 32 )
 
 [node name="DemoSpawner" type="Area2D"]
 script = ExtResource( 2 )
-structure_type = "DemoSpawner"
+structure_type = "DemoSpawningStructure"
 blocker = true
 
 [node name="CellShapePolygon" type="Polygon2D" parent="."]
