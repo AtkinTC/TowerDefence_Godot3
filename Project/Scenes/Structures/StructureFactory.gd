@@ -3,30 +3,30 @@ class_name StructureFactory
 
 const STRUCTURE_SCENES_DIR = "res://Scenes/Structures/"
 const SCENE_FILE_EXT = ".tscn"
-const STRUCTURE_TYPE_FILENAME := {
-	"DemoHQStructure": "DemoHQStructure",
-	"DemoAttackingStructure": "DemoAttackingStructure",
-	"DemoSpawner": "DemoSpawner"
-}
-var structures := {}
+
+var structure_scenes := {}
 var structure_shape_data := {}
 
 func generate_structure(structure_type_id: String):
-	var structure = structures.get(structure_type_id)
-	if(structure == null):
-		var scene_filename = STRUCTURE_TYPE_FILENAME.get(structure_type_id, structure_type_id)
-		var scene_path = STRUCTURE_SCENES_DIR + scene_filename + SCENE_FILE_EXT
-		structure = (load(scene_path) as PackedScene).instance()
-		structures[structure_type_id] = structure
+	var structure_scene : PackedScene = structure_scenes.get(structure_type_id)
+	if(structure_scene == null):
+#		var scene_filename = STRUCTURE_TYPE_FILENAME.get(structure_type_id, structure_type_id)
+		var scene_path = STRUCTURE_SCENES_DIR + structure_type_id + SCENE_FILE_EXT
+		structure_scene = load(scene_path) as PackedScene 
+		if(!structure_scene):
+			print("could not load scene from path" + scene_path)
+			return null
+		structure_scenes[structure_type_id] = structure_scene
+	
+	var structure : Structure = structure_scene.instance()
 	
 	var shape_data = structure_shape_data.get(structure_type_id)
 	if(shape_data == null):
 		structure.run_shape_setup()
 		shape_data = structure.get_shape_data()
 		structure_shape_data[structure_type_id] = shape_data
-	
-	structure = structure.duplicate()
-	structure.setup_shape_from_data(shape_data)
+	else:
+		structure.setup_shape_from_data(shape_data)
 	
 	return structure
 
