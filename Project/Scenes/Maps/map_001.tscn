@@ -42,8 +42,8 @@ rect = Rect2( -32, -32, 64, 64 )
 [node name="E-DemoSpawner" type="Node2D" parent="SpawnNode"]
 position = Vector2( 192, 256 )
 script = ExtResource( 8 )
-structure_type_id = "DemoSpawner"
-structure_scene_file = "DemoSpawner.tscn"
+structure_type_id = "DemoSpawningStructure"
+structure_scene_file = "DemoSpawningStructure.tscn"
 faction_id = "enemy"
 rect = Rect2( -32, -32, 64, 64 )
 
