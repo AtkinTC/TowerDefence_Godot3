@@ -1,0 +1,14 @@
+[gd_scene format=2]
+
+[node name="Image" type="Node2D"]
+
+[node name="Background" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( 24, -24, 24, 24, -24, 24, -24, -24 )
+
+[node name="Foreground" type="Polygon2D" parent="."]
+polygon = PoolVector2Array( 20, -20, 20, 20, -20, 20, -20, -20 )
+
+[node name="Icon" type="Polygon2D" parent="."]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( 16, 16, 16, 4, 12, 4, 12, 16 )

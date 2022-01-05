@@ -32,6 +32,23 @@ __meta__ = {
 "_edit_lock_": true
 }
 
+[node name="Image" type="Node2D" parent="."]
+
+[node name="Background" type="Polygon2D" parent="Image"]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( -25, -25, 25, -25, 25, 25, -25, 25 )
+script = ExtResource( 1 )
+shape = SubResource( 3 )
+
+[node name="Foreground" type="Polygon2D" parent="Image"]
+polygon = PoolVector2Array( -22, -22, 22, -22, 22, 22, -22, 22 )
+script = ExtResource( 1 )
+shape = SubResource( 2 )
+
+[node name="Icon" type="Polygon2D" parent="Image"]
+color = Color( 0, 0, 0, 1 )
+polygon = PoolVector2Array( -12, 20, 12, 20, 12, -4, -4, -4, -4, -12, 4, -12, 4, -8, 12, -8, 12, -20, -12, -20, -12, 4, 4, 4, 4, 12, -4, 12, -4, 8, -12, 8 )
+
 [node name="HealthBar" type="TextureProgress" parent="."]
 margin_left = -30.0
 margin_top = -40.0
@@ -44,21 +61,6 @@ nine_patch_stretch = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="ShapePolygon2D" type="Polygon2D" parent="."]
-color = Color( 0, 0, 0, 1 )
-polygon = PoolVector2Array( -25, -25, 25, -25, 25, 25, -25, 25 )
-script = ExtResource( 1 )
-shape = SubResource( 3 )
-
-[node name="ColorShape" type="Polygon2D" parent="."]
-polygon = PoolVector2Array( -22, -22, 22, -22, 22, 22, -22, 22 )
-script = ExtResource( 1 )
-shape = SubResource( 2 )
-
-[node name="Polygon2D" type="Polygon2D" parent="."]
-color = Color( 0, 0, 0, 1 )
-polygon = PoolVector2Array( -12, 20, 12, 20, 12, -4, -4, -4, -4, -12, 4, -12, 4, -8, 12, -8, 12, -20, -12, -20, -12, 4, 4, 4, 4, 12, -4, 12, -4, 8, -12, 8 )
 
 [node name="SpawnerComponent" type="Node2D" parent="."]
 script = ExtResource( 7 )

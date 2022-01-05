@@ -58,17 +58,15 @@ func _ready() -> void:
 	run_shape_setup()
 		
 	## for prototyping purposes
-	var color_shape: Polygon2D = get_node_or_null("ColorShape")
-	if(color_shape == null):
-		color_shape = get_node_or_null("Image/Foreground")
-	if(color_shape != null):
+	var image_node: Node2D = get_node_or_null("Image")
+	if(image_node):
 		if(faction == "player"):
-			color_shape.color = Color.blue
+			image_node.modulate = Color.blue
 		elif(faction == "enemy"):
-			color_shape.color = Color.red
+			image_node.modulate = Color.red
 		else:
-			color_shape.color = Color.darkgray
-	
+			image_node.modulate = Color.darkgray
+			
 	debug_init()
 	debug_draw()
 	update()
