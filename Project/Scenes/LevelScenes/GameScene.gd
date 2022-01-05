@@ -130,24 +130,6 @@ func _physics_process(delta: float) -> void:
 #			level_complete()
 
 func _unhandled_input(event: InputEvent) -> void:
-	#TEST input, needs to be removed
-	if(event.is_action_released("ui_1")):
-		var ghost = structure_factory.generate_ghost_structure("DemoObst-Small")
-		if (ghost != null):
-			initiate_build_mode(ghost)
-	if(event.is_action_released("ui_2")):
-		var ghost = structure_factory.generate_ghost_structure("DemoObst-Med")
-		if (ghost != null):
-			initiate_build_mode(ghost)
-	if(event.is_action_released("ui_3")):
-		var ghost = structure_factory.generate_ghost_structure("DemoObst-Large")
-		if (ghost != null):
-			initiate_build_mode(ghost)
-	if(event.is_action_released("ui_4")):
-		var ghost = structure_factory.generate_ghost_structure("DemoObst-XLarge")
-		if (ghost != null):
-			initiate_build_mode(ghost)
-	
 	if(event.is_action_released("ui_cancel") and build_mode):
 		cancel_build_mode()
 	if(event.is_action_released("ui_accept") and build_mode):
@@ -172,13 +154,19 @@ func set_level_id(_level_id: String):
 ## Structure Building Functions
 ##
 
-func initiate_build_mode(ghost: GhostStructure) -> void:
+func initiate_build_mode(structure_id: String) -> bool:
 	if build_mode:
 		cancel_build_mode()
+	
+	var ghost = structure_factory.generate_ghost_structure(structure_id)
 	build_ghost = ghost
+	if(!ghost):
+		print("error retrieving structure ghost in function 'initiate_build_mode'")
+		return false
 	build_mode = true
 	ui.set_structure_preview(ghost, get_camera_mouse_position())
 	update_structure_preview()
+	return true
 
 func update_structure_preview() -> void:
 	var mouse_position: Vector2 = get_global_mouse_position()

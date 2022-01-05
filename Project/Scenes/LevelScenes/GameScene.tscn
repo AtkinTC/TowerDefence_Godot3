@@ -6,19 +6,19 @@
 [ext_resource path="res://Scenes/LevelScenes/StructuresNode.gd" type="Script" id=4]
 [ext_resource path="res://Scenes/LevelScenes/BasicResourceDisplay.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Resources/Fonts/kfn_40_o1.tres" type="DynamicFont" id=6]
+[ext_resource path="res://Scenes/Structures/Images/DemoAttackingStructure-Image.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Scenes/LevelScenes/NavigationController.gd" type="Script" id=8]
 [ext_resource path="res://Scenes/LevelScenes/ResourcesController.gd" type="Script" id=9]
 [ext_resource path="res://Scenes/LevelScenes/GameScene.gd" type="Script" id=10]
 [ext_resource path="res://Scenes/LevelScenes/UI.gd" type="Script" id=11]
-[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile203.png" type="Texture" id=12]
-[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile229.png" type="Texture" id=13]
+[ext_resource path="res://Scenes/Structures/Images/DemoSpawningStructure-Image.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Scenes/Structures/Images/DemoObst-Med-Image.tscn" type="PackedScene" id=13]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button10.png" type="Texture" id=14]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button05.png" type="Texture" id=15]
 [ext_resource path="res://Assets/UI/Buttons/kenney/blue_button03.png" type="Texture" id=16]
 [ext_resource path="res://Assets/UI/Art/kenney/metalPanel.png" type="Texture" id=17]
 [ext_resource path="res://Assets/Icons/kenneys/right.png" type="Texture" id=18]
 [ext_resource path="res://Assets/Icons/X2.png" type="Texture" id=19]
-[ext_resource path="res://Assets/Towers/kenney/towerDefense_tile249.png" type="Texture" id=20]
 [ext_resource path="res://Assets/Icons/kenneys/plus.png" type="Texture" id=21]
 [ext_resource path="res://Assets/Towers/kenney/towerDefense_tile296.png" type="Texture" id=22]
 [ext_resource path="res://Assets/Icons/kenneys/pause.png" type="Texture" id=23]
@@ -170,7 +170,6 @@ __meta__ = {
 script = ExtResource( 11 )
 
 [node name="HUD" type="Control" parent="UI"]
-visible = false
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_top = -720.0
@@ -237,7 +236,7 @@ size_flags_vertical = 3
 stretch_mode = 0
 alignment_vertical = 0
 
-[node name="GunT1" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1" groups=["build_buttons"]]
+[node name="DemoAttackingStructure" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1" groups=["build_buttons"]]
 margin_right = 60.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 10, 10 )
@@ -251,20 +250,11 @@ texture_normal = ExtResource( 14 )
 expand = true
 script = ExtResource( 31 )
 
-[node name="Icon" type="TextureRect" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1/GunT1"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 10.0
-margin_top = 10.0
-margin_right = -10.0
-margin_bottom = -10.0
-texture = ExtResource( 20 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Image" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1/DemoAttackingStructure" instance=ExtResource( 7 )]
+position = Vector2( 30, 30 )
+scale = Vector2( 0.75, 0.75 )
 
-[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1/GunT1"]
+[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio1/DemoAttackingStructure"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 5.0
@@ -286,7 +276,7 @@ size_flags_vertical = 3
 stretch_mode = 0
 alignment_vertical = 0
 
-[node name="BlockerTower" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2" groups=["build_buttons"]]
+[node name="DemoSpawningStructure" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2" groups=["build_buttons"]]
 margin_right = 60.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 10, 10 )
@@ -300,20 +290,11 @@ texture_normal = ExtResource( 14 )
 expand = true
 script = ExtResource( 31 )
 
-[node name="Icon" type="TextureRect" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2/BlockerTower"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 10.0
-margin_top = 10.0
-margin_right = -10.0
-margin_bottom = -10.0
-texture = ExtResource( 13 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Image" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2/DemoSpawningStructure" instance=ExtResource( 12 )]
+position = Vector2( 30, 30 )
+scale = Vector2( 0.75, 0.75 )
 
-[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2/BlockerTower"]
+[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio2/DemoSpawningStructure"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 5.0
@@ -335,7 +316,7 @@ size_flags_vertical = 3
 stretch_mode = 0
 alignment_vertical = 0
 
-[node name="ArcTower" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3" groups=["build_buttons"]]
+[node name="DemoObst-Med" type="TextureButton" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3" groups=["build_buttons"]]
 margin_right = 60.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 10, 10 )
@@ -349,20 +330,11 @@ texture_normal = ExtResource( 14 )
 expand = true
 script = ExtResource( 31 )
 
-[node name="Icon" type="TextureRect" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3/ArcTower"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 10.0
-margin_top = 10.0
-margin_right = -10.0
-margin_bottom = -10.0
-texture = ExtResource( 12 )
-expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="Image" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3/DemoObst-Med" instance=ExtResource( 13 )]
+position = Vector2( 30, 30 )
+scale = Vector2( 0.75, 0.75 )
 
-[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3/ArcTower"]
+[node name="InputLabel" type="Label" parent="UI/HUD/BuildPanel/BuildBarMargin/BuildBar/ButtonAspectRatio3/DemoObst-Med"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 5.0
