@@ -187,35 +187,32 @@ func calculate_faction_movement(target_cells: Array, faction_units_pending: Arra
 						else:
 							choice_cell = move_choices[choice_index]
 				
-				#if all potential moves are exhausted
-				if(move_choices == null || choice_index >= move_choices.size()):
-					#remove unit from list of moving units
-					faction_units_pending_dupe[i] = null
-					faction_cells_pending_dupe.erase(current_cell)
-					unit_potential_choices.erase(unit.get_instance_id())
-					unit_move_choice_index.erase(unit.get_instance_id())
-					#add unit to list of unmoving units
-					faction_cells_finalized[current_cell] = unit
-					faction_units_finalized.append({"unit": unit, "cell": current_cell})
-					continue
+				var choice_cell = null
 				
-				var choice_cell = move_choices[choice_index]
-				#if next nav cell conflicts only with a moving unit:
-				if(faction_cells_pending.has(choice_cell)):
-					#skip this unit for now to try again next loop
-					continue
+				#if potential moves have not been exhasted
+				if(move_choices != null && choice_index < move_choices.size()):
+					choice_cell = move_choices[choice_index]
+					#if next nav cell conflicts only with a moving unit:
+					if(faction_cells_pending.has(choice_cell)):
+						#skip this unit for now to try again next loop
+						continue
 					
-				#if no conflicts:
 				#remove unit from the list of moving units
 				faction_units_pending_dupe[i] = null
 				faction_cells_pending_dupe.erase(current_cell)
 				unit_potential_choices.erase(unit.get_instance_id())
 				unit_move_choice_index.erase(unit.get_instance_id())
-				#add unit to the list of moved units
-				#record the next nav cell for the unit
-				faction_units_finalized.append({"unit": unit, "cell": choice_cell})
-				faction_cells_finalized[choice_cell] = unit
-				faction_moves.append({"unit": unit, "cell": choice_cell})
+				
+				if(choice_cell):
+					#add unit to the list of finalized units at the new cell
+					faction_units_finalized.append({"unit": unit, "cell": choice_cell})
+					faction_cells_finalized[choice_cell] = unit
+					#record the next nav cell for the unit
+					faction_moves.append({"unit": unit, "cell": choice_cell})
+				else:
+					#add unit to the list of finalized units unmoved
+					faction_units_finalized.append({"unit": unit, "cell": current_cell})
+					faction_cells_finalized[current_cell] = unit
 			#copy dupe changes back into the original collections
 			#faction_units_pending_dupe has 'null' values to not break the index within the loop
 			faction_units_pending.clear()
